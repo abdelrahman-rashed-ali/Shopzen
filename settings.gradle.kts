@@ -24,4 +24,14 @@ dependencyResolutionManagement {
 
 rootProject.name = "Shopzen"
 include(":app")
- 
+include(":domain")
+include(":data")
+include(":presentation")
+//yousef
+//yousef
+//rashed
+//rashed
+//nour
+//nour
+//ziad
+//ziad
