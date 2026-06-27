@@ -14,3 +14,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+google-services.json
+.ide/
+*.ide
+.idea/
+*.iml

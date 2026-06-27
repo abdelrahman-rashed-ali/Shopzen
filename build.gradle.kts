@@ -9,6 +9,7 @@ plugins {
     //yousef
     //yousef
     //rashed
+    id("com.google.gms.google-services") version "4.5.0" apply false
     //rashed
     //nour
     //nour
