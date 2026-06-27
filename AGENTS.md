@@ -86,7 +86,7 @@ Four Gradle modules. Dependencies flow in one direction only. The `:app` module 
 | `:domain` | Pure Kotlin models, repository interfaces, use cases | `android.*`, Retrofit, Room, Firebase |
 | `:data` | DTOs, Entities, `RepositoryImpl`, API services, DAOs, mappers | Domain models used without mapping |
 | `:presentation` | Composables, ViewModels, MVI State + Intent | Direct repository calls, business logic |
-| `:app` | `ShopzenApp`, `MainActivity`, DI modules, `AppNavGraph`, `Routes`, shared UI components, theme | Business logic, use cases, data sources |
+| `:app` | `ShopzenApp`, `MainActivity`, DI modules, `AppNavGraph`, `Routes` | Business logic, use cases, data sources, UI components |
 
 ### Mandatory Enforcement
 
@@ -135,6 +135,17 @@ com.shopzen.data/
 
 ```
 com.shopzen.presentation/
+├── common/
+│   ├── theme/
+│   │   ├── ShopzenTheme.kt
+│   │   ├── Color.kt
+│   │   └── Typography.kt
+│   └── components/             ← Shared across features
+│       ├── ConfirmationDialog.kt
+│       ├── LoadingIndicator.kt
+│       ├── ErrorScreen.kt
+│       ├── EmptyStateView.kt
+│       └── ProductCard.kt
 └── {feature}/
     ├── screen/         ← Stateless Composable entry points
     ├── components/     ← Feature-scoped reusable UI
@@ -155,20 +166,9 @@ com.shopzen.app/
 │   ├── RepositoryModule.kt
 │   ├── UseCaseModule.kt
 │   └── FirebaseModule.kt
-├── navigation/
-│   ├── AppNavGraph.kt      ← Single NavHost; all routes registered here
-│   └── Routes.kt
-└── ui/
-    ├── theme/
-    │   ├── ShopzenTheme.kt
-    │   ├── Color.kt
-    │   └── Typography.kt
-    └── components/             ← Shared across features
-        ├── ConfirmationDialog.kt
-        ├── LoadingIndicator.kt
-        ├── ErrorScreen.kt
-        ├── EmptyStateView.kt
-        └── ProductCard.kt
+└── navigation/
+    ├── AppNavGraph.kt      ← Single NavHost; all routes registered here
+    └── Routes.kt
 ```
 
 **Features:** `auth`, `catalog`, `search`, `wishlist`, `cart`, `account`, `checkout`
@@ -551,7 +551,7 @@ Auth-gated routes check `IsUserLoggedInUseCase` at navigation time. Unauthentica
 
 ## 11. Confirmation Dialog Pattern
 
-All destructive or high-impact actions **must** show `ConfirmationDialog` (from `:app/ui/components/`) before executing.
+All destructive or high-impact actions **must** show `ConfirmationDialog` (from `:presentation/ui/components/`) before executing.
 
 ### Affected Actions
 
@@ -648,10 +648,10 @@ User taps destructive action
 
 - App name: **Shopzen**
 - Adaptive launcher icon required (foreground + background layers)
-- Material 3 color scheme defined in `:app/ui/theme/Color.kt` — used consistently across all screens
+- Material 3 color scheme defined in `:presentation/ui/theme/Color.kt` — used consistently across all screens
 - Light **and** dark theme both supported via `ShopzenTheme.kt`
 - Typography uses the scale in `Typography.kt` — no arbitrary `fontSize` values outside the scale
-- Shared components (`ProductCard`, `ConfirmationDialog`, `LoadingIndicator`, `ErrorScreen`, `EmptyStateView`) live in `:app/ui/components/` and must be used consistently — **do not re-implement per feature**
+- Shared components (`ProductCard`, `ConfirmationDialog`, `LoadingIndicator`, `ErrorScreen`, `EmptyStateView`) live in `:presentation/ui/components/` and must be used consistently — **do not re-implement per feature**
 
 ---
 
