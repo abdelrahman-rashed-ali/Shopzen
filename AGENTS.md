@@ -1,10 +1,9 @@
-# AGENTS.md — Shopify Android App
+# AGENTS.md — Shopzen
 
 > **Single source of truth** for all architectural, organizational, and implementation decisions.
 > No deviation from these guidelines without updating this document first.
 
 Reference design: <https://pocket-shop-style.lovable.app>
-
 
 ---
 
@@ -13,10 +12,10 @@ Reference design: <https://pocket-shop-style.lovable.app>
 1. [Project Overview](#1-project-overview)
 2. [Tech Stack](#2-tech-stack)
 3. [Architecture](#3-architecture)
-4. [Package Structure](#4-package-structure)
+4. [Module & Package Structure](#4-module--package-structure)
 5. [MVI Pattern](#5-mvi-pattern)
 6. [Feature Map](#6-feature-map)
-7. [API Integration](#7-api-integration)
+7. [Shopify API Integration](#7-shopify-api-integration)
 8. [Local Database — Room](#8-local-database--room)
 9. [Dependency Injection — Hilt](#9-dependency-injection--hilt)
 10. [Navigation](#10-navigation)
@@ -31,7 +30,7 @@ Reference design: <https://pocket-shop-style.lovable.app>
 
 ## 1. Project Overview
 
-Android e-commerce client backed by the **Shopify Admin REST API**. Supports guest browsing plus full authenticated flows: wishlist, cart, checkout, addresses, and order history.
+**Shopzen** is an Android e-commerce client backed by the **Shopify API** (REST + GraphQL). Supports guest browsing plus full authenticated flows: wishlist, cart, checkout, addresses, and order history.
 
 ### Core Business Rules
 
@@ -39,13 +38,13 @@ Android e-commerce client backed by the **Shopify Admin REST API**. Supports gue
 |---|---|
 | Guest Access | Browse products and categories freely without signing in |
 | Auth Gate | Cart and Wishlist require authentication; unauthenticated users are redirected to Login |
-| Shopify Auth | Basic HTTP authentication over TLS for all REST calls |
+| Shopify Auth | Basic HTTP authentication over TLS for all Shopify API calls |
 | Destructive Actions | All delete / logout / order-submit actions require a `ConfirmationDialog` |
 | Stock Enforcement | Cart item quantity cannot exceed real-time Shopify `inventoryQuantity` |
 | COD Limit | Cash on Delivery is blocked when `totalPrice > Constants.MAX_COD_AMOUNT` |
 | Address Validation | Addresses must be validated via GPS or Google Places autocomplete |
 | Verification Email | Sent automatically on successful registration |
-| Order Email | Shopify sends a confirmation email automatically via `POST /orders.json` with `send_receipt: true` |
+| Order Email | Shopify sends a confirmation email automatically on order creation with `send_receipt: true` |
 
 ---
 
@@ -57,10 +56,10 @@ Android e-commerce client backed by the **Shopify Admin REST API**. Supports gue
 | Language | Kotlin |
 | UI | Jetpack Compose (no XML layouts) |
 | Design System | Material 3 |
-| Architecture | Clean Architecture + Feature-Based packages |
+| Architecture | Clean Architecture + Multi-Module + Feature-Based packages |
 | UI Pattern | MVI |
 | DI | Hilt |
-| Networking | Retrofit + OkHttp |
+| Networking | Retrofit + OkHttp (REST) · Apollo Android (GraphQL) |
 | Auth | Firebase Auth (Email/Password + Google Sign-In) |
 | Local DB | Room |
 | Async | Kotlin Coroutines + Flow + StateFlow |
@@ -75,87 +74,104 @@ Android e-commerce client backed by the **Shopify Admin REST API**. Supports gue
 ## 3. Architecture
 
 ```
-Presentation ──▶ Domain ──▶ Data
+:presentation ──▶ :domain ◀── :data
+                    ▲
+              :app wires everything
 ```
 
-Single Gradle module, organized into packages. Dependencies flow in one direction only.
+Four Gradle modules. Dependencies flow in one direction only. The `:app` module is the only one that knows about all others — it owns wiring (DI, navigation, entry points) but contains no business logic.
 
-| Layer | Contains | Must NOT contain |
+| Module | Role | Must NOT contain |
 |---|---|---|
-| **Domain** | Pure Kotlin models, repository interfaces, use cases | `android.*`, Retrofit, Room, Firebase |
-| **Data** | DTOs, Entities, `RepositoryImpl`, API services, DAOs, mappers | Domain models used without mapping |
-| **Presentation** | Composables, ViewModels, MVI State + Intent | Direct repository calls, business logic |
+| `:domain` | Pure Kotlin models, repository interfaces, use cases | `android.*`, Retrofit, Room, Firebase |
+| `:data` | DTOs, Entities, `RepositoryImpl`, API services, DAOs, mappers | Domain models used without mapping |
+| `:presentation` | Composables, ViewModels, MVI State + Intent | Direct repository calls, business logic |
+| `:app` | `ShopzenApp`, `MainActivity`, DI modules, nav graphs, `Routes`, shared UI components, theme | Business logic, use cases, data sources |
 
 ### Mandatory Enforcement
 
-- `domain/**` — zero imports from `android.*`, `retrofit2.*`, `androidx.room.*`
-- `data/**` — DTOs and Room entities never leave the layer without being mapped first
-- `presentation/**` — ViewModels call only UseCases, never repositories directly
+- `:domain` — zero imports from `android.*`, `retrofit2.*`, `androidx.room.*`
+- `:data` — DTOs and Room entities never leave the module without being mapped first
+- `:presentation` — ViewModels call only UseCases, never repositories directly
+- `:app` — no business logic; wires and launches only
 - Composable functions contain zero business logic
 
 ---
 
-## 4. Package Structure
+## 4. Module & Package Structure
+
+### `:domain` module
 
 ```
-com.example.shopifyapp/
-├── data/
-│   ├── {feature}/
-│   │   ├── remote/
-│   │   │   ├── api/          ← Retrofit interfaces
-│   │   │   ├── dto/          ← JSON response shapes
-│   │   │   └── Remote{Feature}DataSource.kt
-│   │   ├── local/
-│   │   │   ├── dao/
-│   │   │   ├── entity/
-│   │   │   └── Local{Feature}DataSource.kt
-│   │   ├── repository/
-│   │   │   └── {Feature}RepositoryImpl.kt
-│   │   └── mapper/
-│   │       └── {Feature}Mapper.kt   ← DTO/Entity ↔ Domain model
-│   └── database/
-│       └── AppDatabase.kt
-│
-├── domain/
-│   └── {feature}/
-│       ├── model/            ← Pure Kotlin data classes
-│       ├── repository/       ← Interfaces only
-│       └── usecase/          ← One class, one public `operator fun invoke`
-│
-├── presentation/
-│   └── {feature}/
-│       ├── screen/           ← Stateless Composable entry points
-│       ├── components/       ← Feature-scoped reusable UI
-│       ├── viewmodel/        ← @HiltViewModel
-│       ├── state/            ← data class with defaults
-│       └── intent/           ← sealed class
-│
+com.shopzen.domain/
+└── {feature}/
+    ├── model/          ← Pure Kotlin data classes; no annotations
+    ├── repository/     ← Interfaces only
+    └── usecase/        ← One class, one public `operator fun invoke`
+```
+
+### `:data` module
+
+```
+com.shopzen.data/
+├── {feature}/
+│   ├── remote/
+│   │   ├── api/                    ← Retrofit interfaces + Apollo operations (.graphql)
+│   │   ├── dto/                    ← JSON/GraphQL response shapes
+│   │   └── Remote{Feature}DataSource.kt
+│   ├── local/
+│   │   ├── dao/
+│   │   ├── entity/
+│   │   └── Local{Feature}DataSource.kt
+│   ├── repository/
+│   │   └── {Feature}RepositoryImpl.kt
+│   └── mapper/
+│       └── {Feature}Mapper.kt      ← DTO/Entity ↔ Domain model
+└── database/
+    └── ShopzenDatabase.kt
+```
+
+### `:presentation` module
+
+```
+com.shopzen.presentation/
+└── {feature}/
+    ├── screen/         ← Stateless Composable entry points
+    ├── components/     ← Feature-scoped reusable UI
+    ├── viewmodel/      ← @HiltViewModel
+    ├── state/          ← data class with defaults
+    └── intent/         ← sealed class
+```
+
+### `:app` module
+
+```
+com.shopzen.app/
+├── ShopzenApp.kt               ← @HiltAndroidApp Application class
+├── MainActivity.kt             ← Single activity; hosts NavHost
 ├── di/
 │   ├── NetworkModule.kt
 │   ├── DatabaseModule.kt
 │   ├── RepositoryModule.kt
 │   ├── UseCaseModule.kt
 │   └── FirebaseModule.kt
-│
 ├── navigation/
 │   ├── AppNavGraph.kt
 │   ├── AuthNavGraph.kt
 │   ├── MainNavGraph.kt
 │   ├── CheckoutNavGraph.kt
 │   └── Routes.kt
-│
-└── core/
-    ├── base/BaseViewModel.kt
-    ├── network/
-    │   ├── ShopifyAuthInterceptor.kt
-    │   ├── NetworkResult.kt
-    │   └── ApiErrorHandler.kt
-    ├── utils/Constants.kt
-    ├── extensions/
-    └── ui/
-        ├── theme/           ← Theme.kt, Color.kt, Typography.kt
-        └── components/      ← ConfirmationDialog, LoadingIndicator, ErrorScreen,
-                             ←   EmptyStateView, ProductCard
+└── ui/
+    ├── theme/
+    │   ├── ShopzenTheme.kt
+    │   ├── Color.kt
+    │   └── Typography.kt
+    └── components/             ← Shared across features
+        ├── ConfirmationDialog.kt
+        ├── LoadingIndicator.kt
+        ├── ErrorScreen.kt
+        ├── EmptyStateView.kt
+        └── ProductCard.kt
 ```
 
 **Features:** `auth`, `catalog`, `search`, `wishlist`, `cart`, `account`, `checkout`
@@ -262,16 +278,16 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 - `ProductVariant` includes `inventoryQuantity` (enforces stock limit) and `selectedOptions`
 - `Product` includes `options: List<ProductOption>` (drives size selector)
 
-**Use cases & endpoints:**
+**Use cases & data sources:**
 
-| Use Case | Endpoint | Description |
+| Use Case | Source | Description |
 |---|---|---|
-| `GetProductsUseCase` | `GET /products.json?limit=50` | Cursor-paginated list |
-| `GetProductByIdUseCase` | `GET /products/{id}.json` | Full detail with variants/images |
-| `GetProductsByBrandUseCase` | `GET /products.json?vendor={name}` | Products by vendor |
-| `GetProductsByCategoryUseCase` | `GET /products.json?product_type={type}` | Products by type |
-| `GetBrandsUseCase` | `GET /products.json?fields=vendor` | Distinct vendors |
-| `GetCategoriesUseCase` | `GET /custom_collections.json` | Collections as categories |
+| `GetProductsUseCase` | REST — `GET /products.json?limit=50` | Cursor-paginated list |
+| `GetProductByIdUseCase` | GraphQL — `product(id:)` query | Full detail with variants/images |
+| `GetProductsByBrandUseCase` | REST — `GET /products.json?vendor={name}` | Products by vendor |
+| `GetProductsByCategoryUseCase` | REST — `GET /products.json?product_type={type}` | Products by type |
+| `GetBrandsUseCase` | REST — `GET /products.json?fields=vendor` | Distinct vendors |
+| `GetCategoriesUseCase` | REST — `GET /custom_collections.json` | Collections as categories |
 | `GetProductReviewsUseCase` | External reviews API | Reviews by product ID |
 
 **Business rules:**
@@ -292,9 +308,9 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 
 **Use cases:**
 
-| Use Case | Execution | Description |
+| Use Case | Source | Description |
 |---|---|---|
-| `SearchProductsUseCase` | `GET /products.json?title={query}` | Text search |
+| `SearchProductsUseCase` | REST — `GET /products.json?title={query}` | Text search |
 | `FilterProductsUseCase` | Client-side | Applies `SearchFilter` to loaded list |
 | `SortProductsUseCase` | Client-side | Sorts by `SortOption` |
 
@@ -357,17 +373,17 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 
 **Domain models:** `UserProfile`, `Order`, `OrderLineItem`, `Address(id?, firstName, lastName, phone, address1, city, province, country, countryCode, zip, latitude, longitude)`, `Country`, `Province`, `CurrencyRate(base, rates, fetchedAt)`
 
-**Use cases & endpoints:**
+**Use cases & data sources:**
 
-| Use Case | Endpoint / Source | Description |
+| Use Case | Source | Description |
 |---|---|---|
-| `GetUserProfileUseCase` | `GET /customers/{id}.json` | Shopify customer record |
-| `GetOrderHistoryUseCase` | `GET /customers/{id}/orders.json` | All past orders |
-| `GetOrderDetailUseCase` | `GET /orders/{id}.json` | Full order with line items |
-| `GetAddressesUseCase` | `GET /customers/{id}/addresses.json` | Saved addresses |
-| `AddAddressUseCase` | `POST /customers/{id}/addresses.json` | Creates address |
-| `UpdateAddressUseCase` | `PUT /customers/{id}/addresses/{addr_id}.json` | Updates address |
-| `DeleteAddressUseCase` | `DELETE /customers/{id}/addresses/{addr_id}.json` | Deletes — confirmation required |
+| `GetUserProfileUseCase` | REST — `GET /customers/{id}.json` | Shopify customer record |
+| `GetOrderHistoryUseCase` | REST — `GET /customers/{id}/orders.json` | All past orders |
+| `GetOrderDetailUseCase` | GraphQL — `order(id:)` query | Full order with line items |
+| `GetAddressesUseCase` | REST — `GET /customers/{id}/addresses.json` | Saved addresses |
+| `AddAddressUseCase` | REST — `POST /customers/{id}/addresses.json` | Creates address |
+| `UpdateAddressUseCase` | REST — `PUT /customers/{id}/addresses/{addr_id}.json` | Updates address |
+| `DeleteAddressUseCase` | REST — `DELETE /customers/{id}/addresses/{addr_id}.json` | Deletes — confirmation required |
 | `GetCountriesUseCase` | External countries API | Dynamic country + province list |
 | `ValidateAddressUseCase` | Google Places / HERE Maps | GPS or autocomplete validation |
 | `GetCurrencyRatesUseCase` | External exchange rate API | Live rates; cached 1 hour |
@@ -388,14 +404,14 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 
 **Use cases:**
 
-| Use Case | Endpoint | Description |
+| Use Case | Source | Description |
 |---|---|---|
-| `ValidateCouponUseCase` | `GET /price_rules/{id}/discount_codes.json` | Checks code validity |
+| `ValidateCouponUseCase` | REST — `GET /price_rules/{id}/discount_codes.json` | Checks code validity |
 | `ApplyCouponUseCase` | Client-side | Deducts discount; updates `CheckoutState` |
 | `RemoveCouponUseCase` | Client-side | Restores original subtotal |
 | `GetAvailablePaymentMethodsUseCase` | Client-side | Filters COD based on `MAX_COD_AMOUNT` |
 | `ValidateCashLimitUseCase` | Client-side | Returns `false` if `totalPrice > Constants.MAX_COD_AMOUNT` |
-| `PlaceOrderUseCase` | `POST /orders.json` | Submits order; Shopify triggers confirmation email |
+| `PlaceOrderUseCase` | GraphQL — `orderCreate` mutation | Submits order; Shopify triggers confirmation email |
 
 **Business rules:**
 - COD shown only when `totalPrice <= Constants.MAX_COD_AMOUNT`
@@ -405,41 +421,47 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 
 ---
 
-## 7. API Integration
+## 7. Shopify API Integration
 
-### Base URL
+Shopzen uses **both** the Shopify REST Admin API and the Shopify GraphQL Admin API. Choose the appropriate transport per operation (see Feature Map use case tables). Both transports share the same hostname and credentials.
 
-```
-https://{hostname}/admin/api/{version}/{resource}.json
-```
+### Endpoints
 
-All credentials come from `BuildConfig`. Authentication is injected via `ShopifyAuthInterceptor` using HTTP Basic auth (`apiKey:password`).
+| Transport | Base URL |
+|---|---|
+| REST | `https://{hostname}/admin/api/{version}/{resource}.json` |
+| GraphQL | `https://{hostname}/admin/api/{version}/graphql.json` |
 
-### Key Endpoints
+All credentials come from `BuildConfig`. REST calls are authenticated via `ShopifyAuthInterceptor` (HTTP Basic — `apiKey:password`). GraphQL calls use the same interceptor.
+
+### REST — Key Endpoints
 
 | Resource | Method | Path |
 |---|---|---|
 | All products | GET | `/products.json?limit=50` |
-| Single product | GET | `/products/{id}.json` |
 | Products by vendor | GET | `/products.json?vendor={name}` |
 | Products by type | GET | `/products.json?product_type={type}` |
 | Custom collections | GET | `/custom_collections.json` |
 | Customer record | GET | `/customers/{id}.json` |
 | Customer orders | GET | `/customers/{id}/orders.json` |
-| Single order | GET | `/orders/{id}.json` |
 | Customer addresses | GET/POST | `/customers/{id}/addresses.json` |
 | Single address | PUT/DELETE | `/customers/{id}/addresses/{addr_id}.json` |
 | Discount codes | GET | `/price_rules/{id}/discount_codes.json` |
 | Create draft order | POST | `/draft_orders.json` |
-| Create order | POST | `/orders.json` |
+
+### GraphQL — Key Operations
+
+| Operation | Type | Description |
+|---|---|---|
+| `product(id:)` | Query | Full product detail with variants and images |
+| `order(id:)` | Query | Full order with line items |
+| `orderCreate` | Mutation | Place a new order |
+
+Place `.graphql` files in `data/{feature}/remote/api/`. Use Apollo Android for type-safe GraphQL — generated types live alongside the operation files.
 
 ### Error Handling
 
-All network calls are wrapped in `NetworkResult<T>` (`Success`, `Error`, `Loading`) inside `RemoteDataSource`. Use the `safeApiCall {}` extension — it catches `IOException` and general exceptions and converts them to `NetworkResult.Error`.
-
-### GraphQL (Optional / Bonus)
-
-Endpoint: `/admin/api/{version}/graphql.json`. Place `.graphql` files in `data/{feature}/remote/graphql/`. Use Apollo Android or raw OkHttp POST.
+All network calls are wrapped in `NetworkResult<T>` (`Success`, `Error`, `Loading`) inside `RemoteDataSource`. Use the `safeApiCall {}` extension — it catches `IOException` and general exceptions and converts them to `NetworkResult.Error`. `NetworkResult` is defined in `:data`.
 
 ---
 
@@ -460,20 +482,24 @@ All entities include a `userId` field where user-specific data is required.
 
 - DAOs are accessed **only** through their `LocalDataSource` — never injected directly into repositories
 - Entities are mapped to domain models via `mapper/` before leaving `RepositoryImpl`
+- `AppDatabase` is named `ShopzenDatabase`; defined in `data/database/ShopzenDatabase.kt`
 - Firebase Auth links to Shopify customer records by **email address**
 
 ---
 
 ## 9. Dependency Injection — Hilt
 
+All DI modules live in `:app/di/`. They are the only place that imports from both `:data` and `:domain`.
+
 | Module | Provides |
 |---|---|
-| `NetworkModule` | `OkHttpClient`, `Retrofit`, all Retrofit API interfaces (`@Singleton`) |
-| `DatabaseModule` | `AppDatabase`, all DAOs |
+| `NetworkModule` | `OkHttpClient`, `Retrofit`, `ApolloClient`, all Retrofit API interfaces (`@Singleton`) |
+| `DatabaseModule` | `ShopzenDatabase`, all DAOs |
 | `RepositoryModule` | `@Binds` — each `RepositoryImpl` bound to its interface (`@Singleton`) |
 | `UseCaseModule` | Use case instances where manual wiring is needed |
 | `FirebaseModule` | `FirebaseAuth`, `GoogleSignInClient` |
 
+- `ShopzenApp` is annotated `@HiltAndroidApp`
 - All repositories are `@Singleton`
 - ViewModels are `@HiltViewModel` with `@Inject constructor`
 - Never instantiate concrete classes manually — always inject interfaces
@@ -482,7 +508,7 @@ All entities include a `userId` field where user-specific data is required.
 
 ## 10. Navigation
 
-Single-Activity architecture. `MainActivity` hosts one `NavHost`.
+Single-Activity architecture. `MainActivity` (in `:app`) hosts one `NavHost`. All nav graphs and `Routes` are defined in `:app/navigation/`.
 
 ### Navigation Flow
 
@@ -523,7 +549,7 @@ Auth-gated routes check `IsUserLoggedInUseCase` at navigation time. Unauthentica
 
 ## 11. Confirmation Dialog Pattern
 
-All destructive or high-impact actions **must** show `ConfirmationDialog` (from `core/ui/components/`) before executing.
+All destructive or high-impact actions **must** show `ConfirmationDialog` (from `:app/ui/components/`) before executing.
 
 ### Affected Actions
 
@@ -560,11 +586,13 @@ User taps destructive action
 | Interface | PascalCase | `CatalogRepository` |
 | Function / variable | camelCase | `processIntent()`, `cartItems` |
 | Constant | SCREAMING_SNAKE_CASE | `MAX_COD_AMOUNT` |
-| Package | lowercase | `data.catalog.remote.api` |
+| Package | lowercase | `com.shopzen.data.catalog.remote.api` |
 | Route string | `noun/noun/{param}` | `"main/products/{productId}"` |
 | Intent | Verb + Noun | `LoadCart`, `RequestRemoveItem` |
 | State | Noun + `State` | `CartState` |
 | UseCase | Verb + Noun + `UseCase` | `AddToCartUseCase` |
+| Application class | `ShopzenApp` | — |
+| Database class | `ShopzenDatabase` | — |
 
 ### Mandatory Rules
 
@@ -574,9 +602,9 @@ User taps destructive action
 - **No `LiveData`** — use `StateFlow` + `collectAsStateWithLifecycle()`
 - **No `GlobalScope`** — all coroutines launched in `viewModelScope`
 - **No `!!` operator** outside Hilt-provided non-null objects; prefer `?: return` or `?.let`
-- All constants and magic numbers → `core/utils/Constants.kt`
+- All constants and magic numbers → `Constants.kt` (in `:data` or `:domain` as appropriate)
 - All user-facing strings → `res/values/strings.xml`
-- KDoc on all public functions in domain and data layers
+- KDoc on all public functions in `:domain` and `:data`
 
 ### SOLID at a Glance
 
@@ -616,12 +644,12 @@ User taps destructive action
 
 ## 14. Visual Identity
 
+- App name: **Shopzen**
 - Adaptive launcher icon required (foreground + background layers)
-- App name must match the Shopify store identity
-- Material 3 color scheme defined in `core/ui/theme/Color.kt` — used consistently across all screens
-- Light **and** dark theme both supported via `Theme.kt`
+- Material 3 color scheme defined in `:app/ui/theme/Color.kt` — used consistently across all screens
+- Light **and** dark theme both supported via `ShopzenTheme.kt`
 - Typography uses the scale in `Typography.kt` — no arbitrary `fontSize` values outside the scale
-- Shared components (`ProductCard`, `ConfirmationDialog`, `LoadingIndicator`, `ErrorScreen`, `EmptyStateView`) must be used consistently — **do not re-implement per feature**
+- Shared components (`ProductCard`, `ConfirmationDialog`, `LoadingIndicator`, `ErrorScreen`, `EmptyStateView`) live in `:app/ui/components/` and must be used consistently — **do not re-implement per feature**
 
 ---
 
