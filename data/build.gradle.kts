@@ -1,5 +1,8 @@
 plugins {
     alias(libs.plugins.android.library)
+    //reashed
+    id("com.google.gms.google-services")
+    //reashed
 }
 
 android {
@@ -33,6 +36,8 @@ dependencies {
     implementation(":domain")
     //yousef
     //rashed
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
     //rashed
     //nour
     //nour
