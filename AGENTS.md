@@ -86,7 +86,7 @@ Four Gradle modules. Dependencies flow in one direction only. The `:app` module 
 | `:domain` | Pure Kotlin models, repository interfaces, use cases | `android.*`, Retrofit, Room, Firebase |
 | `:data` | DTOs, Entities, `RepositoryImpl`, API services, DAOs, mappers | Domain models used without mapping |
 | `:presentation` | Composables, ViewModels, MVI State + Intent | Direct repository calls, business logic |
-| `:app` | `ShopzenApp`, `MainActivity`, DI modules, nav graphs, `Routes`, shared UI components, theme | Business logic, use cases, data sources |
+| `:app` | `ShopzenApp`, `MainActivity`, DI modules, `AppNavGraph`, `Routes`, shared UI components, theme | Business logic, use cases, data sources |
 
 ### Mandatory Enforcement
 
@@ -156,10 +156,7 @@ com.shopzen.app/
 │   ├── UseCaseModule.kt
 │   └── FirebaseModule.kt
 ├── navigation/
-│   ├── AppNavGraph.kt
-│   ├── AuthNavGraph.kt
-│   ├── MainNavGraph.kt
-│   ├── CheckoutNavGraph.kt
+│   ├── AppNavGraph.kt      ← Single NavHost; all routes registered here
 │   └── Routes.kt
 └── ui/
     ├── theme/
@@ -508,27 +505,32 @@ All DI modules live in `:app/di/`. They are the only place that imports from bot
 
 ## 10. Navigation
 
-Single-Activity architecture. `MainActivity` (in `:app`) hosts one `NavHost`. All nav graphs and `Routes` are defined in `:app/navigation/`.
+Single-Activity architecture. `MainActivity` (in `:app`) hosts one `NavHost` backed by a **single nav graph** — `AppNavGraph.kt`. All destinations are registered flat in that one file; there are no nested sub-graphs. `Routes.kt` holds all route strings as constants.
 
 ### Navigation Flow
 
 ```
-SplashScreen
- ├── [authenticated]  ──▶  HomeScreen
- └── [no session]     ──▶  LoginScreen
-                            ├── ──▶  RegisterScreen ──▶  EmailVerificationScreen
-                            └── [success] ──▶  HomeScreen
-
-MainNavGraph (Bottom Navigation — 5 tabs)
- ├── Tab 0  HomeScreen ──▶  BrandListScreen ──▶  BrandProductsScreen ──▶  ProductDetailScreen
- │                     ──▶  ProductListScreen ──▶  ProductDetailScreen
- ├── Tab 1  SearchScreen ──▶  ProductDetailScreen
- ├── Tab 2  WishlistScreen [auth] ──▶  ProductDetailScreen
- ├── Tab 3  CartScreen [auth] ──▶  CheckoutScreen ──▶  PaymentScreen ──▶  OrderConfirmationScreen
- └── Tab 4  ProfileScreen [auth]
-              ├── OrderHistoryScreen ──▶  OrderDetailScreen
-              ├── AddressListScreen ──▶  AddressFormScreen
-              └── SettingsScreen
+AppNavGraph (single graph — all destinations registered flat)
+│
+├── auth/splash  ──▶  [authenticated] ──▶  main/home
+│                └──  [no session]    ──▶  auth/login
+│                                           ├── ──▶  auth/register ──▶  auth/verify-email
+│                                           └── [success] ──▶  main/home
+│
+├── main/home ──▶  main/brands ──▶  main/brands/{brandName} ──▶  main/products/{productId}
+│             ──▶  main/products ──▶  main/products/{productId}
+│
+├── main/search ──▶  main/products/{productId}
+│
+├── main/wishlist [auth] ──▶  main/products/{productId}
+│
+├── main/cart [auth] ──▶  checkout/summary ──▶  checkout/payment
+│                                            └── ──▶  checkout/confirmation/{orderId}
+│
+└── main/profile [auth]
+      ├── main/profile/orders ──▶  main/profile/orders/{orderId}
+      ├── main/profile/addresses ──▶  main/profile/addresses/form
+      └── main/profile/settings
 ```
 
 ### Bottom Nav Tabs
