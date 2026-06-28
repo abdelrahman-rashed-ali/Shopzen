@@ -14,7 +14,7 @@ android {
     }
 
     defaultConfig {
-        minSdk = 35
+        minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -33,11 +33,13 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     //yousef
-    implementation(":domain")
+    implementation(project(":domain"))
     //yousef
     //rashed
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.javax.inject)
     //rashed
     //nour
     //nour
