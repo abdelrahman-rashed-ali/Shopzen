@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 
 import com.shopzen.presentation.auth.screen.EmailVerificationScreen
 import com.shopzen.presentation.auth.screen.RegisterScreen
-import com.shopzen.presentation.navigation.Routes
+import com.shopzen.app.navigation.Routes
 
 
 @Composable

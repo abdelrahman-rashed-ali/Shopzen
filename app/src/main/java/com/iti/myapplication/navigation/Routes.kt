@@ -1,4 +1,4 @@
-package com.shopzen.presentation.navigation
+package com.shopzen.app.navigation
 
 object Routes {
     const val SPLASH = "splash"
