@@ -18,7 +18,8 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
 
             AppNavHost(
-                navController = navController, startDestination = NavScreen.UnknownScreen
+                navController = navController,
+                startDestination = NavScreen.RegisterScreen
             )
         }
     }

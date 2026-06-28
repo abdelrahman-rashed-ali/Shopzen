@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -59,9 +60,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":data"))
-    implementation(project(":domain"))
-    implementation(project(":presentation"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -82,6 +80,12 @@ dependencies {
     //yousef
     //yousef
     //rashed
+    implementation(libs.firebase.auth)
+    implementation(platform(libs.firebase.bom))
+
+    implementation(project(":presentation"))
+    implementation(project(":data"))
+    implementation(project(":domain"))
     //rashed
     //nour
     //nour
@@ -93,3 +97,5 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     //ziad
 }
+
+apply(plugin = "com.google.gms.google-services")
