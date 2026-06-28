@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Shopzen</string>
+    <!-- Home Screen -->
+    <string name="home_banner_title">The Art of Elegance</string>
+    <string name="home_banner_subtitle">Discover our curated collection of timeless pieces designed for the modern connoisseur.</string>
+    <string name="home_section_curations">Curations</string>
+    <string name="home_section_brands">Brands</string>
+    <string name="home_section_new_arrivals">New Arrivals</string>
+    <string name="home_view_all">VIEW ALL</string>
+    <string name="home_explore_collection">EXPLORE COLLECTION</string>
+    <!-- Shared -->
+    <string name="action_retry">RETRY</string>
+    <string name="action_add_to_wishlist">Add to wishlist</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="content_desc_featured_product">Featured product %1$d</string>
 </resources>

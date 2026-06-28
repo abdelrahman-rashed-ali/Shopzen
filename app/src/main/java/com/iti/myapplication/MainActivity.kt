@@ -7,17 +7,21 @@ import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.rememberNavController
 import com.iti.myapplication.navigation.AppNavHost
 import com.iti.myapplication.navigation.NavScreen
+import iti.presentation.common.theme.ShopzenTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val navController = rememberNavController()
+            ShopzenTheme {
+                val navController = rememberNavController()
 
-            AppNavHost(
-                navController = navController, startDestination = NavScreen.UnknownScreen
-            )
+                AppNavHost(
+                    navController = navController,
+                    startDestination = NavScreen.HomeScreen
+                )
+            }
         }
     }
 }
