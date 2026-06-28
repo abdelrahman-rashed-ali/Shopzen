@@ -1,32 +1,37 @@
 package com.iti.myapplication.navigation
 
+import kotlinx.serialization.Serializable
 
- 
 
+@Serializable
 sealed class NavScreen(
     val route: String
-) {
-    object SplashScreen : NavScreen(
-        "splash"
-    )
+)
 
-    object LoginScreen : NavScreen(
-        "auth/login"
-    )
+@Serializable
+object SplashScreen : NavScreen(
+    "splash"
+)
 
-    object RegisterScreen : NavScreen(
-        "auth/register"
-    )
+@Serializable
+object LoginScreen : NavScreen(
+    "login"
+)
 
-    object EmailVerificationScreen : NavScreen(
-        "auth/verify-email"
-    )
+@Serializable
+object RegisterScreen : NavScreen(
+    "register"
+)
 
-    object HomeScreen : NavScreen(
-        "main/home"
-    )
-       data object ProductDetail : NavScreen("main/products/{productId}") {
-        fun createRoute(productId: Long): String = "main/products/$productId"
-    }
+@Serializable
+object EmailVerificationScreen : NavScreen(
+    "verify-email"
+)
 
-}
+@Serializable
+object HomeScreen : NavScreen(
+    "home"
+)
+
+@Serializable
+data class ProductDetail(val productId: Long) : NavScreen("product-detail")

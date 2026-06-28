@@ -1,14 +1,12 @@
 package com.iti.myapplication.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+import com.iti.myapplication.ui.product.screen.ProductDetailScreen
 import com.shopzen.presentation.auth.screen.EmailVerificationScreen
 import com.shopzen.presentation.auth.screen.RegisterScreen
 
@@ -17,63 +15,39 @@ import com.shopzen.presentation.auth.screen.RegisterScreen
 fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: NavScreen = NavScreen.RegisterScreen,
+    startDestination: NavScreen = RegisterScreen,
 ) {
 
 
     NavHost(
-        navController = navController,
         modifier = modifier,
+        navController = navController,
         startDestination = startDestination.route
 
     ) {
-
-        composable(
-            NavScreen.SplashScreen.route
-        ) {
-
-        }
-
-        composable(
-            NavScreen.LoginScreen.route
-        ) {
-
-        }
-
-        composable(
-            NavScreen.RegisterScreen.route
-        ) {
+        composable<SplashScreen> {}
+        composable<LoginScreen> {}
+        composable<RegisterScreen> {
             RegisterScreen(
                 navigateToLogin = {
-                    navController.navigate(
-                        NavScreen.LoginScreen.route
-                    )
-                },
-                navigateToEmailVerification = {
-                    navController.navigate(
-                        NavScreen.EmailVerificationScreen.route
-                    )
-                }
-            )
+                navController.navigate(
+                    LoginScreen.route
+                )
+            },
+                navigateToEmailVerification = { navController.navigate(EmailVerificationScreen.route) })
         }
-
-        composable(
-            NavScreen.EmailVerificationScreen.route
-        ) {
-
-            EmailVerificationScreen(
-                navigateHome = {
-
-                    navController.navigate(
-                        NavScreen.HomeScreen.route
-                    )
-                }
-            )
+        composable<EmailVerificationScreen> {
+            EmailVerificationScreen(navigateHome = {
+                navController.navigate(
+                    HomeScreen.route
+                )
+            })
         }
-        composable(
-            NavScreen.HomeScreen.route
-        ) {
-            UnknownScreen(modifier)
+        composable<HomeScreen> {}
+        composable<ProductDetail> { backStackEntry ->
+            val args = backStackEntry.toRoute<ProductDetail>()
+
+            ProductDetailScreen(productId = args.productId) { navController.navigateUp() }
         }
     }
 
