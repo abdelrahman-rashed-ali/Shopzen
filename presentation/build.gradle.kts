@@ -43,6 +43,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     //yousef
+    implementation(project(":domain"))
     //yousef
     //rashed
     implementation(libs.androidx.hilt.navigation.compose.v120)

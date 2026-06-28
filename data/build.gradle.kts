@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.serialization)
     //reashed
     id("com.google.gms.google-services")
     //reashed
@@ -44,5 +45,8 @@ dependencies {
     //nour
     //nour
     //ziad
+    implementation(libs.bundles.ktor)
+    implementation(libs.bundles.apollo)
+    implementation(libs.javax.inject)
     //ziad
 }

@@ -1,8 +1,12 @@
+import com.android.build.gradle.internal.tasks.AarMetadataReader.Companion.load
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
     id("com.google.gms.google-services")
 }
 
@@ -39,6 +43,19 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+
+    defaultConfig {
+        val properties = Properties().apply {
+            load(rootProject.file("local.properties").inputStream())
+        }
+
+        buildConfigField("String", "SHOPIFY_HOSTNAME",    "\"${properties["SHOPIFY_HOSTNAME"]}\"")
+        buildConfigField("String", "SHOPIFY_API_VERSION", "\"${properties["SHOPIFY_API_VERSION"]}\"")
+        buildConfigField("String", "SHOPIFY_API_KEY",     "\"${properties["SHOPIFY_API_KEY"]}\"")
+        buildConfigField("String", "SHOPIFY_PASSWORD",    "\"${properties["SHOPIFY_PASSWORD"]}\"")
+
     }
 }
 
@@ -77,6 +94,7 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.bundles.ktor)
     implementation(libs.bundles.apollo)
+    implementation(libs.androidx.hilt.navigation.compose)
     //ziad
 }
 
