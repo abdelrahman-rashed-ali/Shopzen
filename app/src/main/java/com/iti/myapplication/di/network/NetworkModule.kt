@@ -1,6 +1,5 @@
 package com.iti.myapplication.di.network
 
-import com.iti.myapplication.BuildConfig
 import com.iti.myapplication.remote.config.NetworkConfig
 import com.iti.myapplication.remote.rest.KtorRestClient
 import dagger.Module
@@ -8,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
+import iti.app.BuildConfig
 import javax.inject.Singleton
 
 @Module

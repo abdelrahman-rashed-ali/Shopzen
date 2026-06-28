@@ -22,7 +22,7 @@ fun AppNavHost(
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = startDestination.route
+        startDestination = startDestination
 
     ) {
         composable<SplashScreen> {}
@@ -31,15 +31,15 @@ fun AppNavHost(
             RegisterScreen(
                 navigateToLogin = {
                 navController.navigate(
-                    LoginScreen.route
+                    LoginScreen
                 )
             },
-                navigateToEmailVerification = { navController.navigate(EmailVerificationScreen.route) })
+                navigateToEmailVerification = { navController.navigate(EmailVerificationScreen) })
         }
         composable<EmailVerificationScreen> {
             EmailVerificationScreen(navigateHome = {
                 navController.navigate(
-                    HomeScreen.route
+                    HomeScreen
                 )
             })
         }
