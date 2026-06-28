@@ -1,19 +1,32 @@
-package com.shopzen.app.di.auth
+package com.iti.myapplication.di.auth
 
+import com.google.firebase.auth.FirebaseAuth
+import com.shopzen.data.auth.remote.RemoteAuthDataSource
+import com.shopzen.data.auth.remote.RemoteAuthDataSourceImpl
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-import com.google.firebase.auth.FirebaseAuth
+
 
 @Module
 @InstallIn(SingletonComponent::class)
-object FirebaseModule {
+abstract class FirebaseModule {
+    companion object {
 
-    @Provides
-    @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth {
-        return FirebaseAuth.getInstance()
+        @Provides
+        @Singleton
+        fun provideFirebaseAuth(): FirebaseAuth {
+            return FirebaseAuth.getInstance()
+        }
+
     }
+
+    @Binds
+    @Singleton
+    abstract fun bindRemoteAuthDataSource(
+        impl: RemoteAuthDataSourceImpl
+    ): RemoteAuthDataSource
 }

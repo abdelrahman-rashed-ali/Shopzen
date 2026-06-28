@@ -45,35 +45,37 @@ class RegisterViewModel @Inject constructor(
 
     private fun handleSubmit() {
         val current = _state.value
-
         if (current.name.isBlank() || current.email.isBlank() ||
             current.password.isBlank() || current.confirmPassword.isBlank()
         ) {
             _state.update { it.copy(error = "All fields are required") }
             return
         }
-
         if (current.password != current.confirmPassword) {
             _state.update { it.copy(error = "Passwords do not match") }
             return
         }
-
         _state.update { it.copy(isLoading = true, error = null) }
-
         registerWithEmailUseCase(
             email = current.email.trim(),
-            password = current.password,
+            password = current.password.trim(),
             displayName = current.name.trim()
         ).onEach { result ->
             result.fold(
                 onSuccess = {
-                    _state.update { it.copy(isLoading = false, isRegistered = true) }
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isRegistered = true
+                        )
+                    }
                 },
                 onFailure = { throwable ->
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = throwable.message ?: "Registration failed. Please try again."
+                            error = throwable.message
+                                ?: "Registration failed. Please try again."
                         )
                     }
                 }

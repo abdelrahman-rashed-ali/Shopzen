@@ -10,35 +10,70 @@ import com.shopzen.presentation.auth.screen.EmailVerificationScreen
 import com.shopzen.presentation.auth.screen.RegisterScreen
 import com.shopzen.presentation.navigation.Routes
 
+
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     startDestination: NavScreen = NavScreen.RegisterScreen,
 ) {
+
     NavHost(
         navController = navController,
         modifier = modifier,
         startDestination = startDestination.route,
     ) {
+
+
         composable(Routes.SPLASH) {
-            // SplashScreen(navController)
+
         }
+
 
         composable(Routes.LOGIN) {
-            // LoginScreen(navController)
+
         }
+
 
         composable(Routes.REGISTER) {
-            RegisterScreen(navController = navController)
+
+            RegisterScreen(
+                navigateToLogin = {
+                    navController.navigate(
+                        Routes.HOME
+                    )
+                },
+                navigateToEmailVerification = {
+
+                    navController.navigate(
+                        Routes.EMAIL_VERIFICATION
+                    )
+
+                }
+            )
+
         }
+
 
         composable(Routes.EMAIL_VERIFICATION) {
-            EmailVerificationScreen(navController = navController)
+
+            EmailVerificationScreen(
+                navigateHome = {
+
+                    navController.navigate(
+                        Routes.HOME
+                    )
+
+                }
+            )
+
         }
 
+
         composable(Routes.HOME) {
+
             UnknownScreen(modifier)
+
         }
     }
 }

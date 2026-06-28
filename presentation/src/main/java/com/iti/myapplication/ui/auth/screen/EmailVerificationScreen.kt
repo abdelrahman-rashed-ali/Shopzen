@@ -12,25 +12,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.shopzen.presentation.auth.components.*
 import com.shopzen.presentation.auth.viewmodel.RegisterViewModel
-import com.shopzen.presentation.navigation.Routes
 import com.iti.myapplication.ui.theme.ColorSurface
 import iti.presentation.R
+
 
 @Composable
 fun EmailVerificationScreen(
 
-
-    navController: NavController,
-
+    navigateHome: () -> Unit,
 
     viewModel: RegisterViewModel = hiltViewModel()
 
-
-){
+) {
 
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -38,15 +34,18 @@ fun EmailVerificationScreen(
 
 
     var notVerified by remember {
+
         mutableStateOf(false)
+
     }
 
 
 
     var resent by remember {
-        mutableStateOf(false)
-    }
 
+        mutableStateOf(false)
+
+    }
 
 
 
@@ -57,14 +56,14 @@ fun EmailVerificationScreen(
             .fillMaxSize()
             .background(ColorSurface),
 
-
         contentAlignment = Alignment.Center
 
-    ){
+    ) {
 
 
 
         AuthCard {
+
 
 
             AuthHeader(
@@ -77,7 +76,6 @@ fun EmailVerificationScreen(
                     R.string.verify_email_desc
                 )
 
-
             )
 
 
@@ -88,10 +86,9 @@ fun EmailVerificationScreen(
 
 
 
-
             AnimatedVisibility(
                 visible = resent
-            ){
+            ) {
 
                 AuthMessage(
 
@@ -103,15 +100,13 @@ fun EmailVerificationScreen(
 
                 )
 
-
             }
-
 
 
 
             AnimatedVisibility(
                 visible = notVerified
-            ){
+            ) {
 
 
                 AuthMessage(
@@ -124,16 +119,13 @@ fun EmailVerificationScreen(
 
                 )
 
-
             }
-
 
 
 
             Spacer(
                 Modifier.height(24.dp)
             )
-
 
 
 
@@ -145,15 +137,13 @@ fun EmailVerificationScreen(
 
                 loading = false
 
-            ){
+            ) {
 
 
 
-                val user =
-
-                    FirebaseAuth
-                        .getInstance()
-                        .currentUser
+                val user = FirebaseAuth
+                    .getInstance()
+                    .currentUser
 
 
 
@@ -161,24 +151,10 @@ fun EmailVerificationScreen(
 
 
 
-
                 if(user?.isEmailVerified == true){
 
 
-                    navController.navigate(
-                        Routes.HOME
-                    ){
-
-                        popUpTo(
-                            Routes.SPLASH
-                        ){
-
-                            inclusive = true
-
-                        }
-
-                    }
-
+                    navigateHome()
 
 
                 }else{
@@ -191,18 +167,13 @@ fun EmailVerificationScreen(
 
                 }
 
-
-
             }
-
 
 
 
             Spacer(
                 Modifier.height(16.dp)
             )
-
-
 
 
 
@@ -215,11 +186,9 @@ fun EmailVerificationScreen(
                         .resendVerificationEmail()
 
 
-
                     resent = true
 
                     notVerified = false
-
 
 
                 },
@@ -229,7 +198,7 @@ fun EmailVerificationScreen(
                     .fillMaxWidth()
                     .height(56.dp)
 
-            ){
+            ) {
 
 
                 Text(
@@ -240,10 +209,7 @@ fun EmailVerificationScreen(
 
                 )
 
-
             }
-
-
 
 
 
@@ -251,7 +217,7 @@ fun EmailVerificationScreen(
 
                 visible = state.error != null
 
-            ){
+            ) {
 
 
                 state.error?.let {
@@ -265,20 +231,12 @@ fun EmailVerificationScreen(
 
                     )
 
-
                 }
-
 
             }
 
-
-
         }
 
-
-
     }
-
-
 
 }

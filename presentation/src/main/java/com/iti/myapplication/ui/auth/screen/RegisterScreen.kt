@@ -16,12 +16,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import iti.presentation.R
 import com.shopzen.presentation.auth.components.*
 import com.shopzen.presentation.auth.intent.RegisterIntent
 import com.shopzen.presentation.auth.viewmodel.RegisterViewModel
-import com.shopzen.presentation.navigation.Routes
 import com.iti.myapplication.ui.theme.ColorOnSurface
 import com.iti.myapplication.ui.theme.ColorSurface
 
@@ -29,37 +27,26 @@ import com.iti.myapplication.ui.theme.ColorSurface
 @Composable
 fun RegisterScreen(
 
-    navController: NavController,
+    navigateToEmailVerification: () -> Unit,
+
+    navigateToLogin: () -> Unit,
 
     viewModel: RegisterViewModel = hiltViewModel()
 
-){
+) {
 
 
     val state by viewModel.state.collectAsStateWithLifecycle()
 
 
 
-    LaunchedEffect(state.isRegistered){
+    LaunchedEffect(state.isRegistered) {
 
+        if (state.isRegistered) {
 
-        if(state.isRegistered){
-
-
-            navController.navigate(
-                Routes.EMAIL_VERIFICATION
-            ){
-
-                popUpTo(
-                    Routes.REGISTER
-                ){
-                    inclusive = true
-                }
-
-            }
+            navigateToEmailVerification()
 
         }
-
 
     }
 
@@ -78,7 +65,7 @@ fun RegisterScreen(
 
         horizontalAlignment = Alignment.CenterHorizontally
 
-    ){
+    ) {
 
 
         Spacer(
@@ -106,7 +93,6 @@ fun RegisterScreen(
         Spacer(
             Modifier.height(32.dp)
         )
-
 
 
 
@@ -147,13 +133,11 @@ fun RegisterScreen(
 
                 onValueChange = {
 
-
                     viewModel.processIntent(
 
                         RegisterIntent.NameChanged(it)
 
                     )
-
 
                 }
 
@@ -181,13 +165,11 @@ fun RegisterScreen(
 
                 onValueChange = {
 
-
                     viewModel.processIntent(
 
                         RegisterIntent.EmailChanged(it)
 
                     )
-
 
                 }
 
@@ -210,7 +192,6 @@ fun RegisterScreen(
                 ),
 
                 onChange = {
-
 
                     viewModel.processIntent(
 
@@ -240,7 +221,6 @@ fun RegisterScreen(
 
                 onChange = {
 
-
                     viewModel.processIntent(
 
                         RegisterIntent.ConfirmPasswordChanged(it)
@@ -253,17 +233,17 @@ fun RegisterScreen(
 
 
 
-
             Spacer(
                 Modifier.height(16.dp)
             )
 
 
 
-
             AnimatedVisibility(
+
                 visible = state.error != null
-            ){
+
+            ) {
 
 
                 state.error?.let {
@@ -277,19 +257,15 @@ fun RegisterScreen(
 
                     )
 
-
                 }
 
-
             }
-
 
 
 
             Spacer(
                 Modifier.height(32.dp)
             )
-
 
 
 
@@ -301,7 +277,7 @@ fun RegisterScreen(
 
                 loading = state.isLoading
 
-            ){
+            ) {
 
 
                 viewModel.processIntent(
@@ -310,9 +286,7 @@ fun RegisterScreen(
 
                 )
 
-
             }
-
 
 
 
@@ -322,13 +296,11 @@ fun RegisterScreen(
 
 
 
-
             Row(
 
                 verticalAlignment = Alignment.CenterVertically
 
-            ){
-
+            ) {
 
 
                 Text(
@@ -345,11 +317,12 @@ fun RegisterScreen(
 
                     onClick = {
 
-                        navController.popBackStack()
+                        navigateToLogin()
 
                     }
 
-                ){
+                ) {
+
 
                     Text(
 
@@ -359,21 +332,12 @@ fun RegisterScreen(
 
                     )
 
-
                 }
-
-
 
             }
 
-
-
         }
 
-
-
     }
-
-
 
 }
