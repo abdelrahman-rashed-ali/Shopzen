@@ -1,29 +1,51 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.serialization)
     //reashed
     id("com.google.gms.google-services")
-    //reashed
 }
 
 android {
     namespace = "iti.data"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Read Shopify credentials from local.properties → BuildConfig
+        val localProperties = Properties().apply {
+            val file = rootProject.file("local.properties")
+            if (file.exists()) load(file.inputStream())
+        }
+        buildConfigField(
+            "String",
+            "SHOPIFY_ACCESS_TOKEN",
+            "\"${localProperties.getProperty("SHOPIFY_ACCESS_TOKEN", "")}\""
+        )
+        buildConfigField(
+            "String",
+            "SHOPIFY_HOSTNAME",
+            "\"${localProperties.getProperty("SHOPIFY_HOSTNAME", "")}\""
+        )
+        buildConfigField(
+            "String",
+            "SHOPIFY_API_VERSION",
+            "\"${localProperties.getProperty("SHOPIFY_API_VERSION", "2026-01")}\""
+        )
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
 }
 
 dependencies {

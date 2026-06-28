@@ -1,6 +1,8 @@
 package com.iti.myapplication.navigation
 
 
+ 
+
 sealed class NavScreen(
     val route: String
 ) {
@@ -23,5 +25,8 @@ sealed class NavScreen(
     object HomeScreen : NavScreen(
         "main/home"
     )
+       data object ProductDetail : NavScreen("main/products/{productId}") {
+        fun createRoute(productId: Long): String = "main/products/$productId"
+    }
 
 }
