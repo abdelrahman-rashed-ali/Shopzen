@@ -19,7 +19,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RemoteModule {
+object NetworkModule {
 
     @Provides
     @Singleton
@@ -42,7 +42,7 @@ object RemoteModule {
             }
 
             defaultRequest {
-                url("https://${BuildConfig.SHOPIFY_HOSTNAME}/")
+                url("https://${BuildConfig.SHOPIFY_HOSTNAME}/admin/api/${BuildConfig.SHOPIFY_API_VERSION}/")
                 header("X-Shopify-Access-Token", BuildConfig.SHOPIFY_ACCESS_TOKEN)
                 header("Content-Type", "application/json")
             }

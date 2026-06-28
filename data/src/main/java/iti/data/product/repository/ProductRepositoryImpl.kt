@@ -14,8 +14,6 @@ class ProductRepositoryImpl(
 ) : ProductRepository {
 
     override suspend fun getProductById(id: Long): Result<Product> {
-        return runCatching {
-            remoteDataSource.getProductById(id).product.toDomain()
-        }
+        return Result.success(remoteDataSource.getProductById(id).product.toDomain())
     }
 }

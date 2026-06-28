@@ -17,8 +17,6 @@ class ProductRemoteDataSource(
      * GET /admin/api/{version}/products/{id}.json
      */
     suspend fun getProductById(id: Long): ProductResponseDto {
-        return client.get(
-            "admin/api/${BuildConfig.SHOPIFY_API_VERSION}/products/$id.json"
-        ).body()
+        return client.get("products/$id.json").body()
     }
 }

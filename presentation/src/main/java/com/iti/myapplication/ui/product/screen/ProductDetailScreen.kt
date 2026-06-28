@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -27,8 +26,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,34 +35,39 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.iti.myapplication.ui.product.components.ErrorContent
 import com.iti.myapplication.ui.product.components.ImagePagerIndicator
+import com.iti.myapplication.ui.product.components.LoadingContent
+import com.iti.myapplication.ui.product.components.OptionSelector
+import com.iti.myapplication.ui.product.components.PriceRow
 import com.iti.myapplication.ui.product.intent.ProductDetailIntent
 import com.iti.myapplication.ui.product.state.ProductDetailState
-import iti.domain.product.model.ProductOption
-import iti.domain.product.model.ProductVariant
+import com.iti.myapplication.ui.product.viewmodel.ProductDetailViewModel
 
 /**
  * Stateless Compose screen for Product Detail.
- * Receives [state] and emits user events via [onIntent].
  * Contains zero business logic.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailScreen(
-    state: ProductDetailState,
-    onIntent: (ProductDetailIntent) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: ProductDetailViewModel = hiltViewModel()
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val onIntent = viewModel::processIntent
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -99,7 +101,7 @@ fun ProductDetailScreen(
             when {
                 state.isLoading -> LoadingContent()
                 state.error != null -> ErrorContent(
-                    message = state.error,
+                    message = state.error!!,
                     onRetry = { onIntent(ProductDetailIntent.Retry) },
                 )
                 state.product != null -> ProductContent(
@@ -111,49 +113,10 @@ fun ProductDetailScreen(
     }
 }
 
-// region — Loading & Error
-
-@Composable
-private fun LoadingContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-private fun ErrorContent(
-    message: String,
-    onRetry: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.error,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        TextButton(onClick = onRetry) {
-            Text("Retry")
-        }
-    }
-}
-
-// endregion
-
 // region — Product Content
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ProductContent(
+fun ProductContent(
     state: ProductDetailState,
     onIntent: (ProductDetailIntent) -> Unit,
 ) {
@@ -299,96 +262,3 @@ private fun ProductContent(
     }
 }
 
-// endregion
-
-// region — Price
-
-@Composable
-private fun PriceRow(state: ProductDetailState) {
-    val product = state.product ?: return
-
-    // Show selected variant's price if available, else the default product price
-    val selectedVariant = state.selectedVariantId?.let { id ->
-        product.variants.find { it.id == id }
-    }
-    val displayPrice = selectedVariant?.price ?: product.price
-    val displayCompareAt = selectedVariant?.compareAtPrice ?: product.compareAtPrice
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = "$$displayPrice",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        if (!displayCompareAt.isNullOrBlank() && displayCompareAt != displayPrice) {
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = "$$displayCompareAt",
-                style = MaterialTheme.typography.bodyLarge,
-                textDecoration = TextDecoration.LineThrough,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            )
-        }
-    }
-}
-
-// endregion
-
-// region — Option Selector (Size / Color chips)
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun OptionSelector(
-    option: ProductOption,
-    variants: List<ProductVariant>,
-    selectedVariantId: Long?,
-    onSelectVariant: (Long) -> Unit,
-) {
-    Text(
-        text = option.name,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(bottom = 8.dp),
-    )
-
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        option.values.forEach { value ->
-            // Find the variant that matches this option value
-            val matchingVariant = variants.find { variant ->
-                variant.selectedOptions.any {
-                    it.name == option.name && it.value == value
-                }
-            }
-
-            val isOutOfStock = matchingVariant?.inventoryQuantity == 0
-            val isSelected = matchingVariant?.id == selectedVariantId
-
-            FilterChip(
-                selected = isSelected,
-                onClick = {
-                    matchingVariant?.let { onSelectVariant(it.id) }
-                },
-                label = {
-                    Text(
-                        text = if (isOutOfStock) "$value (Out of stock)" else value,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                },
-                enabled = !isOutOfStock,
-                modifier = Modifier.clip(RoundedCornerShape(12.dp)),
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                ),
-            )
-        }
-    }
-}
-
-// endregion

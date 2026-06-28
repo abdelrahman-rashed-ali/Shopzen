@@ -11,35 +11,34 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.iti.myapplication.ui.product.screen.ProductDetailScreen
-import com.iti.myapplication.ui.product.viewmodel.ProductDetailViewModel
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: String = NavScreen.UnknownScreen.route,
+    startDestination: String = NavScreen.ProductDetail.route,
 ) {
+    val defaultProductId = if (startDestination.startsWith("main/products/") && startDestination != NavScreen.ProductDetail.route) {
+        startDestination.substringAfterLast("/").toLongOrNull() ?: 9648403579031L
+    } else {
+        9648403579031L
+    }
+
     NavHost(
         navController = navController,
         modifier = modifier,
-        startDestination = startDestination,
+        startDestination = NavScreen.ProductDetail.route,
     ) {
-        composable(NavScreen.UnknownScreen.route) {
-            UnknownScreen()
-        }
-
         composable(
             route = NavScreen.ProductDetail.route,
             arguments = listOf(
-                navArgument("productId") { type = NavType.LongType }
+                navArgument("productId") { 
+                    type = NavType.LongType 
+                    defaultValue = defaultProductId
+                }
             ),
         ) {
-            val viewModel: ProductDetailViewModel = hiltViewModel()
-            val state by viewModel.state.collectAsStateWithLifecycle()
-
             ProductDetailScreen(
-                state = state,
-                onIntent = viewModel::processIntent,
                 onNavigateBack = { navController.popBackStack() },
             )
         }

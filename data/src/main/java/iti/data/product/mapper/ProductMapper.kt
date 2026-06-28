@@ -27,7 +27,7 @@ fun ProductDto.toDomain(): Product {
         description = stripHtml(bodyHtml),
         vendor = vendor,
         productType = productType,
-        tags = tags.split(",").map { it.trim() }.filter { it.isNotEmpty() },
+        tags = tags?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList(),
         images = images.map { it.toDomain() },
         variants = domainVariants,
         options = options.map { it.toDomain() },

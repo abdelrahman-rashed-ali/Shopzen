@@ -82,18 +82,6 @@ class ProductDetailViewModel @Inject constructor(
     }
 
     private fun addToCart() {
-        val currentState = _state.value
-        val product = currentState.product ?: return
-
-        // If product has options (sizes/colors), a variant must be selected
-        val hasOptions = product.options.any { it.values.size > 1 }
-        if (hasOptions && currentState.selectedVariantId == null) {
-            _state.update { it.copy(showSizeRequiredError = true) }
-            return
-        }
-
-        // TODO: Delegate to AddToCartUseCase when cart feature is implemented
-        // For now, clear the error — cart integration is a future feature
-        _state.update { it.copy(showSizeRequiredError = false) }
+        // TODO: Delegate cart handling to dedicated cart feature/use case
     }
 }
