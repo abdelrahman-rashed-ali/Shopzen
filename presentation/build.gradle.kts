@@ -12,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        minSdk = 35
+        minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -41,7 +41,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     //yousef
-    implementation(":domain")
+    implementation(project(":domain"))
     //yousef
     //rashed
     //rashed
