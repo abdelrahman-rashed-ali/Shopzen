@@ -5,10 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-
 import com.shopzen.presentation.auth.screen.EmailVerificationScreen
 import com.shopzen.presentation.auth.screen.RegisterScreen
-import com.shopzen.app.navigation.Routes
 
 
 @Composable
@@ -18,62 +16,61 @@ fun AppNavHost(
     startDestination: NavScreen = NavScreen.RegisterScreen,
 ) {
 
+
     NavHost(
         navController = navController,
         modifier = modifier,
-        startDestination = startDestination.route,
+        startDestination = startDestination.route
+
     ) {
 
-
-        composable(Routes.SPLASH) {
-
-        }
-
-
-        composable(Routes.LOGIN) {
+        composable(
+            NavScreen.SplashScreen.route
+        ) {
 
         }
 
+        composable(
+            NavScreen.LoginScreen.route
+        ) {
 
-        composable(Routes.REGISTER) {
+        }
 
+        composable(
+            NavScreen.RegisterScreen.route
+        ) {
             RegisterScreen(
                 navigateToLogin = {
                     navController.navigate(
-                        Routes.HOME
+                        NavScreen.LoginScreen.route
                     )
                 },
                 navigateToEmailVerification = {
-
                     navController.navigate(
-                        Routes.EMAIL_VERIFICATION
+                        NavScreen.EmailVerificationScreen.route
                     )
-
                 }
             )
-
         }
 
-
-        composable(Routes.EMAIL_VERIFICATION) {
+        composable(
+            NavScreen.EmailVerificationScreen.route
+        ) {
 
             EmailVerificationScreen(
                 navigateHome = {
 
                     navController.navigate(
-                        Routes.HOME
+                        NavScreen.HomeScreen.route
                     )
-
                 }
             )
-
         }
-
-
-        composable(Routes.HOME) {
-
+        composable(
+            NavScreen.HomeScreen.route
+        ) {
             UnknownScreen(modifier)
-
         }
     }
+
 }
