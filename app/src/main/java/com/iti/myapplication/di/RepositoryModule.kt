@@ -1,5 +1,8 @@
 package com.iti.myapplication.di
 
+import com.shopzen.data.auth.repository.AuthRepositoryImpl
+import com.shopzen.domain.auth.repository.AuthRepository
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,13 +14,18 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RepositoryModule {
+abstract class RepositoryModule {
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideProductRepository(
-        remoteDataSource: ProductRemoteDataSource,
-    ): ProductRepository {
-        return ProductRepositoryImpl(remoteDataSource)
-    }
+    abstract fun bindProductRepository(
+        impl: ProductRepositoryImpl,
+    ): ProductRepository
+
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        impl: AuthRepositoryImpl
+    ): AuthRepository
 }

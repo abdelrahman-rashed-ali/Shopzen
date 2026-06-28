@@ -23,5 +23,8 @@ kotlin {
         //rashed
         implementation(libs.kotlinx.coroutines.core)
         //rashed
+        //ziad
+        implementation(libs.javax.inject)
+        //ziad
     }
 }

@@ -1,4 +1,4 @@
-package com.iti.myapplication.di.auth
+package com.iti.myapplication.di.firebase
 
 import com.google.firebase.auth.FirebaseAuth
 import com.shopzen.data.auth.remote.RemoteAuthDataSource
