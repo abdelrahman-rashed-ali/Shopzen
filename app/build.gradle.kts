@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.ksp)
 }
 
 import java.util.Properties
@@ -45,8 +47,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -90,5 +92,9 @@ dependencies {
     //nour
     //nour
     //ziad
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.bundles.ktor)
+    implementation(libs.bundles.apollo)
     //ziad
 }
