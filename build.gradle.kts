@@ -8,11 +8,10 @@ plugins {
     alias(libs.plugins.hilt.android) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.jetbrains.kotlin.jvm) apply false
-    alias(libs.plugins.kotlin.serialization) apply false
     //yousef
     //yousef
     //rashed
-    id("com.google.gms.google-services") version "4.5.0" apply false
+    alias(libs.plugins.google.services) apply false
     //rashed
     //nour
     //nour

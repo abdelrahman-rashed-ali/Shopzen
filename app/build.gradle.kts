@@ -1,4 +1,3 @@
-import com.android.build.gradle.internal.tasks.AarMetadataReader.Companion.load
 import java.util.Properties
 
 plugins {
@@ -7,16 +6,16 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.google.services)
 }
 
 android {
-    namespace = "com.iti.myapplication"
+    namespace = "iti.app"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.iti.myapplication"
-        minSdk = 26
+        applicationId = "com.iti.shopzen"
+        minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -68,6 +67,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -80,7 +80,6 @@ dependencies {
     //rashed
     implementation(libs.firebase.auth)
     implementation(platform(libs.firebase.bom))
-
     implementation(project(":presentation"))
     implementation(project(":data"))
     implementation(project(":domain"))
@@ -90,11 +89,9 @@ dependencies {
     //ziad
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.bundles.ktor)
     implementation(libs.bundles.apollo)
     implementation(libs.androidx.hilt.navigation.compose)
     //ziad
 }
 
-apply(plugin = "com.google.gms.google-services")
