@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.serialization)
+    //reashed
     id("com.google.gms.google-services")
 }
 
@@ -60,10 +61,14 @@ dependencies {
     //rashed
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.javax.inject)
     //rashed
     //nour
     //nour
     //ziad
     implementation(libs.bundles.ktor)
+    implementation(libs.bundles.apollo)
+    implementation(libs.javax.inject)
     //ziad
 }

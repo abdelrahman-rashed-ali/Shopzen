@@ -18,4 +18,10 @@ kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
     }
+
+    dependencies {
+        //rashed
+        implementation(libs.kotlinx.coroutines.core)
+        //rashed
+    }
 }

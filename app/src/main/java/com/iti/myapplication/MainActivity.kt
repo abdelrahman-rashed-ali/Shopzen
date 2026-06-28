@@ -18,8 +18,8 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
 
             AppNavHost(
-                navController = navController, 
-                startDestination = NavScreen.ProductDetail.createRoute(productId = 9648403579031) // Example Shopify product ID
+                navController = navController,
+                startDestination = NavScreen.RegisterScreen
             )
         }
     }

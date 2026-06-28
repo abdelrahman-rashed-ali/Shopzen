@@ -1,5 +1,8 @@
 package com.iti.myapplication.di
 
+import com.iti.myapplication.BuildConfig
+import com.iti.myapplication.remote.config.NetworkConfig
+import com.iti.myapplication.remote.rest.KtorRestClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,7 +15,6 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.serialization.kotlinx.json.json
-import iti.data.BuildConfig
 import iti.data.product.remote.ProductRemoteDataSource
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton
@@ -23,35 +25,14 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(): HttpClient {
-        return HttpClient(Android) {
-            expectSuccess = true
-
-            install(ContentNegotiation) {
-                json(
-                    Json {
-                        ignoreUnknownKeys = true
-                        isLenient = true
-                        prettyPrint = false
-                    }
-                )
-            }
-
-            install(Logging) {
-                level = LogLevel.BODY
-            }
-
-            defaultRequest {
-                url("https://${BuildConfig.SHOPIFY_HOSTNAME}/admin/api/${BuildConfig.SHOPIFY_API_VERSION}/")
-                header("X-Shopify-Access-Token", BuildConfig.SHOPIFY_ACCESS_TOKEN)
-                header("Content-Type", "application/json")
-            }
-        }
-    }
+    fun provideNetworkConfig(): NetworkConfig = NetworkConfig(
+        hostname   = BuildConfig.SHOPIFY_HOSTNAME,
+        apiVersion = BuildConfig.SHOPIFY_API_VERSION,
+        apiKey     = BuildConfig.SHOPIFY_API_KEY,
+    )
 
     @Provides
     @Singleton
-    fun provideProductRemoteDataSource(client: HttpClient): ProductRemoteDataSource {
-        return ProductRemoteDataSource(client)
-    }
+    fun provideRestClient(config: NetworkConfig): HttpClient =
+        KtorRestClient.build(config)
 }

@@ -1,10 +1,32 @@
 package com.iti.myapplication.navigation
 
-/**
- * All route definitions for the app. Single source of truth for route strings.
- */
-sealed class NavScreen(val route: String) {
-    data object ProductDetail : NavScreen("main/products/{productId}") {
+
+ 
+
+sealed class NavScreen(
+    val route: String
+) {
+    object SplashScreen : NavScreen(
+        "splash"
+    )
+
+    object LoginScreen : NavScreen(
+        "auth/login"
+    )
+
+    object RegisterScreen : NavScreen(
+        "auth/register"
+    )
+
+    object EmailVerificationScreen : NavScreen(
+        "auth/verify-email"
+    )
+
+    object HomeScreen : NavScreen(
+        "main/home"
+    )
+       data object ProductDetail : NavScreen("main/products/{productId}") {
         fun createRoute(productId: Long): String = "main/products/$productId"
     }
+
 }
