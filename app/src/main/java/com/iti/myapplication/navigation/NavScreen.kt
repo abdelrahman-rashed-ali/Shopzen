@@ -1,6 +1,6 @@
 package com.iti.myapplication.navigation
 
-import com.shopzen.presentation.navigation.Routes
+import com.shopzen.app.navigation.Routes
 
 sealed class NavScreen(val route: String) {
     object SplashScreen : NavScreen(Routes.SPLASH)
