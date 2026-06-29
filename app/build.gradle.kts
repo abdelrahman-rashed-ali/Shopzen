@@ -10,7 +10,7 @@ plugins {
 }
 
 android {
-    namespace = "iti.app"
+    namespace = "shopzen.app"
     compileSdk = 36
 
     defaultConfig {
@@ -40,6 +40,7 @@ android {
         compose = true
         buildConfig = true
     }
+
 
     defaultConfig {
         val properties = Properties().apply {

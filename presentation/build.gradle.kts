@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "iti.presentation"
+    namespace = "shopzen.presentation"
     compileSdk = 36
 
     defaultConfig {
@@ -22,6 +22,7 @@ android {
     buildFeatures {
         compose = true
     }
+
 }
 
 kotlin {
