@@ -1,6 +1,5 @@
-package com.iti.myapplication.di
+package com.iti.myapplication.di.network
 
-import com.iti.myapplication.BuildConfig
 import com.iti.myapplication.remote.config.NetworkConfig
 import com.iti.myapplication.remote.rest.KtorRestClient
 import dagger.Module
@@ -8,15 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.android.Android
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.header
-import io.ktor.serialization.kotlinx.json.json
-import iti.data.product.remote.ProductRemoteDataSource
-import kotlinx.serialization.json.Json
+import iti.app.BuildConfig
 import javax.inject.Singleton
 
 @Module

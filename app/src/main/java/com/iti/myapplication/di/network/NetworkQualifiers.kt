@@ -1,4 +1,4 @@
-package com.iti.myapplication.di
+package com.iti.myapplication.di.network
 
 import javax.inject.Qualifier
 

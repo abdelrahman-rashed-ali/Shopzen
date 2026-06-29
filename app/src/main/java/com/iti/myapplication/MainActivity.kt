@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.rememberNavController
 import com.iti.myapplication.navigation.AppNavHost
-import com.iti.myapplication.navigation.NavScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -16,11 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-
-            AppNavHost(
-                navController = navController,
-                startDestination = NavScreen.RegisterScreen
-            )
+            AppNavHost(navController = navController)
         }
     }
 }
