@@ -16,6 +16,7 @@
     <string name="email_hint">name@example.com</string>
 
     <string name="password">Password</string>
+    <string name="password_hint">********</string>
     <string name="confirm_password">Confirm Password</string>
 
     <string name="sign_up">SIGN UP</string>
@@ -25,6 +26,21 @@
     </string>
 
     <string name="login">Log in</string>
+
+    <!-- Login -->
+    <string name="welcome_back">Welcome Back</string>
+    <string name="sign_in_desc">Sign in to access your exclusive benefits.</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="sign_in">SIGN IN</string>
+    <string name="or_continue_with">OR CONTINUE WITH</string>
+    <string name="continue_with_google">Google</string>
+    <string name="continue_with_apple">Apple</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="register">Register</string>
+    <string name="continue_as_guest">CONTINUE AS GUEST</string>
+    <string name="google_sign_in_unavailable">Google sign in setup is not available yet.</string>
+    <string name="apple_sign_in_unavailable">Apple sign in setup is not available yet.</string>
+    <string name="splash_loading">Loading</string>
 
 
     <!-- Email Verification -->
