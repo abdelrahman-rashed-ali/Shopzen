@@ -61,7 +61,6 @@ okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-i
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilCompose" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
-material           = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 # Ktor - Core
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
