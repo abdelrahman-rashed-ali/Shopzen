@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Shopzen</string>
+    <string name="error_google_client_id_missing">Google sign in is missing GOOGLE_WEB_CLIENT_ID in local.properties.</string>
+    <string name="error_google_cancelled">Google sign in was cancelled.</string>
+    <string name="error_google_failed">Google sign in failed. Please try again.</string>
+    <string name="error_apple_cancelled">Apple sign in was cancelled.</string>
+    <string name="error_apple_failed">Apple sign in failed. Please try again.</string>
 </resources>
