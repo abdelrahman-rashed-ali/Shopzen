@@ -96,7 +96,7 @@ object ShopzenSize {
     val StarSize = 16.dp
     val BadgeSize = 16.dp
 
-    // Accessibility
+    // Accessibility minimum
     val TouchTargetMin = 48.dp
 
     // Bottom Sheet
