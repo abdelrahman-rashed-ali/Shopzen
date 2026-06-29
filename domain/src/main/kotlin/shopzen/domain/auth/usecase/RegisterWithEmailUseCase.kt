@@ -1,7 +1,7 @@
-package iti.domain.auth.usecase
+package shopzen.domain.auth.usecase
 
-import com.shopzen.domain.auth.model.User
-import iti.domain.auth.repository.AuthRepository
+import shopzen.domain.auth.model.User
+import shopzen.domain.auth.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

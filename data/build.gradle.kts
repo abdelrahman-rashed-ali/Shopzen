@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "iti.data"
+    namespace = "shopzen.data"
     compileSdk = 36
 
     defaultConfig {

@@ -1,6 +1,6 @@
-package iti.domain.auth.repository
+package shopzen.domain.auth.repository
 
-import com.shopzen.domain.auth.model.User
+import shopzen.domain.auth.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface AuthRepository {

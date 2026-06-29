@@ -1,6 +1,6 @@
-package iti.domain.auth.usecase
+package shopzen.domain.auth.usecase
 
-import iti.domain.auth.repository.AuthRepository
+import shopzen.domain.auth.repository.AuthRepository
 import javax.inject.Inject
 
 class SendVerificationEmailUseCase @Inject constructor(
