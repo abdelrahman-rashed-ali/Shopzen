@@ -1,4 +1,4 @@
-﻿package shopzen.presentation.theme
+package shopzen.presentation.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -107,11 +107,11 @@ private val ShopzenDarkColorScheme = darkColorScheme(
 // ── M3 Shapes ─────────────────────────────────────────────────────────────────
 
 private val ShopzenM3Shapes = Shapes(
-    extraSmall = ShopzenShapes.Xs,
-    small      = ShopzenShapes.Sm,
-    medium     = ShopzenShapes.Md,
-    large      = ShopzenShapes.Lg,
-    extraLarge = ShopzenShapes.Xl,
+    extraSmall = ShopzenShapes.XS,
+    small      = ShopzenShapes.SM,
+    medium     = ShopzenShapes.MD,
+    large      = ShopzenShapes.LG,
+    extraLarge = ShopzenShapes.XL,
 )
 
 // ── Extended Color Token Object ───────────────────────────────────────────────
