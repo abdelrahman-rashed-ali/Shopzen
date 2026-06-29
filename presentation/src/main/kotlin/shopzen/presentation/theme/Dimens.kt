@@ -92,9 +92,8 @@ object ShopzenSize {
     // Notification badge
     val BadgeSize           = 16.dp
 
-    // Accessibility minimums
-    val TouchTargetMin      = 44.dp
-    val TouchTargetPreferred = 48.dp
+    // Accessibility minimum
+    val TouchTargetMin = 48.dp
 
     // Bottom sheet handle
     val SheetHandleWidth    = 32.dp
