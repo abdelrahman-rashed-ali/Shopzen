@@ -78,32 +78,31 @@ fun FeaturedBanner(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.BottomCenter)
+                .align(Alignment.BottomStart)
                 .padding(horizontal = 24.dp, vertical = 40.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = title.uppercase(),
+                text = title,
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
-                    letterSpacing = 4.sp
+                    fontSize = 32.sp,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Serif
                 ),
                 color = Color.White,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Start
             )
 
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                     letterSpacing = 0.5.sp,
                     lineHeight = 22.sp
                 ),
                 color = Color.White.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                textAlign = TextAlign.Start
             )
 
             // Flat square explore button
@@ -120,9 +119,9 @@ fun FeaturedBanner(
                     text = "EXPLORE COLLECTION",
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
+                        letterSpacing = 1.sp
                     ),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
             }
         }
