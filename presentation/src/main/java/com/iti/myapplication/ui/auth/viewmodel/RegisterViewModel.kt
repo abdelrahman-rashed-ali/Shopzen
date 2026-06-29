@@ -2,8 +2,8 @@ package com.shopzen.presentation.auth.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import iti.domain.Auth.usecase.RegisterWithEmailUseCase
-import iti.domain.Auth.usecase.SendVerificationEmailUseCase
+import iti.domain.auth.usecase.RegisterWithEmailUseCase
+import iti.domain.auth.usecase.SendVerificationEmailUseCase
 import com.shopzen.presentation.auth.intent.RegisterIntent
 import com.shopzen.presentation.auth.state.RegisterState
 import dagger.hilt.android.lifecycle.HiltViewModel

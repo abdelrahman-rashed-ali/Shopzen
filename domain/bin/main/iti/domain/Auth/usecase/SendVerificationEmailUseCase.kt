@@ -1,4 +1,4 @@
-package iti.domain.Auth.usecase
+package iti.domain.auth.usecase
 
 import com.shopzen.domain.auth.repository.AuthRepository
 import javax.inject.Inject
