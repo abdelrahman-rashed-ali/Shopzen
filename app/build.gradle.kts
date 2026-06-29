@@ -1,28 +1,17 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.google.services)
 }
-
-import java.util.Properties
-
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localProperties.load(localPropertiesFile.inputStream())
-}
-
-val shopifyBaseUrl = localProperties.getProperty("shopify.base.url") ?: "https://mad46-and11.myshopify.com/admin/api/2026-01/"
-val shopifyAccessToken = localProperties.getProperty("shopify.access.token") ?: ""
 
 android {
-    namespace = "com.iti.myapplication"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    namespace = "shopzen.app"
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.iti.myapplication"
@@ -32,9 +21,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "SHOPIFY_BASE_URL", "\"$shopifyBaseUrl\"")
-        buildConfigField("String", "SHOPIFY_ACCESS_TOKEN", "\"$shopifyAccessToken\"")
     }
 
     buildTypes {
@@ -54,30 +40,39 @@ android {
         compose = true
         buildConfig = true
     }
+
+    defaultConfig {
+        val properties = Properties().apply {
+            load(rootProject.file("local.properties").inputStream())
+        }
+
+        buildConfigField("String", "SHOPIFY_HOSTNAME",    "\"${properties["SHOPIFY_HOSTNAME"]}\"")
+        buildConfigField("String", "SHOPIFY_API_VERSION", "\"${properties["SHOPIFY_API_VERSION"]}\"")
+        buildConfigField("String", "SHOPIFY_API_KEY",     "\"${properties["SHOPIFY_API_KEY"]}\"")
+        buildConfigField("String", "SHOPIFY_PASSWORD",    "\"${properties["SHOPIFY_PASSWORD"]}\"")
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
 }
 
 dependencies {
-    implementation(project(":domain"))
-    implementation(project(":data"))
-    implementation(project(":presentation"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.coil.compose)
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.gson)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging.interceptor)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -85,16 +80,16 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    //yousef
-    //yousef
-    //rashed
-    //rashed
-    //nour
-    //nour
-    //ziad
+
+    implementation(libs.firebase.auth)
+    implementation(platform(libs.firebase.bom))
+    implementation(project(":presentation"))
+    implementation(project(":data"))
+    implementation(project(":domain"))
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.bundles.ktor)
     implementation(libs.bundles.apollo)
-    //ziad
+    implementation(libs.androidx.hilt.navigation.compose)
 }
