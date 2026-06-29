@@ -45,10 +45,10 @@ fun NewArrivalsSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "BEST SELLERS",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 3.sp
+                text = "Best Sellers",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Serif
                 ),
                 color = Color.Black
             )
@@ -69,7 +69,7 @@ fun NewArrivalsSection(
         Spacer(modifier = Modifier.height(20.dp))
 
         // 2-Column Fashion Layout Grid
-        val chunkedProducts = products.take(6).chunked(2)
+        val chunkedProducts = products.chunked(2)
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(24.dp)

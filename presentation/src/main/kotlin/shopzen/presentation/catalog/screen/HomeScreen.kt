@@ -1,5 +1,6 @@
 package shopzen.presentation.catalog.screen
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +9,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -108,56 +112,89 @@ fun HomeScreen(
  */
 @Composable
 private fun HomeTopBar() {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsPadding()
-            .height(56.dp)
             .background(Color.White)
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .statusBarsPadding()
     ) {
-        // Hamburger Menu Icon
-        IconButton(onClick = { /* Open drawer */ }) {
-            Icon(
-                imageVector = Icons.Outlined.Menu,
-                contentDescription = "Menu",
-                tint = Color.Black
-            )
-        }
-
-        // Center LUXE Branding
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Gold brand icon mark
-            Box(
-                modifier = Modifier
-                    .size(8.dp, 15.dp)
-                    .background(Color(0xFFC5A85A)) // Luxe Gold
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = "LUXE",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    letterSpacing = 4.sp
-                ),
-                color = Color.Black
-            )
-        }
+            // Hamburger Menu Icon
+            IconButton(onClick = { /* Open drawer */ }) {
+                Icon(
+                    imageVector = Icons.Outlined.Menu,
+                    contentDescription = "Menu",
+                    tint = Color.Black
+                )
+            }
 
-        // Notification Bell Icon
-        IconButton(onClick = { /* View notifications */ }) {
-            Icon(
-                imageVector = Icons.Outlined.Notifications,
-                contentDescription = "Notifications",
-                tint = Color.Black
-            )
+            // Center LUXE Branding
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                // Gold and Black emblem / logo mark matching screenshot exactly
+                Canvas(modifier = Modifier.size(16.dp, 16.dp)) {
+                    // Left black bar
+                    drawRect(
+                        color = Color.Black,
+                        topLeft = Offset(0f, 0f),
+                        size = Size(width = size.width * 0.25f, height = size.height)
+                    )
+                    // Middle gold slanted bar
+                    val goldPath = Path().apply {
+                        moveTo(size.width * 0.35f, 0f)
+                        lineTo(size.width * 0.55f, 0f)
+                        lineTo(size.width * 0.9f, size.height)
+                        lineTo(size.width * 0.7f, size.height)
+                        close()
+                    }
+                    drawPath(
+                        path = goldPath,
+                        color = Color(0xFFC5A85A)
+                    )
+                    // Right black bar
+                    drawRect(
+                        color = Color.Black,
+                        topLeft = Offset(size.width * 0.75f, 0f),
+                        size = Size(width = size.width * 0.25f, height = size.height)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "LUXE",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        letterSpacing = 4.sp
+                    ),
+                    color = Color.Black
+                )
+            }
+
+            // Notification Bell Icon
+            IconButton(onClick = { /* View notifications */ }) {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "Notifications",
+                    tint = Color.Black
+                )
+            }
         }
+        // Subtle divider line at the bottom
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(0.5.dp)
+                .background(Color(0xFFEEEEEE))
+        )
     }
 }
 

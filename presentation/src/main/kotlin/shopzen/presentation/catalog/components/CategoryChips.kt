@@ -44,10 +44,10 @@ fun CategoryChips(
     ) {
         // Curation Section Header
         Text(
-            text = "CURATIONS",
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 3.sp
+            text = "Curations",
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Serif
             ),
             color = Color.Black,
             modifier = Modifier.padding(horizontal = 16.dp)
