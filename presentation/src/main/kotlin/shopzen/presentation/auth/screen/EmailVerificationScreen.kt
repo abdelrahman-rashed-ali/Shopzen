@@ -15,7 +15,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.auth.FirebaseAuth
 import shopzen.presentation.auth.components.*
 import shopzen.presentation.auth.viewmodel.RegisterViewModel
-import shopzen.presentation.theme.ColorSurface
 import shopzen.presentation.R
 
 
@@ -54,7 +53,7 @@ fun EmailVerificationScreen(
 
         modifier = Modifier
             .fillMaxSize()
-            .background(ColorSurface),
+            .background(MaterialTheme.colorScheme.surface),
 
         contentAlignment = Alignment.Center
 

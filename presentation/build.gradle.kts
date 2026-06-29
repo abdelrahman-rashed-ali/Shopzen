@@ -67,5 +67,6 @@ dependencies {
     //nour
     //nour
     //ziad
+    implementation(libs.androidx.compose.ui.text.google.fonts)
     //ziad
 }

@@ -1,10 +1,10 @@
 package shopzen.presentation.auth.components
 
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import shopzen.presentation.theme.ColorError
-import shopzen.presentation.theme.ColorSuccess
+import shopzen.presentation.theme.LocalShopzenColors
 
 
 @Composable
@@ -19,9 +19,9 @@ fun AuthMessage(
 
         color =
             if(error)
-                ColorError
+                MaterialTheme.colorScheme.error
             else
-                ColorSuccess
+                LocalShopzenColors.current.textSuccess
 
     )
 
