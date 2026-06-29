@@ -20,8 +20,6 @@ import shopzen.presentation.R
 import shopzen.presentation.auth.components.*
 import shopzen.presentation.auth.intent.RegisterIntent
 import shopzen.presentation.auth.viewmodel.RegisterViewModel
-import shopzen.presentation.theme.ColorOnSurface
-import shopzen.presentation.theme.ColorSurface
 
 
 @Composable
@@ -56,7 +54,7 @@ fun RegisterScreen(
 
         modifier = Modifier
             .fillMaxSize()
-            .background(ColorSurface)
+            .background(MaterialTheme.colorScheme.surface)
             .verticalScroll(
                 rememberScrollState()
             )
@@ -84,7 +82,7 @@ fun RegisterScreen(
 
             fontWeight = FontWeight.SemiBold,
 
-            color = ColorOnSurface
+            color = MaterialTheme.colorScheme.onSurface
 
         )
 
