@@ -6,10 +6,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import shopzen.presentation.theme.ColorOnSurface
-import shopzen.presentation.theme.ColorOnSurfaceVariant
-import shopzen.presentation.theme.ColorOutlineVariant
-import shopzen.presentation.theme.ColorSurfaceContainerLow
 
 
 @Composable
@@ -44,7 +40,8 @@ fun AuthTextField(
 
                 text = label,
 
-                color = ColorOnSurfaceVariant
+                color =
+                    MaterialTheme.colorScheme.onSurfaceVariant
 
             )
 
@@ -58,7 +55,8 @@ fun AuthTextField(
 
                 text = hint,
 
-                color = ColorOutlineVariant
+                color =
+                    MaterialTheme.colorScheme.outlineVariant
 
             )
 
@@ -68,7 +66,8 @@ fun AuthTextField(
 
         textStyle = LocalTextStyle.current.copy(
 
-            color = ColorOnSurface
+            color =
+                MaterialTheme.colorScheme.onSurface
 
         ),
 
@@ -82,31 +81,32 @@ fun AuthTextField(
 
 
             focusedContainerColor =
-                ColorSurfaceContainerLow,
+
+                MaterialTheme.colorScheme.surfaceContainerLow,
 
 
             unfocusedContainerColor =
-                ColorSurfaceContainerLow,
+                MaterialTheme.colorScheme.surfaceContainerLow,
 
 
             disabledContainerColor =
-                ColorSurfaceContainerLow,
+                MaterialTheme.colorScheme.surfaceContainerLow,
 
 
             focusedTextColor =
-                ColorOnSurface,
+                MaterialTheme.colorScheme.onSurface,
 
 
             unfocusedTextColor =
-                ColorOnSurface,
+                MaterialTheme.colorScheme.onSurface,
 
 
             cursorColor =
-                ColorOnSurface,
+                MaterialTheme.colorScheme.onSurface,
 
 
             focusedIndicatorColor =
-                ColorOnSurface,
+                MaterialTheme.colorScheme.onSurface,
 
 
             unfocusedIndicatorColor =

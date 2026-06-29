@@ -6,8 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.*
-import shopzen.presentation.theme.ColorOnPrimary
-import shopzen.presentation.theme.ColorPrimary
 
 
 @Composable
@@ -27,7 +25,7 @@ fun AuthButton(
 
 
         colors = ButtonDefaults.buttonColors(
-            containerColor = ColorPrimary
+            containerColor = MaterialTheme.colorScheme.primary,
         )
 
     ){
@@ -37,7 +35,7 @@ fun AuthButton(
 
             CircularProgressIndicator(
                 modifier = Modifier.size(20.dp),
-                color = ColorOnPrimary
+                color = MaterialTheme.colorScheme.onPrimary,
             )
 
         }else{

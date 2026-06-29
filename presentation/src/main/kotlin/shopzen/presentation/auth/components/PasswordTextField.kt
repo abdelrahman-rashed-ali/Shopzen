@@ -10,83 +10,52 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxWidth
-import shopzen.presentation.theme.ColorOnSurface
-import shopzen.presentation.theme.ColorOnSurfaceVariant
-import shopzen.presentation.theme.ColorOutlineVariant
-import shopzen.presentation.theme.ColorSurfaceContainerLow
 
 
 @Composable
 fun PasswordInputField(
-    value: String,
-    label: String,
-    onChange: (String) -> Unit
-){
+    value: String, label: String, onChange: (String) -> Unit
+) {
     var visible by remember {
         mutableStateOf(false)
     }
     TextField(
-        value = value,
-        onValueChange = onChange,
-        modifier = Modifier.fillMaxWidth(),
-        label = {
-            Text(
-                text = label,
-                color = ColorOnSurfaceVariant
+        value = value, onValueChange = onChange, modifier = Modifier.fillMaxWidth(), label = {
+        Text(
+            text = label, color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }, placeholder = {
+        Text(
+            text = "••••••••", color = MaterialTheme.colorScheme.outlineVariant
+        )
+    }, textStyle = LocalTextStyle.current.copy(
+        color = MaterialTheme.colorScheme.onSurface
+    ), visualTransformation = if (visible) VisualTransformation.None
+    else PasswordVisualTransformation(), trailingIcon = {
+        IconButton(
+            onClick = {
+                visible = !visible
+            }) {
+            Icon(
+                imageVector = if (visible) Icons.Outlined.VisibilityOff
+                else Icons.Outlined.Visibility,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        },
-        placeholder = {
-            Text(
-                text = "••••••••",
-                color = ColorOutlineVariant
-            )
-        },
-        textStyle = LocalTextStyle.current.copy(
-            color = ColorOnSurface
-        ),
-        visualTransformation =
-            if(visible)
-                VisualTransformation.None
-            else
-                PasswordVisualTransformation(),
-        trailingIcon = {
-            IconButton(
-                onClick = {
-                    visible = !visible
-                }
-            ){
-                Icon(
-                    imageVector =
-                        if(visible)
-                            Icons.Outlined.VisibilityOff
-                        else
-                            Icons.Outlined.Visibility,
-                    contentDescription = null,
-                    tint = ColorOnSurfaceVariant
-                )
-            }
-        },
-
+        }
+    },
 
 
         colors = TextFieldDefaults.colors(
-            focusedContainerColor =
-                ColorSurfaceContainerLow,
-            unfocusedContainerColor =
-                ColorSurfaceContainerLow,
-            disabledContainerColor =
-                ColorSurfaceContainerLow,
-            focusedTextColor =
-                ColorOnSurface,
-            unfocusedTextColor =
-                ColorOnSurface,
-            cursorColor =
-                ColorOnSurface,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            cursorColor = MaterialTheme.colorScheme.onSurface,
 
-            focusedIndicatorColor =
-                ColorOnSurface,
-            unfocusedIndicatorColor =
-                Color.Transparent
+            focusedIndicatorColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedIndicatorColor = Color.Transparent
 
         )
 
