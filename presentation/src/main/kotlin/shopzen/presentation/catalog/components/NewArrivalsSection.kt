@@ -3,8 +3,6 @@ package shopzen.presentation.catalog.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,7 +25,6 @@ import shopzen.presentation.common.components.ProductCard
 /**
  * Section displaying the best sellers (or new arrivals) in a beautiful, structured 2-column fashion grid.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NewArrivalsSection(
     products: List<Product>,
@@ -72,20 +69,29 @@ fun NewArrivalsSection(
         Spacer(modifier = Modifier.height(20.dp))
 
         // 2-Column Fashion Layout Grid
-        FlowRow(
+        val chunkedProducts = products.take(6).chunked(2)
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            maxItemsInEachRow = 2
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            val cardWidth = 160.dp
-            products.take(6).forEach { product ->
-                ProductCard(
-                    product = product,
-                    onProductClick = { onProductClick(product.id) },
-                    onWishlistClick = { _ -> onWishlistClick(product) },
-                    modifier = Modifier.width(cardWidth)
-                )
+            chunkedProducts.forEach { rowProducts ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    rowProducts.forEach { product ->
+                        ProductCard(
+                            product = product,
+                            onProductClick = { onProductClick(product.id) },
+                            onWishlistClick = { _ -> onWishlistClick(product) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    // If odd number of items, insert spacer to align layout
+                    if (rowProducts.size < 2) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
     }
