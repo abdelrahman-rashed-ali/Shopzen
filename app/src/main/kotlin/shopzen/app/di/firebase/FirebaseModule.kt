@@ -1,8 +1,8 @@
 package shopzen.app.di.firebase
 
 import com.google.firebase.auth.FirebaseAuth
-// import shopzen.data.auth.remote.RemoteAuthDataSource
-// import shopzen.data.auth.remote.RemoteAuthDataSourceImpl
+import shopzen.data.auth.remote.RemoteAuthDataSource
+import shopzen.data.auth.remote.RemoteAuthDataSourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -24,9 +24,9 @@ abstract class FirebaseModule {
 
     }
 
-    // @Binds
-    // @Singleton
-    // abstract fun bindRemoteAuthDataSource(
-    //     impl: RemoteAuthDataSourceImpl
-    // ): RemoteAuthDataSource
+    @Binds
+    @Singleton
+    abstract fun bindRemoteAuthDataSource(
+        impl: RemoteAuthDataSourceImpl
+    ): RemoteAuthDataSource
 }

@@ -7,9 +7,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import shopzen.presentation.catalog.screen.HomeScreen
-// import shopzen.presentation.product.screen.ProductDetailScreen
-// import shopzen.presentation.auth.screen.EmailVerificationScreen
-// import shopzen.presentation.auth.screen.RegisterScreen
+import shopzen.presentation.product.screen.ProductDetailScreen
+import shopzen.presentation.auth.screen.EmailVerificationScreen
+import shopzen.presentation.auth.screen.RegisterScreen
 
 @Composable
 fun AppNavHost(
@@ -24,23 +24,23 @@ fun AppNavHost(
     ) {
         composable<SplashScreen> {}
         composable<LoginScreen> {}
-        // composable<RegisterScreen> {
-        //     RegisterScreen(
-        //         navigateToLogin = {
-        //             navController.navigate(LoginScreen)
-        //         },
-        //         navigateToEmailVerification = {
-        //             navController.navigate(EmailVerificationScreen)
-        //         }
-        //     )
-        // }
-        // composable<EmailVerificationScreen> {
-        //     EmailVerificationScreen(
-        //         navigateHome = {
-        //             navController.navigate(HomeScreen)
-        //         }
-        //     )
-        // }
+        composable<RegisterScreen> {
+            RegisterScreen(
+                navigateToLogin = {
+                    navController.navigate(LoginScreen)
+                },
+                navigateToEmailVerification = {
+                    navController.navigate(EmailVerificationScreen)
+                }
+            )
+        }
+        composable<EmailVerificationScreen> {
+            EmailVerificationScreen(
+                navigateHome = {
+                    navController.navigate(HomeScreen)
+                }
+            )
+        }
         composable<HomeScreen> {
             HomeScreen(
                 onNavigateToBrand = { brandName ->
@@ -57,11 +57,11 @@ fun AppNavHost(
                 }
             )
         }
-        // composable<ProductDetail> { backStackEntry ->
-        //     val args = backStackEntry.toRoute<ProductDetail>()
-        //     ProductDetailScreen(productId = args.productId) {
-        //         navController.navigateUp()
-        //     }
-        // }
+        composable<ProductDetail> { backStackEntry ->
+            val args = backStackEntry.toRoute<ProductDetail>()
+            ProductDetailScreen(productId = args.productId) {
+                navController.navigateUp()
+            }
+        }
     }
 }
