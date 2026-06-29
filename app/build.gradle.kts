@@ -14,7 +14,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.iti.myapplication"
+        applicationId = "com.iti.shopzen"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -41,6 +41,7 @@ android {
         buildConfig = true
     }
 
+
     defaultConfig {
         val properties = Properties().apply {
             load(rootProject.file("local.properties").inputStream())
@@ -50,6 +51,7 @@ android {
         buildConfigField("String", "SHOPIFY_API_VERSION", "\"${properties["SHOPIFY_API_VERSION"]}\"")
         buildConfigField("String", "SHOPIFY_API_KEY",     "\"${properties["SHOPIFY_API_KEY"]}\"")
         buildConfigField("String", "SHOPIFY_PASSWORD",    "\"${properties["SHOPIFY_PASSWORD"]}\"")
+
     }
 }
 
@@ -80,16 +82,23 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
+    //yousef
+    //yousef
+    //rashed
     implementation(libs.firebase.auth)
     implementation(platform(libs.firebase.bom))
     implementation(project(":presentation"))
     implementation(project(":data"))
     implementation(project(":domain"))
-
+    //rashed
+    //nour
+    //nour
+    //ziad
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.bundles.ktor)
     implementation(libs.bundles.apollo)
     implementation(libs.androidx.hilt.navigation.compose)
+    //ziad
 }
+

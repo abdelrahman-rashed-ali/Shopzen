@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.serialization)
@@ -33,14 +35,19 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
-
+    //yousef
     implementation(project(":domain"))
-
+    //yousef
+    //rashed
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
-
+    //rashed
+    //nour
+    //nour
+    //ziad
     implementation(libs.bundles.ktor)
     implementation(libs.bundles.apollo)
     implementation(libs.javax.inject)
+    //ziad
 }

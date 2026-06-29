@@ -1,0 +1,10 @@
+package shopzen.domain.auth.usecase
+
+import shopzen.domain.auth.repository.AuthRepository
+import javax.inject.Inject
+
+class SendVerificationEmailUseCase @Inject constructor(
+    private val authRepository: AuthRepository
+) {
+    suspend operator fun invoke(): Result<Unit> = authRepository.sendVerificationEmail()
+}
