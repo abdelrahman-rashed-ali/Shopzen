@@ -1,8 +1,9 @@
 package iti.data.catalog.remote
 
 import iti.data.catalog.remote.api.CatalogApiService
-import iti.data.catalog.remote.dto.CollectionDto
-import iti.data.catalog.remote.dto.ProductDto
+import iti.data.catalog.remote.dto.CollectionsResponse
+import iti.data.catalog.remote.dto.ProductsResponse
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,15 +15,15 @@ import javax.inject.Singleton
 class RemoteCatalogDataSource @Inject constructor(
     private val apiService: CatalogApiService
 ) {
-    suspend fun getProducts(): ProductDto {
+    suspend fun getProducts(): Response<ProductsResponse> {
         return apiService.getProducts()
     }
 
-    suspend fun getProductVendors(): ProductDto {
+    suspend fun getProductVendors(): Response<ProductsResponse> {
         return apiService.getProductVendors()
     }
 
-    suspend fun getCustomCollections(): CollectionDto {
+    suspend fun getCustomCollections(): Response<CollectionsResponse> {
         return apiService.getCustomCollections()
     }
 }

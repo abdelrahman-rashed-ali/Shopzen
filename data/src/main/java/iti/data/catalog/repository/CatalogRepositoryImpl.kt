@@ -25,10 +25,14 @@ class CatalogRepositoryImpl @Inject constructor(
     override suspend fun getProducts(): Result<List<Product>> {
         return try {
             val response = remoteDataSource.getProducts()
-            val products = response.products
-                ?.map { it.toDomain() }
-                .orEmpty()
-            Result.success(products)
+            if (response.isSuccessful) {
+                val products = response.body()?.products
+                    ?.map { it.toDomain() }
+                    .orEmpty()
+                Result.success(products)
+            } else {
+                Result.failure(Exception("Failed to fetch products: ${response.message()}"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -40,10 +44,14 @@ class CatalogRepositoryImpl @Inject constructor(
     override suspend fun getBrands(): Result<List<Brand>> {
         return try {
             val response = remoteDataSource.getProductVendors()
-            val brands = response.products
-                ?.toDistinctBrands()
-                .orEmpty()
-            Result.success(brands)
+            if (response.isSuccessful) {
+                val brands = response.body()?.products
+                    ?.toDistinctBrands()
+                    .orEmpty()
+                Result.success(brands)
+            } else {
+                Result.failure(Exception("Failed to fetch brands: ${response.message()}"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -55,10 +63,14 @@ class CatalogRepositoryImpl @Inject constructor(
     override suspend fun getCategories(): Result<List<Category>> {
         return try {
             val response = remoteDataSource.getCustomCollections()
-            val categories = response.customCollections
-                ?.map { it.toDomain() }
-                .orEmpty()
-            Result.success(categories)
+            if (response.isSuccessful) {
+                val categories = response.body()?.customCollections
+                    ?.map { it.toDomain() }
+                    .orEmpty()
+                Result.success(categories)
+            } else {
+                Result.failure(Exception("Failed to fetch categories: ${response.message()}"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
