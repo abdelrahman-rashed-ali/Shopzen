@@ -51,6 +51,7 @@ android {
         buildConfigField("String", "SHOPIFY_API_VERSION", "\"${properties["SHOPIFY_API_VERSION"]}\"")
         buildConfigField("String", "SHOPIFY_API_KEY",     "\"${properties["SHOPIFY_API_KEY"]}\"")
         buildConfigField("String", "SHOPIFY_PASSWORD",    "\"${properties["SHOPIFY_PASSWORD"]}\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${properties["GOOGLE_WEB_CLIENT_ID"] ?: ""}\"")
 
     }
 }
@@ -74,6 +75,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

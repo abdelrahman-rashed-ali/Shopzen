@@ -9,5 +9,21 @@ interface RemoteAuthDataSource {
         displayName: String
     ): FirebaseUser
 
+    suspend fun signIn(
+        email: String,
+        password: String
+    ): FirebaseUser
+
+    suspend fun signInWithGoogle(idToken: String): FirebaseUser
+
+    suspend fun signInWithApple(
+        idToken: String,
+        rawNonce: String
+    ): FirebaseUser
+
+    suspend fun signInAnonymously(): FirebaseUser
+
+    fun getCurrentUser(): FirebaseUser?
+
     suspend fun sendVerificationEmail()
 }

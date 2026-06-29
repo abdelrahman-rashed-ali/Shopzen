@@ -6,6 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import shopzen.presentation.auth.screen.LoginScreen as LoginRouteScreen
+import shopzen.presentation.auth.screen.SplashScreen as SplashRouteScreen
 import shopzen.presentation.product.screen.ProductDetailScreen
 import shopzen.presentation.auth.screen.EmailVerificationScreen
 import shopzen.presentation.auth.screen.RegisterScreen
@@ -15,7 +17,15 @@ import shopzen.presentation.auth.screen.RegisterScreen
 fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: NavScreen = RegisterScreen,
+    startDestination: NavScreen = SplashScreen,
+    launchGoogleSignIn: (
+        onToken: (String) -> Unit,
+        onError: (String) -> Unit
+    ) -> Unit,
+    launchAppleSignIn: (
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) -> Unit,
 ) {
 
 
@@ -25,8 +35,54 @@ fun AppNavHost(
         startDestination = startDestination
 
     ) {
-        composable<SplashScreen> {}
-        composable<LoginScreen> {}
+        composable<SplashScreen> {
+            SplashRouteScreen(
+                navigateToHome = {
+                    navController.navigate(HomeScreen) {
+                        popUpTo<SplashScreen> { inclusive = true }
+                    }
+                },
+                navigateToLogin = {
+                    navController.navigate(LoginScreen) {
+                        popUpTo<SplashScreen> { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable<LoginScreen> {
+            LoginRouteScreen(
+                navigateToHome = {
+                    navController.navigate(HomeScreen) {
+                        popUpTo<LoginScreen> { inclusive = true }
+                    }
+                },
+                navigateToRegister = {
+                    navController.navigate(RegisterScreen)
+                },
+                navigateToForgotPassword = {
+                    navController.navigate(ForgotPasswordScreen)
+                },
+                launchGoogleSignIn = launchGoogleSignIn,
+                launchAppleSignIn = launchAppleSignIn
+            )
+        }
+        composable<ForgotPasswordScreen> {
+            LoginRouteScreen(
+                navigateToHome = {
+                    navController.navigate(HomeScreen) {
+                        popUpTo<LoginScreen> { inclusive = true }
+                    }
+                },
+                navigateToRegister = {
+                    navController.navigate(RegisterScreen)
+                },
+                navigateToForgotPassword = {
+                    navController.navigateUp()
+                },
+                launchGoogleSignIn = launchGoogleSignIn,
+                launchAppleSignIn = launchAppleSignIn
+            )
+        }
         composable<RegisterScreen> {
             RegisterScreen(
                 navigateToLogin = {

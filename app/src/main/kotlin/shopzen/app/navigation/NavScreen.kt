@@ -19,6 +19,11 @@ object LoginScreen : NavScreen(
 )
 
 @Serializable
+object ForgotPasswordScreen : NavScreen(
+    "forgot-password"
+)
+
+@Serializable
 object RegisterScreen : NavScreen(
     "register"
 )
