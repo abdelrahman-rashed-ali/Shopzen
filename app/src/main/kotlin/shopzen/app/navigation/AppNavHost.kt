@@ -13,6 +13,8 @@ import shopzen.presentation.auth.screen.EmailVerificationScreen
 import shopzen.presentation.auth.screen.RegisterScreen
 import shopzen.presentation.catalog.screen.HomeScreen
 import shopzen.presentation.product.screen.ProductDetailScreen
+import shopzen.presentation.onboarding.screen.OnboardingScreen
+
 
 @Composable
 fun AppNavHost(
@@ -43,6 +45,20 @@ fun AppNavHost(
                 navigateToLogin = {
                     navController.navigate(LoginScreen) {
                         popUpTo<SplashScreen> { inclusive = true }
+                    }
+                },
+                navigateToOnboarding = {
+                    navController.navigate(shopzen.app.navigation.OnboardingScreen) {
+                        popUpTo<SplashScreen> { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable<shopzen.app.navigation.OnboardingScreen> {
+            OnboardingScreen(
+                onFinish = {
+                    navController.navigate(LoginScreen) {
+                        popUpTo<shopzen.app.navigation.OnboardingScreen> { inclusive = true }
                     }
                 }
             )
