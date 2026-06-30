@@ -9,13 +9,14 @@ import androidx.navigation.toRoute
 import shopzen.presentation.product.screen.ProductDetailScreen
 import shopzen.presentation.auth.screen.EmailVerificationScreen
 import shopzen.presentation.auth.screen.RegisterScreen
+import shopzen.presentation.cart.screen.CartScreen
 
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: NavScreen = RegisterScreen,
+    startDestination: NavScreen = CartScreen,
 ) {
 
 
@@ -48,6 +49,13 @@ fun AppNavHost(
             val args = backStackEntry.toRoute<ProductDetail>()
 
             ProductDetailScreen(productId = args.productId) { navController.navigateUp() }
+        }
+        composable<CartScreen> {
+            CartScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToProduct = {},
+                onNavigateToCheckout = {},
+            )
         }
     }
 
