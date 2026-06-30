@@ -8,6 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import shopzen.data.product.repository.ProductRepositoryImpl
 import shopzen.domain.product.repository.ProductRepository
+import shopzen.data.onboarding.repository.OnboardingRepositoryImpl
+import shopzen.domain.onboarding.repository.OnboardingRepository
 import javax.inject.Singleton
 
 @Module
@@ -26,4 +28,10 @@ abstract class RepositoryModule {
     abstract fun bindAuthRepository(
         impl: AuthRepositoryImpl
     ): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindOnboardingRepository(
+        impl: OnboardingRepositoryImpl
+    ): OnboardingRepository
 }

@@ -18,17 +18,20 @@ import shopzen.presentation.auth.viewmodel.SplashViewModel
 fun SplashScreen(
     navigateToHome: () -> Unit,
     navigateToLogin: () -> Unit,
+    navigateToOnboarding: () -> Unit,
     viewModel: SplashViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(
         state.shouldNavigateHome,
-        state.shouldNavigateLogin
+        state.shouldNavigateLogin,
+        state.shouldNavigateOnboarding
     ) {
         when {
             state.shouldNavigateHome -> navigateToHome()
             state.shouldNavigateLogin -> navigateToLogin()
+            state.shouldNavigateOnboarding -> navigateToOnboarding()
         }
     }
 
