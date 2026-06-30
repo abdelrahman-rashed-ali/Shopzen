@@ -11,11 +11,14 @@ import kotlinx.coroutines.launch
 import shopzen.domain.auth.usecase.GetCurrentUserUseCase
 import shopzen.presentation.auth.intent.SplashIntent
 import shopzen.presentation.auth.state.SplashState
+import shopzen.domain.onboarding.usecase.HasCompletedOnboardingUseCase
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    private val getCurrentUserUseCase: GetCurrentUserUseCase
+    private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val hasCompletedOnboardingUseCase: HasCompletedOnboardingUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SplashState())
@@ -34,11 +37,13 @@ class SplashViewModel @Inject constructor(
     private fun checkSession() {
         viewModelScope.launch {
             val user = getCurrentUserUseCase().getOrNull()
+            val hasCompletedOnboarding = hasCompletedOnboardingUseCase().first()
             _state.update {
                 it.copy(
                     isLoading = false,
-                    shouldNavigateHome = user != null,
-                    shouldNavigateLogin = user == null
+                    shouldNavigateHome = hasCompletedOnboarding && user != null,
+                    shouldNavigateLogin = hasCompletedOnboarding && user == null,
+                    shouldNavigateOnboarding = !hasCompletedOnboarding
                 )
             }
         }
