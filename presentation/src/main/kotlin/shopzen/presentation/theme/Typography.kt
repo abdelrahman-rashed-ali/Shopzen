@@ -21,7 +21,7 @@ private val GoogleFontsProvider = GoogleFont.Provider(
     certificates      = R.array.com_google_android_gms_fonts_certs,
 )
 
-private val PlusJakartaSans = GoogleFont("DynaPuff")
+private val PlusJakartaSans = GoogleFont("Plus Jakarta Sans")
 
 val PlusJakartaSansFamily = FontFamily(
     Font(googleFont = PlusJakartaSans, fontProvider = GoogleFontsProvider, weight = FontWeight.Normal),
