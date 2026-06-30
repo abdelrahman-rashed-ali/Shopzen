@@ -11,6 +11,8 @@ import shopzen.presentation.auth.screen.SplashScreen as SplashRouteScreen
 import shopzen.presentation.product.screen.ProductDetailScreen
 import shopzen.presentation.auth.screen.EmailVerificationScreen
 import shopzen.presentation.auth.screen.RegisterScreen
+import shopzen.presentation.catalog.screen.HomeScreen
+import shopzen.presentation.product.screen.ProductDetailScreen
 import shopzen.presentation.onboarding.screen.OnboardingScreen
 
 
@@ -28,13 +30,10 @@ fun AppNavHost(
         onError: (String) -> Unit
     ) -> Unit,
 ) {
-
-
     NavHost(
         modifier = modifier,
         navController = navController,
         startDestination = startDestination
-
     ) {
         composable<SplashScreen> {
             SplashRouteScreen(
@@ -101,25 +100,52 @@ fun AppNavHost(
         composable<RegisterScreen> {
             RegisterScreen(
                 navigateToLogin = {
-                navController.navigate(
-                    LoginScreen
-                )
-            },
-                navigateToEmailVerification = { navController.navigate(EmailVerificationScreen) })
+                    navController.navigate(LoginScreen)
+                },
+                navigateToEmailVerification = {
+                    navController.navigate(EmailVerificationScreen)
+                }
+            )
         }
+
         composable<EmailVerificationScreen> {
-            EmailVerificationScreen(navigateHome = {
-                navController.navigate(
-                    HomeScreen
-                )
-            })
+            EmailVerificationScreen(
+                navigateHome = {
+                    navController.navigate(HomeScreen)
+                }
+            )
         }
-        composable<HomeScreen> {}
+
+        composable<HomeScreen> {
+            HomeScreen(
+                onNavigateToBrand = { brandName ->
+                    // TODO: Handle brand navigation
+                },
+                onNavigateToCategory = { categoryId ->
+                    // TODO: Handle category navigation
+                },
+                onNavigateToProduct = { productId ->
+                    navController.navigate(
+                        ProductDetail(
+                            productId.toLongOrNull() ?: 0L
+                        )
+                    )
+                },
+                onNavigateToProducts = {
+                    // TODO: Handle view all products
+                }
+            )
+        }
+
         composable<ProductDetail> { backStackEntry ->
             val args = backStackEntry.toRoute<ProductDetail>()
 
-            ProductDetailScreen(productId = args.productId) { navController.navigateUp() }
+            ProductDetailScreen(
+                productId = args.productId,
+                onBackClick = {
+                    navController.navigateUp()
+                }
+            )
         }
     }
-
 }

@@ -1,5 +1,7 @@
 package shopzen.app.di
 
+import shopzen.data.catalog.repository.CatalogRepositoryImpl
+import shopzen.domain.catalog.repository.CatalogRepository
 import shopzen.data.auth.repository.AuthRepositoryImpl
 import shopzen.domain.auth.repository.AuthRepository
 import dagger.Binds
@@ -16,6 +18,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
 
+    @Binds
+    @Singleton
+    abstract fun bindCatalogRepository(
+        impl: CatalogRepositoryImpl
+    ): CatalogRepository
     @Binds
     @Singleton
     abstract fun bindProductRepository(

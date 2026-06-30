@@ -1,14 +1,6 @@
 plugins {
     id("java-library")
     alias(libs.plugins.jetbrains.kotlin.jvm)
-    //yousef
-    //yousef
-    //rashed
-    //rashed
-    //nour
-    //nour
-    //ziad
-    //ziad
 }
 java {
     sourceCompatibility = JavaVersion.VERSION_17
