@@ -53,4 +53,39 @@
         Email not yet verified. Please check your inbox.
     </string>
 
+    <!-- Cart -->
+    <string name="cart_title">My Cart</string>
+    <string name="cart_empty_title">Your cart is empty</string>
+    <string name="cart_empty_desc">Looks like you haven\'t added\nanything to your cart yet</string>
+    <string name="cart_start_shopping">Start Shopping</string>
+    <string name="cart_checkout">Checkout</string>
+    <string name="cart_clear_all">Clear All</string>
+    <string name="cart_subtotal">Subtotal</string>
+    <string name="cart_discount">Discount</string>
+    <string name="cart_total">Total</string>
+    <string name="cart_apply_coupon">Apply Coupon</string>
+    <string name="cart_coupon_desc">Save more on your order</string>
+    <string name="cart_coupon_hint">Enter Discount Code</string>
+    <string name="cart_add_coupon">Add Coupon</string>
+    <string name="cart_apply">Apply</string>
+    <string name="cart_remove_item_title">Remove Item</string>
+    <string name="cart_remove_item_msg">Remove this item from your cart?</string>
+    <string name="cart_remove">Remove</string>
+    <string name="cart_cancel">Cancel</string>
+    <string name="cart_clear_cart_title">Clear Cart</string>
+    <string name="cart_clear_cart_msg">Remove all items from your cart? This cannot be undone.</string>
+    <string name="cart_error_title">Something went wrong</string>
+    <string name="cart_retry">Retry</string>
+    <string name="cart_close">Close</string>
+    <string name="cart_back">Back</string>
+    <string name="cart_remove_item_cd">Remove item</string>
+    <string name="cart_clear_cart_cd">Clear cart</string>
+    <string name="cart_decrease_qty">Decrease quantity</string>
+    <string name="cart_increase_qty">Increase quantity</string>
+
+    <string name="cart_error_load_failed">Failed to load cart</string>
+    <string name="cart_coupon_empty_error">Please enter a coupon code</string>
+    <string name="cart_coupon_applied">Coupon applied!</string>
+    <string name="cart_coupon_validate_error">Could not validate coupon</string>
+
 </resources>
