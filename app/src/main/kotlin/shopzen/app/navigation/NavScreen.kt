@@ -44,4 +44,9 @@ object HomeScreen : NavScreen(
 )
 
 @Serializable
+object WishlistScreen : NavScreen(
+    "wishlist"
+)
+
+@Serializable
 data class ProductDetail(val productId: Long) : NavScreen("product-detail")

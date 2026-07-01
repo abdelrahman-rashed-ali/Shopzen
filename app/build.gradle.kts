@@ -96,6 +96,7 @@ dependencies {
     implementation(project(":domain"))
     //rashed
     //nour
+    implementation(libs.room.runtime)
     //nour
     //ziad
     implementation(libs.hilt.android)

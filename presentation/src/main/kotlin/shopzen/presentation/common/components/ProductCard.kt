@@ -27,6 +27,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.ui.graphics.Color
 import coil.compose.AsyncImage
 import shopzen.domain.catalog.model.Product
 
@@ -37,13 +39,15 @@ import shopzen.domain.catalog.model.Product
  * @param product The product data to display.
  * @param onProductClick Callback when the card is tapped.
  * @param onWishlistClick Callback when the heart icon is tapped.
+ * @param isFavorite Whether the product is currently in the wishlist.
  */
 @Composable
 fun ProductCard(
     product: Product,
     onProductClick: (String) -> Unit,
     onWishlistClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isFavorite: Boolean = false
 ) {
     Column(
         modifier = modifier
@@ -84,9 +88,9 @@ fun ProductCard(
                     )
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.FavoriteBorder,
-                    contentDescription = "Add to wishlist",
-                    tint = MaterialTheme.colorScheme.outline,
+                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Remove from wishlist" else "Add to wishlist",
+                    tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.outline,
                     modifier = Modifier.size(20.dp)
                 )
             }
