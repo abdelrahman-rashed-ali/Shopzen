@@ -44,4 +44,9 @@ object HomeScreen : NavScreen(
 )
 
 @Serializable
+object SearchScreen : NavScreen(
+    "search"
+)
+
+@Serializable
 data class ProductDetail(val productId: Long) : NavScreen("product-detail")

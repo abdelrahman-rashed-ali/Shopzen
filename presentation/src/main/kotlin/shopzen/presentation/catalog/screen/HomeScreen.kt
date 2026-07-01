@@ -66,6 +66,7 @@ fun HomeScreen(
     onNavigateToCategory: (String) -> Unit,
     onNavigateToProduct: (String) -> Unit,
     onNavigateToProducts: () -> Unit,
+    onNavigateToSearch: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -74,7 +75,7 @@ fun HomeScreen(
 
     Scaffold(
         topBar = { HomeTopBar() },
-        bottomBar = { HomeBottomBar() },
+        bottomBar = { HomeBottomBar(onSearchClick = onNavigateToSearch) },
         modifier = modifier.background(Color.White)
     ) { innerPadding ->
         when {
@@ -203,7 +204,7 @@ private fun HomeTopBar() {
  * Features Home active state with dot indicator underneath.
  */
 @Composable
-private fun HomeBottomBar() {
+private fun HomeBottomBar(onSearchClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -241,7 +242,7 @@ private fun HomeBottomBar() {
             }
 
             // Tab 2: Search
-            IconButton(onClick = { /* Navigate to Search */ }) {
+            IconButton(onClick = onSearchClick) {
                 Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = "Search",
