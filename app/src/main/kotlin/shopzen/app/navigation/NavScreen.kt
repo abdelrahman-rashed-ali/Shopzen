@@ -14,8 +14,18 @@ object SplashScreen : NavScreen(
 )
 
 @Serializable
+object OnboardingScreen : NavScreen(
+    "onboarding"
+)
+
+@Serializable
 object LoginScreen : NavScreen(
     "login"
+)
+
+@Serializable
+object ForgotPasswordScreen : NavScreen(
+    "forgot-password"
 )
 
 @Serializable
