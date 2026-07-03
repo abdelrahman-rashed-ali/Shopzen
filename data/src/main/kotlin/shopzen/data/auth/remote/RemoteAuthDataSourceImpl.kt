@@ -89,4 +89,8 @@ class RemoteAuthDataSourceImpl @Inject constructor(
         }
         user.sendEmailVerification().await()
     }
+
+    override fun signOut() {
+        firebaseAuth.signOut()
+    }
 }

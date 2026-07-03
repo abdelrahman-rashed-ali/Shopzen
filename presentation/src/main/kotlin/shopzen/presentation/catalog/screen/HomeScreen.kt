@@ -52,11 +52,13 @@ import shopzen.presentation.catalog.components.NewArrivalsSection
 import shopzen.presentation.catalog.intent.HomeIntent
 import shopzen.presentation.catalog.state.HomeState
 import shopzen.presentation.catalog.viewmodel.HomeViewModel
+import shopzen.presentation.common.components.BottomBarTab
 import shopzen.presentation.common.components.ErrorScreen
 import shopzen.presentation.common.components.LoadingIndicator
 import shopzen.presentation.common.components.ConfirmationDialog
-import shopzen.presentation.wishlist.viewmodel.WishlistViewModel
+import shopzen.presentation.common.components.HomeBottomBar
 import shopzen.presentation.wishlist.intent.WishlistIntent
+import shopzen.presentation.wishlist.viewmodel.WishlistViewModel
 
 /**
  * Stateful/Stateless Home screen composable.
@@ -69,7 +71,10 @@ fun HomeScreen(
     onNavigateToCategory: (String) -> Unit,
     onNavigateToProduct: (String) -> Unit,
     onNavigateToProducts: () -> Unit,
+    onNavigateToSearch: () -> Unit,
+    onNavigateToProfile: () -> Unit,
     onNavigateToWishlist: () -> Unit,
+    onNavigateToCart: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     wishlistViewModel: WishlistViewModel = hiltViewModel()
@@ -77,19 +82,19 @@ fun HomeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val wishlistState by wishlistViewModel.state.collectAsStateWithLifecycle()
     val onIntent = viewModel::processIntent
-    
+
     val wishlistProductIds = wishlistState.items.map { it.productId }.toSet()
 
     Scaffold(
         topBar = { HomeTopBar() },
         bottomBar = {
-            shopzen.presentation.common.components.MainBottomBar(
-                currentTab = shopzen.presentation.common.components.BottomTab.HOME,
-                onTabClick = { tab ->
-                    if (tab == shopzen.presentation.common.components.BottomTab.WISHLIST) {
-                        onNavigateToWishlist()
-                    }
-                }
+            HomeBottomBar(
+                currentTab = BottomBarTab.HOME,
+                onNavigateToHome = {},
+                onNavigateToSearch = onNavigateToSearch,
+                onNavigateToWishlist = onNavigateToWishlist,
+                onNavigateToCart = onNavigateToCart,
+                onNavigateToProfile = onNavigateToProfile
             )
         },
         modifier = modifier.background(Color.White)
@@ -139,14 +144,19 @@ fun HomeScreen(
         val pendingId = wishlistState.pendingRemovalItemId!!
         val pendingItem = wishlistState.items.find { it.id == pendingId }
         ConfirmationDialog(
+            title = "Remove Item",
             message = "Remove ${pendingItem?.title ?: "this item"} from your wishlist?",
             confirmText = "Remove",
             dismissText = "Cancel",
             onConfirm = {
-                wishlistViewModel.processIntent(WishlistIntent.ConfirmRemoveItem(pendingId))
+                wishlistViewModel.processIntent(
+                    WishlistIntent.ConfirmRemoveItem(pendingId)
+                )
             },
             onDismiss = {
-                wishlistViewModel.processIntent(WishlistIntent.DismissConfirmDialog)
+                wishlistViewModel.processIntent(
+                    WishlistIntent.DismissConfirmDialog
+                )
             }
         )
     }
@@ -154,14 +164,19 @@ fun HomeScreen(
     if (wishlistState.showAddConfirmationDialog && wishlistState.pendingAddProduct != null) {
         val pendingProduct = wishlistState.pendingAddProduct!!
         ConfirmationDialog(
+            title = "Add to Wishlist",
             message = "Add ${pendingProduct.title} to your wishlist?",
             confirmText = "Add",
             dismissText = "Cancel",
             onConfirm = {
-                wishlistViewModel.processIntent(WishlistIntent.ConfirmAddToWishlist(pendingProduct))
+                wishlistViewModel.processIntent(
+                    WishlistIntent.ConfirmAddToWishlist(pendingProduct)
+                )
             },
             onDismiss = {
-                wishlistViewModel.processIntent(WishlistIntent.DismissAddConfirmDialog)
+                wishlistViewModel.processIntent(
+                    WishlistIntent.DismissAddConfirmDialog
+                )
             }
         )
     }
@@ -257,7 +272,6 @@ private fun HomeTopBar() {
         )
     }
 }
-
 
 
 @Composable
