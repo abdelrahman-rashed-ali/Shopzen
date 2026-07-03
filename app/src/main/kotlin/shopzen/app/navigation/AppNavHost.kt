@@ -133,6 +133,26 @@ fun AppNavHost(
                 },
                 onNavigateToProducts = {
                     // TODO: Handle view all products
+                },
+                onNavigateToWishlist = {
+                    navController.navigate(WishlistScreen)
+                }
+            )
+        }
+
+        composable<WishlistScreen> {
+            shopzen.presentation.wishlist.screen.WishlistScreen(
+                onNavigateToHome = {
+                    navController.navigate(HomeScreen) {
+                        popUpTo<HomeScreen> { inclusive = false }
+                    }
+                },
+                onNavigateToProduct = { productId ->
+                    navController.navigate(
+                        ProductDetail(
+                            productId.toLongOrNull() ?: 0L
+                        )
+                    )
                 }
             )
         }
@@ -142,7 +162,7 @@ fun AppNavHost(
 
             ProductDetailScreen(
                 productId = args.productId,
-                onBackClick = {
+                onNavigateBack = {
                     navController.navigateUp()
                 }
             )

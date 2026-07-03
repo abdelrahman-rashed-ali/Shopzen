@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -40,6 +41,11 @@ dependencies {
     //yousef
     //rashed
     implementation(platform(libs.firebase.bom))
+    // Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+    
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
     //rashed

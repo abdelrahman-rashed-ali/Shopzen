@@ -15,6 +15,10 @@ class ProductRepositoryImpl @Inject constructor(
 ) : ProductRepository {
 
     override suspend fun getProductById(id: Long): Result<Product> {
-        return Result.success(remoteDataSource.getProductById(id).product.toDomain())
+        return try {
+            Result.success(remoteDataSource.getProductById(id).product.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }
