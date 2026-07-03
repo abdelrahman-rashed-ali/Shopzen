@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import shopzen.data.cart.local.entity.CartItemEntity
 
 @Dao
+@JvmSuppressWildcards
 interface CartDao {
 
     /** Reactive stream of all cart items for [userId]. Emits on every DB mutation. */
@@ -19,13 +20,13 @@ interface CartDao {
 
     /** Inserts or replaces rows. Used after every remote sync. */
     @Upsert
-    suspend fun upsertAll(items: List<CartItemEntity>)
+    suspend fun upsertAll(items: List<CartItemEntity>): List<Long>
 
     /** Deletes a single line item. Called on remove-from-cart. */
     @Query("DELETE FROM cart_items WHERE id = :id AND userId = :userId")
-    suspend fun deleteById(id: String, userId: String)
+    suspend fun deleteById(id: String, userId: String): Int
 
     /** Clears the entire cart for [userId]. Called on checkout completion or explicit clear. */
     @Query("DELETE FROM cart_items WHERE userId = :userId")
-    suspend fun clearForUser(userId: String)
+    suspend fun clearForUser(userId: String): Int
 }
