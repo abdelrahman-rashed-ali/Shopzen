@@ -19,7 +19,8 @@ import com.google.firebase.auth.OAuthProvider
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import shopzen.app.navigation.AppNavHost
-import shopzen.presentation.theme.MyApplicationTheme
+import shopzen.app.theme.AppThemeController
+import shopzen.app.theme.LocaleControllerEffect
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -30,7 +31,8 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val credentialManager = remember { CredentialManager.create(this@MainActivity) }
             val coroutineScope = rememberCoroutineScope()
-            MyApplicationTheme{
+            AppThemeController {
+                LocaleControllerEffect()
                 AppNavHost(
                     navController = navController,
                     launchGoogleSignIn = { onToken, onError ->

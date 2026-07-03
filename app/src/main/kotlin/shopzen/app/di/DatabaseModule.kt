@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import shopzen.data.cart.local.dao.CartDao
 import shopzen.data.database.ShopzenDatabase
+import shopzen.data.wishlist.local.dao.WishlistDao
 import javax.inject.Singleton
 
 @Module
@@ -21,10 +22,14 @@ object DatabaseModule {
         Room.databaseBuilder(
             context,
             ShopzenDatabase::class.java,
-            "shopzen.db",
+            "shopzen_db",
         ).build()
 
     @Provides
     @Singleton
     fun provideCartDao(db: ShopzenDatabase): CartDao = db.cartDao()
+
+    @Provides
+    @Singleton
+    fun provideWishlistDao(db: ShopzenDatabase): = db.wishlistDao()
 }

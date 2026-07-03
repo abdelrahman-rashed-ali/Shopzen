@@ -89,4 +89,14 @@ class RemoteAuthDataSourceImpl @Inject constructor(
         }
         user.sendEmailVerification().await()
     }
+
+    override fun signOut() {
+        firebaseAuth.signOut()
+    }
+
+    override suspend fun deleteCurrentUser() {
+        requireNotNull(firebaseAuth.currentUser) {
+            "No authenticated user to delete"
+        }.delete().await()
+    }
 }

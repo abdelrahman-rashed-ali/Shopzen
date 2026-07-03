@@ -26,4 +26,8 @@ interface RemoteAuthDataSource {
     fun getCurrentUser(): FirebaseUser?
 
     suspend fun sendVerificationEmail()
+
+    fun signOut()
+
+    suspend fun deleteCurrentUser()
 }

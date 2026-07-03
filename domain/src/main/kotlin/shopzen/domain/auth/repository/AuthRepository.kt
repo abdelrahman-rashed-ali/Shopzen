@@ -28,4 +28,8 @@ interface AuthRepository {
     suspend fun getCurrentUser(): Result<User?>
 
     suspend fun sendVerificationEmail(): Result<Unit>
+
+    suspend fun signOut(): Result<Unit>
+
+    suspend fun deleteCurrentUser(): Result<Unit>
 }

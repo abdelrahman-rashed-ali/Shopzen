@@ -74,7 +74,10 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.googleid)
+    implementation(libs.androidx.datastore.core)
+    implementation(libs.appcompat)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -89,11 +92,13 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
     implementation(project(":presentation"))
     implementation(project(":data"))
     implementation(project(":domain"))
     //rashed
     //nour
+    implementation(libs.room.runtime)
     //nour
     //ziad
     implementation(libs.hilt.android)
@@ -104,4 +109,3 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     //ziad
 }
-

@@ -13,7 +13,15 @@ import shopzen.data.product.repository.ProductRepositoryImpl
 import shopzen.domain.cart.repository.CartRepository
 import shopzen.domain.product.repository.ProductRepository
 import shopzen.data.onboarding.repository.OnboardingRepositoryImpl
+import shopzen.data.profile.remote.RemoteProfileDataSource
+import shopzen.data.profile.remote.RemoteProfileDataSourceImpl
+import shopzen.data.profile.repository.PreferencesRepositoryImpl
+import shopzen.data.profile.repository.ProfileRepositoryImpl
 import shopzen.domain.onboarding.repository.OnboardingRepository
+import shopzen.data.wishlist.repository.WishlistRepositoryImpl
+import shopzen.domain.wishlist.repository.WishlistRepository
+import shopzen.domain.profile.repository.PreferencesRepository
+import shopzen.domain.profile.repository.ProfileRepository
 import javax.inject.Singleton
 
 @Module
@@ -34,6 +42,12 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindWishlistRepository(
+        impl: WishlistRepositoryImpl
+    ): WishlistRepository
+
+    @Binds
+    @Singleton
     abstract fun bindAuthRepository(
         impl: AuthRepositoryImpl
     ): AuthRepository
@@ -49,4 +63,18 @@ abstract class RepositoryModule {
     abstract fun bindOnboardingRepository(
         impl: OnboardingRepositoryImpl
     ): OnboardingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProfileRepository(impl: ProfileRepositoryImpl): ProfileRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPreferencesRepository(impl: PreferencesRepositoryImpl): PreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRemoteProfileDataSource(
+        impl: RemoteProfileDataSourceImpl
+    ): RemoteProfileDataSource
 }

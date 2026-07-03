@@ -5,4 +5,5 @@
     <string name="error_google_failed">Google sign in failed. Please try again.</string>
     <string name="error_apple_cancelled">Apple sign in was cancelled.</string>
     <string name="error_apple_failed">Apple sign in failed. Please try again.</string>
+    <string name="default_web_client_id" translatable="false">dummy_google_client_id</string>
 </resources>

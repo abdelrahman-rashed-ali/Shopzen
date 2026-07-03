@@ -42,11 +42,28 @@ object EmailVerificationScreen : NavScreen(
 object HomeScreen : NavScreen(
     "home"
 )
+@Serializable
+data object WishlistScreen : NavScreen(
+    "wishlist"
+)
 
 @Serializable
 data class ProductDetail(val productId: Long) : NavScreen("product-detail")
 
 @Serializable
-object CartScreen : NavScreen(
-    "cart"
-)
+object CartScreen : NavScreen("cart")
+
+@Serializable
+data object ProfileScreen : NavScreen("profile")
+
+@Serializable
+data object PersonalDetailsScreen : NavScreen("personal-details")
+
+@Serializable
+data object AddressesScreen : NavScreen("addresses")
+
+@Serializable
+data object SearchScreen : NavScreen("search")
+
+@Serializable
+data class AddressEditScreen(val addressId: String? = null) : NavScreen("address-edit")
