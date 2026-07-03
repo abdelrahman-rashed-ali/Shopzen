@@ -67,4 +67,8 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun sendVerificationEmail(): Result<Unit> = runCatching {
         remoteAuthDataSource.sendVerificationEmail()
     }
+
+    override suspend fun signOut(): Result<Unit> = runCatching {
+        remoteAuthDataSource.signOut()
+    }
 }

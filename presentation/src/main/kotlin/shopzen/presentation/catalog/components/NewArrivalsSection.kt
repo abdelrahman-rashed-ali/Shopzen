@@ -31,7 +31,8 @@ fun NewArrivalsSection(
     onProductClick: (String) -> Unit,
     onWishlistClick: (Product) -> Unit,
     onViewAllClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    wishlistProductIds: Set<String> = emptySet()
 ) {
     Column(
         modifier = modifier
@@ -84,7 +85,8 @@ fun NewArrivalsSection(
                             product = product,
                             onProductClick = { onProductClick(product.id) },
                             onWishlistClick = { _ -> onWishlistClick(product) },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            isFavorite = wishlistProductIds.contains(product.id)
                         )
                     }
                     // If odd number of items, insert spacer to align layout
