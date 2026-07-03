@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.activity.compose.LocalActivity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -62,7 +63,7 @@ import shopzen.presentation.product.viewmodel.ProductDetailViewModel
 fun ProductDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: ProductDetailViewModel = hiltViewModel(),
-    cartViewModel: CartViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
+    cartViewModel: CartViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     productId: Long?,
     onNavigateBack: () -> Unit,
 ) {

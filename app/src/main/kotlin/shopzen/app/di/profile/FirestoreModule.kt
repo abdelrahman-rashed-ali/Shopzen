@@ -25,9 +25,6 @@ private val Context.userPreferencesDataStore: DataStore<Preferences> by preferen
 @InstallIn(SingletonComponent::class)
 object FirestoreModule {
 
-    @Provides
-    @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
 
     @Provides
     @Singleton

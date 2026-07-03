@@ -23,7 +23,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class RemoteShopifyCustomerDataSourceImpl @Inject constructor(
-    private val client: HttpClient,
+    @shopzen.data.remote.qualifier.RestClient private val client: HttpClient,
 ) : RemoteShopifyCustomerDataSource {
 
     override suspend fun createCustomer(

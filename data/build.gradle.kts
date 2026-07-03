@@ -2,7 +2,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
-    // alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
     alias(libs.plugins.ksp)
@@ -44,10 +43,6 @@ dependencies {
     //yousef
     //rashed
     implementation(platform(libs.firebase.bom))
-    // Room
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
     
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
@@ -60,6 +55,5 @@ dependencies {
     implementation(libs.javax.inject)
     implementation(libs.bundles.room)
     ksp(libs.room.compiler)
-    implementation(libs.firebase.firestore)
     //ziad
 }

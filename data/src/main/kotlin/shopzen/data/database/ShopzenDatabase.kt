@@ -15,7 +15,7 @@ import shopzen.data.wishlist.local.dao.WishlistDao
  */
 @Database(
     entities  = [CartItemEntity::class, WishlistEntity::class],
-    version   = 1,
+    version   = 2,
     exportSchema = false,
 )
 abstract class ShopzenDatabase : RoomDatabase() {

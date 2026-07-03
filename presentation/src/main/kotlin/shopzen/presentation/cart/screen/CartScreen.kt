@@ -1,6 +1,7 @@
 package shopzen.presentation.cart.screen
 
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -28,7 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import shopzen.presentation.R
@@ -57,7 +58,7 @@ fun CartScreen(
     onNavigateToProduct: (String) -> Unit,
     // Scoped to Activity so CartViewModel survives navigation and is shared across screens
     // (e.g. Cart, Checkout, bottom-nav badge).
-    viewModel: CartViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
+    viewModel: CartViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -161,25 +162,27 @@ fun CartScreenContent(
         onDismiss = { onIntent(CartIntent.DismissCouponSheet) },
     )
 
-    ConfirmationDialog(
-        visible = state.showRemoveItemDialog,
-        title = stringResource(R.string.cart_remove_item_title),
-        message = stringResource(R.string.cart_remove_item_msg),
-        confirmText = stringResource(R.string.cart_remove),
-        dismissText = stringResource(R.string.cart_cancel),
-        onConfirm = { onIntent(CartIntent.ConfirmRemoveItem) },
-        onDismiss = { onIntent(CartIntent.DismissRemoveItemDialog) },
-    )
+    if (state.showRemoveItemDialog) {
+        ConfirmationDialog(
+            title = stringResource(R.string.cart_remove_item_title),
+            message = stringResource(R.string.cart_remove_item_msg),
+            confirmText = stringResource(R.string.cart_remove),
+            dismissText = stringResource(R.string.cart_cancel),
+            onConfirm = { onIntent(CartIntent.ConfirmRemoveItem) },
+            onDismiss = { onIntent(CartIntent.DismissRemoveItemDialog) },
+        )
+    }
 
-    ConfirmationDialog(
-        visible = state.showClearCartDialog,
-        title = stringResource(R.string.cart_clear_cart_title),
-        message = stringResource(R.string.cart_clear_cart_msg),
-        confirmText = stringResource(R.string.cart_clear_all),
-        dismissText = stringResource(R.string.cart_cancel),
-        onConfirm = { onIntent(CartIntent.ConfirmClearCart) },
-        onDismiss = { onIntent(CartIntent.DismissClearCartDialog) },
-    )
+    if (state.showClearCartDialog) {
+        ConfirmationDialog(
+            title = stringResource(R.string.cart_clear_cart_title),
+            message = stringResource(R.string.cart_clear_cart_msg),
+            confirmText = stringResource(R.string.cart_clear_all),
+            dismissText = stringResource(R.string.cart_cancel),
+            onConfirm = { onIntent(CartIntent.ConfirmClearCart) },
+            onDismiss = { onIntent(CartIntent.DismissClearCartDialog) },
+        )
+    }
 }
 
 @Preview(showBackground = true, showSystemUi = true, name = "Cart â€” Filled (Light)")

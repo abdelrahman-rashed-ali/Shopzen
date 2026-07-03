@@ -31,5 +31,5 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideWishlistDao(db: ShopzenDatabase): = db.wishlistDao()
+    fun provideWishlistDao(db: ShopzenDatabase): WishlistDao = db.wishlistDao()
 }
