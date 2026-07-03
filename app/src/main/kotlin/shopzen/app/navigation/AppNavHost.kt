@@ -14,6 +14,7 @@ import shopzen.presentation.auth.screen.RegisterScreen
 import shopzen.presentation.catalog.screen.HomeScreen
 import shopzen.presentation.product.screen.ProductDetailScreen
 import shopzen.presentation.onboarding.screen.OnboardingScreen
+import shopzen.presentation.search.screen.SearchScreen as SearchRouteScreen
 import shopzen.presentation.profile.screen.AddEditAddressScreen
 import shopzen.presentation.profile.screen.PersonalDetailsScreen as PersonalDetailsRouteScreen
 import shopzen.presentation.profile.screen.ProfileScreen as ProfileRouteScreen
@@ -24,7 +25,7 @@ import shopzen.presentation.profile.screen.SavedAddressesScreen
 fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: NavScreen = SplashScreen,
+    startDestination: NavScreen = HomeScreen,
     launchGoogleSignIn: (
         onToken: (String) -> Unit,
         onError: (String) -> Unit
@@ -138,6 +139,29 @@ fun AppNavHost(
                 onNavigateToProducts = {
                     // TODO: Handle view all products
                 },
+                onNavigateToSearch = {
+                    navController.navigate(SearchScreen)
+                }
+            )
+        }
+
+        composable<SearchScreen> {
+            SearchRouteScreen(
+                onNavigateToHome = {
+                    navController.navigate(HomeScreen) {
+                        popUpTo<HomeScreen> { inclusive = false }
+                    }
+                },
+                onNavigateToWishlist = {},
+                onNavigateToProduct = { productId ->
+                    navController.navigate(
+                        ProductDetail(
+                            productId.toLongOrNull() ?: 0L
+                        )
+                    )
+                },
+                onNavigateToCategory = { categoryId ->
+                    // TODO: Handle category navigation
                 onNavigateToProfile = {
                     navController.navigate(ProfileScreen) {
                         launchSingleTop = true

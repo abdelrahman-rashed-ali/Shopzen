@@ -44,6 +44,8 @@ object HomeScreen : NavScreen(
 )
 
 @Serializable
+object SearchScreen : NavScreen(
+    "search" )
 object WishlistScreen : NavScreen(
     "wishlist"
 )

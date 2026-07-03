@@ -273,6 +273,90 @@ private fun HomeTopBar() {
     }
 }
 
+/**
+ * Custom Bottom Navigation Bar matching the design.
+ * Features Home active state with dot indicator underneath.
+ */
+@Composable
+private fun HomeBottomBar(onSearchClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .background(Color.White)
+            .border(width = 0.5.dp, color = Color(0xFFEEEEEE))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Tab 1: Home (Active with dot indicator below)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                IconButton(onClick = { /* Already on Home */ }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Home,
+                        contentDescription = "Home",
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                // Dot indicator for active Home screen
+                Box(
+                    modifier = Modifier
+                        .size(4.dp)
+                        .background(Color.Black, shape = CircleShape)
+                )
+            }
+
+            // Tab 2: Search
+            IconButton(onClick = onSearchClick) {
+                Icon(
+                    imageVector = Icons.Outlined.Search,
+                    contentDescription = "Search",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Tab 3: Wishlist
+            IconButton(onClick = { /* Navigate to Wishlist */ }) {
+                Icon(
+                    imageVector = Icons.Outlined.FavoriteBorder,
+                    contentDescription = "Wishlist",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Tab 4: Cart (Shopping Bag)
+            IconButton(onClick = { /* Navigate to Cart */ }) {
+                Icon(
+                    imageVector = Icons.Outlined.ShoppingBag,
+                    contentDescription = "Cart",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Tab 5: Profile
+            IconButton(onClick = { /* Navigate to Profile */ }) {
+                Icon(
+                    imageVector = Icons.Outlined.Person,
+                    contentDescription = "Profile",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun HomeContent(
