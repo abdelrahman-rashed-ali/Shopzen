@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,8 +13,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import shopzen.domain.auth.usecase.GetCurrentUserUseCase
 import shopzen.domain.cart.model.CartItem
 import shopzen.domain.cart.model.CouponValidationResult
+import shopzen.domain.cart.usecase.AddToCartUseCase
 import shopzen.domain.cart.usecase.ClearCartUseCase
 import shopzen.domain.cart.usecase.GetCartTotalUseCase
 import shopzen.domain.cart.usecase.GetCartUseCase
@@ -45,9 +46,15 @@ class CartViewModel @Inject constructor(
     private val validateCouponUseCase: ValidateCouponUseCase,
     private val getCartTotalUseCase: GetCartTotalUseCase,
     private val getCurrencySymbolUseCase: GetCurrencySymbolUseCase,
+    private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val addToCartUseCase: AddToCartUseCase,
 ) : ViewModel() {
 
-    private val userId = "mock-user-id"
+    /**
+     * Firebase UID resolved once at init from [GetCurrentUserUseCase].
+     * Null when the auth guard failed to prevent unauthenticated access.
+     */
+    private var userId: String? = null
 
     private val _state = MutableStateFlow(CartState())
     val state: StateFlow<CartState> = _state.asStateFlow()
@@ -59,7 +66,21 @@ class CartViewModel @Inject constructor(
     private var discountMultiplier: Double = 1.0
 
     init {
-        loadCurrencyAndCart()
+        viewModelScope.launch {
+            val userResult = getCurrentUserUseCase()
+            val user = userResult.getOrNull()
+            if (user == null) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiText.StringResource(R.string.cart_error_not_authenticated),
+                    )
+                }
+            } else {
+                userId = user.uid
+                loadCurrencyAndCart()
+            }
+        }
     }
 
     fun processIntent(intent: CartIntent) {
@@ -90,20 +111,22 @@ class CartViewModel @Inject constructor(
                 _effects.emit(CartEffect.NavigateToProduct(intent.productId))
             }
             CartIntent.Retry -> loadCurrencyAndCart()
+            is CartIntent.AddToCart -> handleAddToCart(intent.item)
         }
     }
 
     private fun loadCurrencyAndCart() {
+        val uid = userId ?: return
         viewModelScope.launch {
             val symbol = getCurrencySymbolUseCase()
             _state.update { it.copy(currencySymbol = symbol) }
-            observeCart(symbol)
+            observeCart(uid, symbol)
         }
     }
 
-    private fun observeCart(symbol: String) {
+    private fun observeCart(uid: String, symbol: String) {
         _state.update { it.copy(isLoading = true, error = null) }
-        getCartUseCase(userId)
+        getCartUseCase(uid)
             .onEach { result ->
                 result.fold(
                     onSuccess = { cart ->
@@ -166,7 +189,7 @@ class CartViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            updateCartItemQuantityUseCase(itemId, newQty, userId)
+            updateCartItemQuantityUseCase(itemId, newQty, userId ?: return@launch)
         }
     }
 
@@ -188,7 +211,7 @@ class CartViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            removeFromCartUseCase(itemId, userId)
+            removeFromCartUseCase(itemId, userId ?: return@launch)
         }
     }
 
@@ -207,7 +230,7 @@ class CartViewModel @Inject constructor(
                 appliedCouponLabel = null,
             )
         }
-        viewModelScope.launch { clearCartUseCase(userId) }
+        viewModelScope.launch { clearCartUseCase(userId ?: return@launch) }
     }
 
     private fun handleApplyCoupon() {
@@ -218,7 +241,6 @@ class CartViewModel @Inject constructor(
         }
         _state.update { it.copy(isCouponLoading = true, couponError = null) }
         viewModelScope.launch(Dispatchers.IO) {
-            delay(2000L)
             validateCouponUseCase(code).fold(
                 onSuccess = { result ->
                     when (result) {
@@ -291,6 +313,34 @@ class CartViewModel @Inject constructor(
                 formattedSubtotal = symbol.formatPrice(subtotal),
                 formattedDiscount = null,
                 formattedTotal = symbol.formatPrice(subtotal),
+            )
+        }
+    }
+
+    private fun handleAddToCart(item: CartItem) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            addToCartUseCase(item).fold(
+                onSuccess = {
+                    _state.update { it.copy(isLoading = false) }
+
+                    _effects.emit(
+                        CartEffect.ShowSnackbar(
+                            UiText.StringResource(R.string.cart_item_added)
+                        )
+                    )
+                },
+                onFailure = { throwable ->
+                    _state.update { it.copy(isLoading = false) }
+
+                    _effects.emit(
+                        CartEffect.ShowSnackbar(
+                            throwable.message?.let(UiText::DynamicString)
+                                ?: UiText.StringResource(R.string.cart_error_add_failed)
+                        )
+                    )
+                }
             )
         }
     }

@@ -1,5 +1,7 @@
 package shopzen.presentation.cart.screen
 
+import androidx.activity.ComponentActivity
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -26,7 +28,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import shopzen.presentation.R
 import shopzen.presentation.cart.screen.content.CartEmptyState
@@ -52,7 +55,9 @@ fun CartScreen(
     onNavigateBack: () -> Unit,
     onNavigateToCheckout: () -> Unit,
     onNavigateToProduct: (String) -> Unit,
-    viewModel: CartViewModel = hiltViewModel(),
+    // Scoped to Activity so CartViewModel survives navigation and is shared across screens
+    // (e.g. Cart, Checkout, bottom-nav badge).
+    viewModel: CartViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

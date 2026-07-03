@@ -2,8 +2,10 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -49,5 +51,8 @@ dependencies {
     implementation(libs.bundles.ktor)
     implementation(libs.bundles.apollo)
     implementation(libs.javax.inject)
+    implementation(libs.bundles.room)
+    ksp(libs.room.compiler)
+    implementation(libs.firebase.firestore)
     //ziad
 }

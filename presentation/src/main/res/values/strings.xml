@@ -103,5 +103,8 @@
     <string name="cart_coupon_empty_error">Please enter a coupon code</string>
     <string name="cart_coupon_applied">Coupon applied!</string>
     <string name="cart_coupon_validate_error">Could not validate coupon</string>
+    <string name="cart_error_not_authenticated">Please log in to view your cart</string>
+    <string name="cart_item_added">Item added to cart.</string>
+    <string name="cart_error_add_failed">Failed to add item to cart.</string>
 
 </resources>

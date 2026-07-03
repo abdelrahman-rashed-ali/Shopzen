@@ -2,6 +2,7 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
@@ -21,6 +22,16 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val properties = Properties().apply {
+            load(rootProject.file("local.properties").inputStream())
+        }
+        buildConfigField("String", "SHOPIFY_HOSTNAME", "\"${properties["SHOPIFY_HOSTNAME"]}\"")
+        buildConfigField("String", "SHOPIFY_API_VERSION", "\"${properties["SHOPIFY_API_VERSION"]}\"")
+        buildConfigField("String", "SHOPIFY_API_KEY", "\"${properties["SHOPIFY_API_KEY"]}\"")
+        buildConfigField("String", "SHOPIFY_STOREFRONT_TOKEN", "\"${properties["SHOPIFY_STOREFRONT_TOKEN"] ?: ""}\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${properties["GOOGLE_WEB_CLIENT_ID"] ?: ""}\"")
+
     }
 
     buildTypes {
@@ -39,20 +50,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-
-
-    defaultConfig {
-        val properties = Properties().apply {
-            load(rootProject.file("local.properties").inputStream())
-        }
-
-        buildConfigField("String", "SHOPIFY_HOSTNAME",    "\"${properties["SHOPIFY_HOSTNAME"]}\"")
-        buildConfigField("String", "SHOPIFY_API_VERSION", "\"${properties["SHOPIFY_API_VERSION"]}\"")
-        buildConfigField("String", "SHOPIFY_API_KEY",     "\"${properties["SHOPIFY_API_KEY"]}\"")
-        buildConfigField("String", "SHOPIFY_PASSWORD",    "\"${properties["SHOPIFY_PASSWORD"]}\"")
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${properties["GOOGLE_WEB_CLIENT_ID"] ?: ""}\"")
-
     }
 }
 
@@ -90,6 +87,7 @@ dependencies {
     //yousef
     //rashed
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     implementation(platform(libs.firebase.bom))
     implementation(project(":presentation"))
     implementation(project(":data"))
@@ -102,6 +100,7 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.bundles.ktor)
     implementation(libs.bundles.apollo)
+    implementation(libs.bundles.room)
     implementation(libs.androidx.hilt.navigation.compose)
     //ziad
 }

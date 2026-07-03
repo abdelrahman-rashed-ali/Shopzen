@@ -6,7 +6,7 @@ import shopzen.domain.cart.model.CartItem
 import shopzen.domain.cart.model.CouponValidationResult
 
 interface CartRepository {
-    fun getCart(userId: String): Flow<Result<Cart>>
+    fun getCart(userId: String, forceRefresh: Boolean = false): Flow<Result<Cart>>
     suspend fun addToCart(item: CartItem): Result<Unit>
     suspend fun removeFromCart(itemId: String, userId: String): Result<Unit>
     suspend fun updateItemQuantity(itemId: String, quantity: Int, userId: String): Result<Unit>

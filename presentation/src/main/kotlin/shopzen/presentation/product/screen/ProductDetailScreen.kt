@@ -1,5 +1,6 @@
 package shopzen.presentation.product.screen
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,12 +34,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import shopzen.domain.cart.model.CartItem
+import shopzen.presentation.cart.intent.CartIntent
+import shopzen.presentation.cart.viewmodel.CartViewModel
 import shopzen.presentation.product.components.ErrorContent
 import shopzen.presentation.product.components.ImagePagerIndicator
 import shopzen.presentation.product.components.LoadingContent
@@ -57,6 +62,7 @@ import shopzen.presentation.product.viewmodel.ProductDetailViewModel
 fun ProductDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: ProductDetailViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
     productId: Long?,
     onNavigateBack: () -> Unit,
 ) {
@@ -101,7 +107,8 @@ fun ProductDetailScreen(
                 )
                 state.product != null -> ProductContent(
                     state = state,
-                    onIntent = onIntent,
+                    onProductIntent = onIntent,
+                    onCartIntent = cartViewModel::processIntent
                 )
             }
         }
@@ -113,7 +120,8 @@ fun ProductDetailScreen(
 @Composable
 fun ProductContent(
     state: ProductDetailState,
-    onIntent: (ProductDetailIntent) -> Unit,
+    onProductIntent: (ProductDetailIntent) -> Unit,
+    onCartIntent: (CartIntent) -> Unit,
 ) {
     val product = state.product ?: return
     val scrollState = rememberScrollState()
@@ -184,7 +192,7 @@ fun ProductContent(
                         variants = product.variants,
                         selectedVariantId = state.selectedVariantId,
                         onSelectVariant = { variantId ->
-                            onIntent(ProductDetailIntent.SelectVariant(variantId))
+                            onProductIntent(ProductDetailIntent.SelectVariant(variantId))
                         },
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -210,7 +218,20 @@ fun ProductContent(
             val isOutOfStock = selectedVariant?.inventoryQuantity == 0
 
             Button(
-                onClick = { onIntent(ProductDetailIntent.AddToCart) },
+                onClick = { onCartIntent(CartIntent.AddToCart(
+                    item = CartItem(
+                        id = "",
+                        productId = product.id.toString(),
+                        variantId = selectedVariant?.id?.toString() ?: "",
+                        title = product.title,
+                        variantTitle = selectedVariant?.title ?: "",
+                        price = selectedVariant?.price?.toDouble() ?: 0.0,
+                        quantity = 1,
+                        maxQuantity = selectedVariant?.inventoryQuantity ?: 1,
+                        imageUrl = product.images[0].src,
+                        userId = "",
+                    )
+                )) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

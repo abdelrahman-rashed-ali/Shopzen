@@ -40,7 +40,6 @@ class ProductDetailViewModel @Inject constructor(
         when (intent) {
             is ProductDetailIntent.LoadProduct -> loadProduct(intent.productId)
             is ProductDetailIntent.SelectVariant -> selectVariant(intent.variantId)
-            is ProductDetailIntent.AddToCart -> addToCart()
             is ProductDetailIntent.Retry -> loadProduct(productId)
         }
     }
@@ -79,9 +78,5 @@ class ProductDetailViewModel @Inject constructor(
                 showSizeRequiredError = false,
             )
         }
-    }
-
-    private fun addToCart() {
-        // TODO: Delegate cart handling to dedicated cart feature/use case
     }
 }

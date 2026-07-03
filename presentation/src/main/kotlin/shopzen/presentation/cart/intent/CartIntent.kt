@@ -1,5 +1,7 @@
 package shopzen.presentation.cart.intent
 
+import shopzen.domain.cart.model.CartItem
+
 sealed class CartIntent {
     data class IncrementQuantity(val itemId: String) : CartIntent()
     data class DecrementQuantity(val itemId: String) : CartIntent()
@@ -22,4 +24,8 @@ sealed class CartIntent {
     data class NavigateToProduct(val productId: String) : CartIntent()
 
     data object Retry : CartIntent()
+
+    data class AddToCart(
+        val item: CartItem,
+    ) : CartIntent()
 }

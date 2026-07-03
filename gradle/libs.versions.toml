@@ -23,7 +23,8 @@ coil = "2.7.0"
 kotlinxSerialization = "1.7.3"
 googleServices = "4.5.0"
 googleFonts = "1.7.5"
-credentials = "1.5.0"
+room = "2.6.1"
+credentials = "1.3.0"
 googleid = "1.1.1"
 
 [libraries]
@@ -33,6 +34,7 @@ androidx-credentials = { group = "androidx.credentials", name = "credentials", v
 androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
@@ -76,6 +78,11 @@ apollo-normalized-cache = { group = "com.apollographql.apollo", name = "apollo-n
 # Coil
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
+# Room
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-ktx     = { group = "androidx.room", name = "room-ktx",     version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
 [bundles]
 ktor = [
     "ktor-client-core",
@@ -88,6 +95,10 @@ ktor = [
 apollo = [
     "apollo-runtime",
     "apollo-normalized-cache",
+]
+room = [
+    "room-runtime",
+    "room-ktx",
 ]
 
 [plugins]

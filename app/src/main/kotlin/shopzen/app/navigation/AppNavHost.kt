@@ -12,7 +12,6 @@ import shopzen.presentation.product.screen.ProductDetailScreen
 import shopzen.presentation.auth.screen.EmailVerificationScreen
 import shopzen.presentation.auth.screen.RegisterScreen
 import shopzen.presentation.catalog.screen.HomeScreen
-import shopzen.presentation.product.screen.ProductDetailScreen
 import shopzen.presentation.onboarding.screen.OnboardingScreen
 import shopzen.presentation.cart.screen.CartScreen
 
@@ -143,7 +142,7 @@ fun AppNavHost(
 
             ProductDetailScreen(
                 productId = args.productId,
-                onBackClick = {
+                onNavigateBack = {
                     navController.navigateUp()
                 }
             )

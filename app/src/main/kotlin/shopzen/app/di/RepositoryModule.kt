@@ -8,7 +8,9 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import shopzen.data.cart.repository.CartRepositoryImpl
 import shopzen.data.product.repository.ProductRepositoryImpl
+import shopzen.domain.cart.repository.CartRepository
 import shopzen.domain.product.repository.ProductRepository
 import shopzen.data.onboarding.repository.OnboardingRepositoryImpl
 import shopzen.domain.onboarding.repository.OnboardingRepository
@@ -23,18 +25,24 @@ abstract class RepositoryModule {
     abstract fun bindCatalogRepository(
         impl: CatalogRepositoryImpl
     ): CatalogRepository
+
     @Binds
     @Singleton
     abstract fun bindProductRepository(
         impl: ProductRepositoryImpl,
     ): ProductRepository
 
-
     @Binds
     @Singleton
     abstract fun bindAuthRepository(
         impl: AuthRepositoryImpl
     ): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCartRepository(
+        impl: CartRepositoryImpl
+    ): CartRepository
 
     @Binds
     @Singleton
