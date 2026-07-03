@@ -28,4 +28,6 @@ interface RemoteAuthDataSource {
     suspend fun sendVerificationEmail()
 
     fun signOut()
+
+    suspend fun deleteCurrentUser()
 }

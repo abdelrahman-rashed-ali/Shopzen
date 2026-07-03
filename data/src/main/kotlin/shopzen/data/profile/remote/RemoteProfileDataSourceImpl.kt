@@ -11,6 +11,7 @@ import javax.inject.Inject
 private const val USERS = "users"
 private const val ADDRESSES = "addresses"
 private const val PREFERENCES_FIELD = "preferences"
+private const val SHOPIFY_CUSTOMER_ID_FIELD = "shopifyCustomerId"
 
 /**
  * Firestore CRUD against users/{uid} and users/{uid}/addresses.
@@ -87,5 +88,19 @@ class RemoteProfileDataSourceImpl @Inject constructor(
     override suspend fun readPreferences(uid: String): Result<Map<String, Any?>?> = runCatching {
         @Suppress("UNCHECKED_CAST")
         userDoc(uid).get().await().get(PREFERENCES_FIELD) as? Map<String, Any?>
+    }
+
+    // ── Shopify customer ID ───────────────────────────────────────────────────
+
+    override suspend fun saveShopifyCustomerId(uid: String, customerId: Long): Result<Unit> =
+        runCatching {
+            userDoc(uid)
+                .set(mapOf(SHOPIFY_CUSTOMER_ID_FIELD to customerId), SetOptions.merge())
+                .await()
+            Unit
+        }
+
+    override suspend fun getShopifyCustomerId(uid: String): Result<Long?> = runCatching {
+        userDoc(uid).get().await().getLong(SHOPIFY_CUSTOMER_ID_FIELD)
     }
 }
