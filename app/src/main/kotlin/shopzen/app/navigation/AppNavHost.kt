@@ -25,7 +25,7 @@ import shopzen.presentation.profile.screen.SavedAddressesScreen
 fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: NavScreen = HomeScreen,
+    startDestination: NavScreen = SplashScreen,
     launchGoogleSignIn: (
         onToken: (String) -> Unit,
         onError: (String) -> Unit
@@ -153,6 +153,9 @@ fun AppNavHost(
                 },
                 onNavigateToCart = {
                     navController.navigate(CartScreen)
+                },
+                onNavigateToLogin = {
+                    navController.navigate(LoginScreen)
                 }
             )
         }
