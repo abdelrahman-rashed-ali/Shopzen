@@ -14,4 +14,11 @@ interface RemoteProfileDataSource {
 
     suspend fun writePreferences(uid: String, data: Map<String, Any?>): Result<Unit>
     suspend fun readPreferences(uid: String): Result<Map<String, Any?>?>
+
+    // ── Shopify customer ID ───────────────────────────────────────────────────
+    // Stored as field `shopifyCustomerId` on the users/{uid} document.
+    // Written once during registration; read on every feature that needs it.
+
+    suspend fun saveShopifyCustomerId(uid: String, customerId: Long): Result<Unit>
+    suspend fun getShopifyCustomerId(uid: String): Result<Long?>
 }
