@@ -189,6 +189,7 @@ fun AppNavHost(
         composable<AddressesScreen> {
             SavedAddressesScreen(
                 onNavigateBack = { navController.navigateUp() },
+                onNavigateToLogin = { navController.navigate(LoginScreen) },
                 onNavigateToEdit = { addressId ->
                     navController.navigate(AddressEditScreen(addressId = addressId))
                 }
