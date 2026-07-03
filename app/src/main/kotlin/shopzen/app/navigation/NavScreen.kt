@@ -42,11 +42,8 @@ object EmailVerificationScreen : NavScreen(
 object HomeScreen : NavScreen(
     "home"
 )
-
 @Serializable
-object SearchScreen : NavScreen(
-    "search" )
-object WishlistScreen : NavScreen(
+data object WishlistScreen : NavScreen(
     "wishlist"
 )
 

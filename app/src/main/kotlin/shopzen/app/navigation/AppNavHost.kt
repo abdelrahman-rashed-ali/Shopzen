@@ -141,6 +141,18 @@ fun AppNavHost(
                 },
                 onNavigateToSearch = {
                     navController.navigate(SearchScreen)
+                },
+                onNavigateToProfile = {
+                    navController.navigate(ProfileScreen) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onNavigateToWishlist = {
+                    navController.navigate(WishlistScreen)
+                },
+                onNavigateToCart = {
+                    navController.navigate(CartScreen)
                 }
             )
         }
@@ -152,7 +164,9 @@ fun AppNavHost(
                         popUpTo<HomeScreen> { inclusive = false }
                     }
                 },
-                onNavigateToWishlist = {},
+                onNavigateToWishlist = {
+                    navController.navigate(WishlistScreen)
+                },
                 onNavigateToProduct = { productId ->
                     navController.navigate(
                         ProductDetail(
@@ -162,19 +176,17 @@ fun AppNavHost(
                 },
                 onNavigateToCategory = { categoryId ->
                     // TODO: Handle category navigation
+                },
+                onNavigateToSearch = {},
+                onNavigateToCart = {
+                    navController.navigate(CartScreen)
+                },
                 onNavigateToProfile = {
                     navController.navigate(ProfileScreen) {
                         launchSingleTop = true
                         restoreState = true
                     }
-                },
-                onNavigateToWishlist = {
-                    navController.navigate(WishlistScreen)
-                },
-                onNavigateToSearch = {
-
-                },
-                onNavigateToCart = {}
+                }
             )
         }
 

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,10 +46,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import shopzen.presentation.common.components.BottomTab
+import shopzen.presentation.common.components.BottomBarTab
 import shopzen.presentation.common.components.ErrorScreen
 import shopzen.presentation.common.components.LoadingIndicator
-import shopzen.presentation.common.components.MainBottomBar
+import shopzen.presentation.common.components.HomeBottomBar
 import shopzen.presentation.common.components.ProductCard
 import shopzen.presentation.search.components.CollectionCard
 import shopzen.presentation.search.components.FilterDialog
@@ -65,6 +64,9 @@ fun SearchScreen(
     onNavigateToWishlist: () -> Unit,
     onNavigateToProduct: (String) -> Unit,
     onNavigateToCategory: (String) -> Unit,
+    onNavigateToSearch: () -> Unit,
+    onNavigateToCart: () -> Unit,
+    onNavigateToProfile: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
@@ -91,15 +93,13 @@ fun SearchScreen(
     Scaffold(
         topBar = { SearchTopBar() },
         bottomBar = {
-            MainBottomBar(
-                currentTab = BottomTab.SEARCH,
-                onTabClick = { tab ->
-                    when (tab) {
-                        BottomTab.HOME -> onNavigateToHome()
-                        BottomTab.WISHLIST -> onNavigateToWishlist()
-                        else -> {}
-                    }
-                }
+            HomeBottomBar(
+                currentTab = BottomBarTab.SEARCH,
+                onNavigateToHome = onNavigateToHome,
+                onNavigateToSearch = onNavigateToSearch,
+                onNavigateToWishlist = onNavigateToWishlist,
+                onNavigateToCart = onNavigateToCart,
+                onNavigateToProfile = onNavigateToProfile
             )
         },
         modifier = modifier.background(Color.White)
