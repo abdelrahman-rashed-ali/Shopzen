@@ -146,7 +146,11 @@ fun AppNavHost(
                 },
                 onNavigateToWishlist = {
                     navController.navigate(WishlistScreen)
-                }
+                },
+                onNavigateToSearch = {
+
+                },
+                onNavigateToCart = {}
             )
         }
 
@@ -154,15 +158,26 @@ fun AppNavHost(
             shopzen.presentation.wishlist.screen.WishlistScreen(
                 onNavigateToHome = {
                     navController.navigate(HomeScreen) {
-                        popUpTo<HomeScreen> { inclusive = false }
+                        launchSingleTop = true
+                        restoreState = true
                     }
                 },
                 onNavigateToProduct = { productId ->
                     navController.navigate(
-                        ProductDetail(
-                            productId.toLongOrNull() ?: 0L
-                        )
+                        ProductDetail(productId.toLongOrNull() ?: 0L)
                     )
+                },
+                onNavigateToSearch = {
+
+                },
+                onNavigateToCart = {
+
+                },
+                onNavigateToProfile = {
+                    navController.navigate(ProfileScreen) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
             )
         }
@@ -193,6 +208,11 @@ fun AppNavHost(
                 },
                 onNavigateToPersonalDetails = { navController.navigate(PersonalDetailsScreen) },
                 onNavigateToAddresses = { navController.navigate(AddressesScreen) },
+                onNavigateToSearch = {},
+                onNavigateToCart = {},
+                onNavigateToWishlist = {
+                    navController.navigate(WishlistScreen)
+                },
                 onSignedOut = {
                     navController.navigate(LoginScreen) {
                         popUpTo(navController.graph.id) { inclusive = true }

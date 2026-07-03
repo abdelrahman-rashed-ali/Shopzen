@@ -34,12 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import shopzen.presentation.common.components.BottomTab
+import shopzen.presentation.common.components.BottomBarTab
 import shopzen.presentation.common.components.ConfirmationDialog
 import shopzen.presentation.common.components.EmptyStateView
 import shopzen.presentation.common.components.ErrorScreen
+import shopzen.presentation.common.components.HomeBottomBar
 import shopzen.presentation.common.components.LoadingIndicator
-import shopzen.presentation.common.components.MainBottomBar
 import shopzen.presentation.wishlist.components.WishlistItemCard
 import shopzen.presentation.wishlist.intent.WishlistIntent
 import shopzen.presentation.wishlist.state.WishlistState
@@ -49,6 +49,9 @@ import shopzen.presentation.wishlist.viewmodel.WishlistViewModel
 fun WishlistScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToProduct: (String) -> Unit,
+    onNavigateToSearch: () -> Unit,
+    onNavigateToCart: () -> Unit,
+    onNavigateToProfile: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: WishlistViewModel = hiltViewModel()
 ) {
@@ -58,13 +61,13 @@ fun WishlistScreen(
     Scaffold(
         topBar = { WishlistTopBar() },
         bottomBar = {
-            MainBottomBar(
-                currentTab = BottomTab.WISHLIST,
-                onTabClick = { tab ->
-                    if (tab == BottomTab.HOME) {
-                        onNavigateToHome()
-                    }
-                }
+            HomeBottomBar(
+                currentTab = BottomBarTab.WISHLIST,
+                onNavigateToHome = onNavigateToHome,
+                onNavigateToSearch = onNavigateToSearch,
+                onNavigateToWishlist = {},
+                onNavigateToCart = onNavigateToCart,
+                onNavigateToProfile = onNavigateToProfile
             )
         },
         modifier = modifier.background(Color.White)
@@ -99,7 +102,10 @@ fun WishlistScreen(
             val pendingRemovalId = state.pendingRemovalItemId
             if (state.showRemoveItemDialog && pendingRemovalId != null) {
                 ConfirmationDialog(
+                    title = "Remove Item",
                     message = "Remove this item from your wishlist?",
+                    confirmText = "Remove",
+                    dismissText = "Cancel",
                     onConfirm = {
                         onIntent(WishlistIntent.ConfirmRemoveItem(pendingRemovalId))
                     },

@@ -61,4 +61,9 @@ data object PersonalDetailsScreen : NavScreen("personal-details")
 data object AddressesScreen : NavScreen("addresses")
 
 @Serializable
+data object SearchScreen : NavScreen("search")
+
+@Serializable
+data object CartScreen : NavScreen("cart")
+@Serializable
 data class AddressEditScreen(val addressId: String? = null) : NavScreen("address-edit")

@@ -13,7 +13,7 @@ fun AuthRequiredDialog(
         title = stringResource(R.string.auth_required_title),
         message = stringResource(R.string.auth_required_message),
         confirmText = stringResource(R.string.auth_required_login),
-        cancelText = stringResource(R.string.auth_required_cancel),
+        dismissText = stringResource(R.string.auth_required_cancel),
         onConfirm = onLoginClick,
         onDismiss = onDismiss
     )

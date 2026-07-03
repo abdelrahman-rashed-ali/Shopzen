@@ -167,7 +167,7 @@ private fun SavedAddressesContent(
             title = stringResource(R.string.addresses_delete_confirm_title),
             message = stringResource(R.string.addresses_delete_confirm_body),
             confirmText = stringResource(R.string.addresses_delete_confirm_cta),
-            cancelText = stringResource(R.string.addresses_delete_cancel_cta),
+            dismissText = stringResource(R.string.addresses_delete_cancel_cta),
             onConfirm = { onIntent(AddressListIntent.ConfirmDeleteAddress) },
             onDismiss = { onIntent(AddressListIntent.DismissDialog) }
         )

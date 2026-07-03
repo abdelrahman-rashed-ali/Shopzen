@@ -52,7 +52,9 @@ import shopzen.domain.profile.model.AppLanguage
 import shopzen.domain.profile.model.AppTheme
 import shopzen.presentation.R
 import shopzen.presentation.common.components.AuthRequiredDialog
+import shopzen.presentation.common.components.BottomBarTab
 import shopzen.presentation.common.components.ConfirmationDialog
+import shopzen.presentation.common.components.HomeBottomBar
 import shopzen.presentation.common.components.LoadingIndicator
 import shopzen.presentation.common.components.MainBottomNavigationBar
 import shopzen.presentation.common.components.MainTab
@@ -67,6 +69,9 @@ fun ProfileScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToPersonalDetails: () -> Unit,
     onNavigateToAddresses: () -> Unit,
+    onNavigateToSearch: () -> Unit,
+    onNavigateToCart: () -> Unit,
+    onNavigateToWishlist: () -> Unit,
     onSignedOut: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel()
@@ -97,6 +102,9 @@ fun ProfileScreen(
         onIntent = onIntent,
         onNavigateToHome = onNavigateToHome,
         onNavigateToLogin = onNavigateToLogin,
+        onNavigateToSearch = onNavigateToSearch,
+        onNavigateToCart = onNavigateToCart,
+        onNavigateToWishlist = onNavigateToWishlist,
         modifier = modifier
     )
 }
@@ -108,6 +116,9 @@ private fun ProfileContent(
     onIntent: (ProfileIntent) -> Unit,
     onNavigateToHome: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToSearch: () -> Unit,
+    onNavigateToCart: () -> Unit,
+    onNavigateToWishlist: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -128,10 +139,13 @@ private fun ProfileContent(
             )
         },
         bottomBar = {
-            MainBottomNavigationBar(
-                selectedTab = MainTab.PROFILE,
-                onHomeClick = onNavigateToHome,
-                onProfileClick = {}
+            HomeBottomBar(
+                currentTab = BottomBarTab.PROFILE,
+                onNavigateToHome = onNavigateToHome,
+                onNavigateToSearch = onNavigateToSearch,
+                onNavigateToWishlist = onNavigateToWishlist,
+                onNavigateToCart = onNavigateToCart,
+                onNavigateToProfile = { }
             )
         }
     ) { innerPadding ->
@@ -217,9 +231,13 @@ private fun ProfileContent(
             title = stringResource(R.string.profile_logout_confirm_title),
             message = stringResource(R.string.profile_logout_confirm_body),
             confirmText = stringResource(R.string.profile_logout_confirm_cta),
-            cancelText = stringResource(R.string.profile_logout_cancel_cta),
-            onConfirm = { onIntent(ProfileIntent.ConfirmSignOut) },
-            onDismiss = { onIntent(ProfileIntent.DismissDialog) }
+            dismissText = stringResource(R.string.profile_logout_cancel_cta),
+            onConfirm = {
+                onIntent(ProfileIntent.ConfirmSignOut)
+            },
+            onDismiss = {
+                onIntent(ProfileIntent.DismissDialog)
+            }
         )
     }
 }
