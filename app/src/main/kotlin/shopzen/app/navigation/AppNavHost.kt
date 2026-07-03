@@ -12,8 +12,11 @@ import shopzen.presentation.product.screen.ProductDetailScreen
 import shopzen.presentation.auth.screen.EmailVerificationScreen
 import shopzen.presentation.auth.screen.RegisterScreen
 import shopzen.presentation.catalog.screen.HomeScreen
-import shopzen.presentation.product.screen.ProductDetailScreen
 import shopzen.presentation.onboarding.screen.OnboardingScreen
+import shopzen.presentation.profile.screen.AddEditAddressScreen
+import shopzen.presentation.profile.screen.PersonalDetailsScreen as PersonalDetailsRouteScreen
+import shopzen.presentation.profile.screen.ProfileScreen as ProfileRouteScreen
+import shopzen.presentation.profile.screen.SavedAddressesScreen
 
 
 @Composable
@@ -66,7 +69,7 @@ fun AppNavHost(
         composable<LoginScreen> {
             LoginRouteScreen(
                 navigateToHome = {
-                    navController.navigate(HomeScreen) {
+                    navController.navigate(ProfileScreen) {
                         popUpTo<LoginScreen> { inclusive = true }
                     }
                 },
@@ -83,7 +86,7 @@ fun AppNavHost(
         composable<ForgotPasswordScreen> {
             LoginRouteScreen(
                 navigateToHome = {
-                    navController.navigate(HomeScreen) {
+                    navController.navigate(ProfileScreen) {
                         popUpTo<LoginScreen> { inclusive = true }
                     }
                 },
@@ -111,7 +114,7 @@ fun AppNavHost(
         composable<EmailVerificationScreen> {
             EmailVerificationScreen(
                 navigateHome = {
-                    navController.navigate(HomeScreen)
+                    navController.navigate(ProfileScreen)
                 }
             )
         }
@@ -133,6 +136,12 @@ fun AppNavHost(
                 },
                 onNavigateToProducts = {
                     // TODO: Handle view all products
+                },
+                onNavigateToProfile = {
+                    navController.navigate(ProfileScreen) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
             )
         }
@@ -142,9 +151,56 @@ fun AppNavHost(
 
             ProductDetailScreen(
                 productId = args.productId,
-                onBackClick = {
+                onNavigateBack = {
                     navController.navigateUp()
                 }
+            )
+        }
+
+        // ── Profile & Settings feature ──
+
+        composable<ProfileScreen> {
+            ProfileRouteScreen(
+                onNavigateToHome = {
+                    navController.navigate(HomeScreen) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(LoginScreen)
+                },
+                onNavigateToPersonalDetails = { navController.navigate(PersonalDetailsScreen) },
+                onNavigateToAddresses = { navController.navigate(AddressesScreen) },
+                onSignedOut = {
+                    navController.navigate(LoginScreen) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable<PersonalDetailsScreen> {
+            PersonalDetailsRouteScreen(
+                onNavigateBack = { navController.navigateUp() }
+            )
+        }
+
+        composable<AddressesScreen> {
+            SavedAddressesScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToEdit = { addressId ->
+                    navController.navigate(AddressEditScreen(addressId = addressId))
+                }
+            )
+        }
+
+        composable<AddressEditScreen> { backStackEntry ->
+            val args = backStackEntry.toRoute<AddressEditScreen>()
+
+            AddEditAddressScreen(
+                addressId = args.addressId,
+                onNavigateBack = { navController.navigateUp() }
             )
         }
     }

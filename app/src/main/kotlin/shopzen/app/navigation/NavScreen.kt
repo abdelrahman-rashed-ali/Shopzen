@@ -45,3 +45,15 @@ object HomeScreen : NavScreen(
 
 @Serializable
 data class ProductDetail(val productId: Long) : NavScreen("product-detail")
+
+@Serializable
+data object ProfileScreen : NavScreen("profile")
+
+@Serializable
+data object PersonalDetailsScreen : NavScreen("personal-details")
+
+@Serializable
+data object AddressesScreen : NavScreen("addresses")
+
+@Serializable
+data class AddressEditScreen(val addressId: String? = null) : NavScreen("address-edit")

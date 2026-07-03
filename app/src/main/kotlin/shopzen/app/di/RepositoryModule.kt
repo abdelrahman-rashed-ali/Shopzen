@@ -11,7 +11,13 @@ import dagger.hilt.components.SingletonComponent
 import shopzen.data.product.repository.ProductRepositoryImpl
 import shopzen.domain.product.repository.ProductRepository
 import shopzen.data.onboarding.repository.OnboardingRepositoryImpl
+import shopzen.data.profile.remote.RemoteProfileDataSource
+import shopzen.data.profile.remote.RemoteProfileDataSourceImpl
+import shopzen.data.profile.repository.PreferencesRepositoryImpl
+import shopzen.data.profile.repository.ProfileRepositoryImpl
 import shopzen.domain.onboarding.repository.OnboardingRepository
+import shopzen.domain.profile.repository.PreferencesRepository
+import shopzen.domain.profile.repository.ProfileRepository
 import javax.inject.Singleton
 
 @Module
@@ -41,4 +47,18 @@ abstract class RepositoryModule {
     abstract fun bindOnboardingRepository(
         impl: OnboardingRepositoryImpl
     ): OnboardingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProfileRepository(impl: ProfileRepositoryImpl): ProfileRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPreferencesRepository(impl: PreferencesRepositoryImpl): PreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRemoteProfileDataSource(
+        impl: RemoteProfileDataSourceImpl
+    ): RemoteProfileDataSource
 }
