@@ -54,8 +54,6 @@ import shopzen.presentation.catalog.state.HomeState
 import shopzen.presentation.catalog.viewmodel.HomeViewModel
 import shopzen.presentation.common.components.ErrorScreen
 import shopzen.presentation.common.components.LoadingIndicator
-import shopzen.presentation.common.components.MainBottomNavigationBar
-import shopzen.presentation.common.components.MainTab
 
 /**
  * Stateful/Stateless Home screen composable.
@@ -69,21 +67,20 @@ fun HomeScreen(
     onNavigateToProduct: (String) -> Unit,
     onNavigateToProducts: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToWishlist: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    wishlistViewModel: WishlistViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val wishlistState by wishlistViewModel.state.collectAsStateWithLifecycle()
     val onIntent = viewModel::processIntent
+
+    val wishlistProductIds = wishlistState.items.map { it.productId }.toSet()
 
     Scaffold(
         topBar = { HomeTopBar() },
-        bottomBar = {
-            MainBottomNavigationBar(
-                selectedTab = MainTab.HOME,
-                onHomeClick = {},
-                onProfileClick = onNavigateToProfile,
-            )
-        },
+        bottomBar = { HomeBottomBar() },
         modifier = modifier.background(Color.White)
     ) { innerPadding ->
         when {
@@ -108,11 +105,53 @@ fun HomeScreen(
                     onNavigateToProduct = onProductClick@{ productId ->
                         onNavigateToProduct(productId)
                     },
+                    onWishlistClick = { product ->
+                        val isFav = wishlistProductIds.contains(product.id)
+                        if (isFav) {
+                            val item = wishlistState.items.find { it.productId == product.id }
+                            if (item != null) {
+                                wishlistViewModel.processIntent(WishlistIntent.RequestRemoveItem(item.id))
+                            }
+                        } else {
+                            wishlistViewModel.processIntent(WishlistIntent.RequestAddToWishlist(product))
+                        }
+                    },
                     onNavigateToProducts = onNavigateToProducts,
                     modifier = Modifier.padding(innerPadding)
                 )
             }
         }
+    }
+
+    if (wishlistState.showRemoveItemDialog && wishlistState.pendingRemovalItemId != null) {
+        val pendingId = wishlistState.pendingRemovalItemId!!
+        val pendingItem = wishlistState.items.find { it.id == pendingId }
+        ConfirmationDialog(
+            message = "Remove ${pendingItem?.title ?: "this item"} from your wishlist?",
+            confirmText = "Remove",
+            dismissText = "Cancel",
+            onConfirm = {
+                wishlistViewModel.processIntent(WishlistIntent.ConfirmRemoveItem(pendingId))
+            },
+            onDismiss = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissConfirmDialog)
+            }
+        )
+    }
+
+    if (wishlistState.showAddConfirmationDialog && wishlistState.pendingAddProduct != null) {
+        val pendingProduct = wishlistState.pendingAddProduct!!
+        ConfirmationDialog(
+            message = "Add ${pendingProduct.title} to your wishlist?",
+            confirmText = "Add",
+            dismissText = "Cancel",
+            onConfirm = {
+                wishlistViewModel.processIntent(WishlistIntent.ConfirmAddToWishlist(pendingProduct))
+            },
+            onDismiss = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissAddConfirmDialog)
+            }
+        )
     }
 }
 
@@ -207,11 +246,98 @@ private fun HomeTopBar() {
     }
 }
 
+/**
+ * Custom Bottom Navigation Bar matching the design.
+ * Features Home active state with dot indicator underneath.
+ */
+@Composable
+private fun HomeBottomBar() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .background(Color.White)
+            .border(width = 0.5.dp, color = Color(0xFFEEEEEE))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Tab 1: Home (Active with dot indicator below)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                IconButton(onClick = { /* Already on Home */ }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Home,
+                        contentDescription = "Home",
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                // Dot indicator for active Home screen
+                Box(
+                    modifier = Modifier
+                        .size(4.dp)
+                        .background(Color.Black, shape = CircleShape)
+                )
+            }
+
+            // Tab 2: Search
+            IconButton(onClick = { /* Navigate to Search */ }) {
+                Icon(
+                    imageVector = Icons.Outlined.Search,
+                    contentDescription = "Search",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Tab 3: Wishlist
+            IconButton(onClick = { /* Navigate to Wishlist */ }) {
+                Icon(
+                    imageVector = Icons.Outlined.FavoriteBorder,
+                    contentDescription = "Wishlist",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Tab 4: Cart (Shopping Bag)
+            IconButton(onClick = { /* Navigate to Cart */ }) {
+                Icon(
+                    imageVector = Icons.Outlined.ShoppingBag,
+                    contentDescription = "Cart",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Tab 5: Profile
+            IconButton(onClick = { /* Navigate to Profile */ }) {
+                Icon(
+                    imageVector = Icons.Outlined.Person,
+                    contentDescription = "Profile",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun HomeContent(
     state: HomeState,
+    wishlistProductIds: Set<String>,
     onNavigateToCategory: (String) -> Unit,
     onNavigateToProduct: (String) -> Unit,
+    onWishlistClick: (shopzen.domain.catalog.model.Product) -> Unit,
     onNavigateToProducts: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -244,8 +370,9 @@ private fun HomeContent(
         NewArrivalsSection(
             products = state.newArrivals,
             onProductClick = onNavigateToProduct,
-            onWishlistClick = { /* Wishlist implementation */ },
-            onViewAllClick = onNavigateToProducts
+            onWishlistClick = onWishlistClick,
+            onViewAllClick = onNavigateToProducts,
+            wishlistProductIds = wishlistProductIds
         )
 
         Spacer(modifier = Modifier.height(16.dp))

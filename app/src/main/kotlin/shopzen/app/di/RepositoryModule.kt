@@ -16,6 +16,8 @@ import shopzen.data.profile.remote.RemoteProfileDataSourceImpl
 import shopzen.data.profile.repository.PreferencesRepositoryImpl
 import shopzen.data.profile.repository.ProfileRepositoryImpl
 import shopzen.domain.onboarding.repository.OnboardingRepository
+import shopzen.data.wishlist.repository.WishlistRepositoryImpl
+import shopzen.domain.wishlist.repository.WishlistRepository
 import shopzen.domain.profile.repository.PreferencesRepository
 import shopzen.domain.profile.repository.ProfileRepository
 import javax.inject.Singleton
@@ -29,12 +31,18 @@ abstract class RepositoryModule {
     abstract fun bindCatalogRepository(
         impl: CatalogRepositoryImpl
     ): CatalogRepository
+
     @Binds
     @Singleton
     abstract fun bindProductRepository(
         impl: ProductRepositoryImpl,
     ): ProductRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindWishlistRepository(
+        impl: WishlistRepositoryImpl
+    ): WishlistRepository
 
     @Binds
     @Singleton

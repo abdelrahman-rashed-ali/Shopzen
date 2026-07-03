@@ -12,6 +12,7 @@ import shopzen.presentation.product.screen.ProductDetailScreen
 import shopzen.presentation.auth.screen.EmailVerificationScreen
 import shopzen.presentation.auth.screen.RegisterScreen
 import shopzen.presentation.catalog.screen.HomeScreen
+import shopzen.presentation.product.screen.ProductDetailScreen
 import shopzen.presentation.onboarding.screen.OnboardingScreen
 import shopzen.presentation.profile.screen.AddEditAddressScreen
 import shopzen.presentation.profile.screen.PersonalDetailsScreen as PersonalDetailsRouteScreen
@@ -69,7 +70,7 @@ fun AppNavHost(
         composable<LoginScreen> {
             LoginRouteScreen(
                 navigateToHome = {
-                    navController.navigate(ProfileScreen) {
+                    navController.navigate(HomeScreen) {
                         popUpTo<LoginScreen> { inclusive = true }
                     }
                 },
@@ -86,7 +87,7 @@ fun AppNavHost(
         composable<ForgotPasswordScreen> {
             LoginRouteScreen(
                 navigateToHome = {
-                    navController.navigate(ProfileScreen) {
+                    navController.navigate(HomeScreen) {
                         popUpTo<LoginScreen> { inclusive = true }
                     }
                 },
@@ -114,7 +115,7 @@ fun AppNavHost(
         composable<EmailVerificationScreen> {
             EmailVerificationScreen(
                 navigateHome = {
-                    navController.navigate(ProfileScreen)
+                    navController.navigate(HomeScreen)
                 }
             )
         }
@@ -142,6 +143,26 @@ fun AppNavHost(
                         launchSingleTop = true
                         restoreState = true
                     }
+                },
+                onNavigateToWishlist = {
+                    navController.navigate(WishlistScreen)
+                }
+            )
+        }
+
+        composable<WishlistScreen> {
+            shopzen.presentation.wishlist.screen.WishlistScreen(
+                onNavigateToHome = {
+                    navController.navigate(HomeScreen) {
+                        popUpTo<HomeScreen> { inclusive = false }
+                    }
+                },
+                onNavigateToProduct = { productId ->
+                    navController.navigate(
+                        ProductDetail(
+                            productId.toLongOrNull() ?: 0L
+                        )
+                    )
                 }
             )
         }
