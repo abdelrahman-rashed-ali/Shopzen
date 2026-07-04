@@ -23,6 +23,7 @@ object NetworkModule {
         hostname        = BuildConfig.SHOPIFY_HOSTNAME,
         apiVersion      = BuildConfig.SHOPIFY_API_VERSION,
         apiKey          = BuildConfig.SHOPIFY_API_KEY,
+        apiPassword     = BuildConfig.SHOPIFY_PASSWORD,
         storefrontToken = BuildConfig.SHOPIFY_STOREFRONT_TOKEN,
     )
 
@@ -38,4 +39,3 @@ object NetworkModule {
     fun provideGraphQLClient(config: NetworkConfig): HttpClient =
         KtorGraphQLClient.build(config)
 }
-

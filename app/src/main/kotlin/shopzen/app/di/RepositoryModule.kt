@@ -1,5 +1,7 @@
 package shopzen.app.di
 
+import shopzen.data.checkout.repository.CheckoutRepositoryImpl
+import shopzen.domain.checkout.repository.CheckoutRepository
 import shopzen.data.catalog.repository.CatalogRepositoryImpl
 import shopzen.domain.catalog.repository.CatalogRepository
 import shopzen.data.auth.repository.AuthRepositoryImpl
@@ -77,4 +79,10 @@ abstract class RepositoryModule {
     abstract fun bindRemoteProfileDataSource(
         impl: RemoteProfileDataSourceImpl
     ): RemoteProfileDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindCheckoutRepository(
+        impl: CheckoutRepositoryImpl
+    ): CheckoutRepository
 }

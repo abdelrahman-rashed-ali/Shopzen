@@ -1,0 +1,88 @@
+package shopzen.data.checkout.mapper
+
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
+import shopzen.data.checkout.remote.dto.OrderDto
+import shopzen.domain.cart.model.DiscountCode
+import shopzen.domain.cart.model.DiscountType
+import shopzen.domain.checkout.model.Checkout
+import shopzen.domain.checkout.model.OrderConfirmation
+import javax.inject.Inject
+
+class CheckoutMapper @Inject constructor() {
+    fun toOrderCreateVariables(checkout: Checkout): JsonObject =
+        buildJsonObject {
+            putJsonObject("order") {
+                if (checkout.currency.isNotBlank()) {
+                    put("currency", checkout.currency)
+                }
+                put("lineItems", buildJsonArray {
+                    checkout.lineItems.forEach { item ->
+                        addJsonObject {
+                            put("variantId", toVariantGid(item.variantId))
+                            put("quantity", item.quantity)
+                        }
+                    }
+                })
+                checkout.shippingAddress.phone?.let { put("phone", it) }
+                put("shippingAddress", toMailingAddressJson(checkout))
+                checkout.appliedCoupon?.let { coupon ->
+                    put("discountCode", toDiscountCodeJson(coupon, checkout.currency))
+                }
+            }
+            putJsonObject("options") {
+                put("sendReceipt", true)
+            }
+        }
+
+    fun toOrderConfirmation(order: OrderDto): OrderConfirmation =
+        OrderConfirmation(
+            orderId = order.id,
+            orderNumber = order.name,
+        )
+
+    private fun toMailingAddressJson(checkout: Checkout): JsonObject {
+        val nameParts = checkout.shippingAddress.recipientName.trim().split(Regex("\\s+"))
+        val firstName = nameParts.firstOrNull().orEmpty()
+        val lastName = nameParts.drop(1).joinToString(" ")
+
+        return buildJsonObject {
+            if (firstName.isNotBlank()) put("firstName", firstName)
+            if (lastName.isNotBlank()) put("lastName", lastName)
+            checkout.shippingAddress.phone?.let { put("phone", it) }
+            put("address1", checkout.shippingAddress.addressLine1)
+            checkout.shippingAddress.addressLine2?.let { put("address2", it) }
+            put("city", checkout.shippingAddress.city)
+            checkout.shippingAddress.stateOrProvince?.let { put("province", it) }
+            put("country", checkout.shippingAddress.country)
+            put("zip", checkout.shippingAddress.postalCode)
+        }
+    }
+
+    private fun toDiscountCodeJson(coupon: DiscountCode, currency: String): JsonObject =
+        buildJsonObject {
+            when (coupon.discountType) {
+                DiscountType.PERCENTAGE -> putJsonObject("itemPercentageDiscountCode") {
+                    put("code", coupon.code)
+                    put("percentage", coupon.value)
+                }
+
+                DiscountType.FIXED_AMOUNT -> putJsonObject("itemFixedDiscountCode") {
+                    put("code", coupon.code)
+                    putJsonObject("amountSet") {
+                        putJsonObject("shopMoney") {
+                            put("amount", coupon.value.toString())
+                            put("currencyCode", currency)
+                        }
+                    }
+                }
+            }
+        }
+
+    private fun toVariantGid(variantId: String): String =
+        if (variantId.startsWith("gid://")) variantId else "gid://shopify/ProductVariant/$variantId"
+}

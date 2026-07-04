@@ -14,6 +14,7 @@ import shopzen.domain.cart.model.CartItem
 import shopzen.domain.cart.model.CouponValidationResult
 import shopzen.domain.cart.repository.CartRepository
 import shopzen.data.cart.remote.CouponRemoteDataSource
+import kotlin.math.abs
 import javax.inject.Inject
 
 /**
@@ -116,6 +117,44 @@ class CartRepositoryImpl @Inject constructor(
     }
 
     // ── Coupon / Currency (delegated to other features per AGENTS.md) ──────────
+
+    override suspend fun validateCoupon(code: String): Result<CouponValidationResult> {
+        return try {
+            val normalizedCode = code.trim()
+            if (normalizedCode.isBlank()) {
+                return Result.success(CouponValidationResult.Invalid("Coupon code is required"))
+            }
+
+            val priceRules = couponRemote.getPriceRules()
+            for (priceRule in priceRules) {
+                val discountCode = couponRemote.getDiscountCodes(priceRule.id)
+                    .firstOrNull { it.code.equals(normalizedCode, ignoreCase = true) }
+                    ?: continue
+
+                val value = abs(priceRule.value.toDoubleOrNull() ?: 0.0)
+                val result = when (priceRule.value_type) {
+                    "percentage" -> CouponValidationResult.Valid(
+                        code = discountCode.code,
+                        discountPercent = value,
+                        discountFixed = null,
+                    )
+                    "fixed_amount" -> CouponValidationResult.Valid(
+                        code = discountCode.code,
+                        discountPercent = null,
+                        discountFixed = value,
+                    )
+                    else -> CouponValidationResult.Invalid("Unsupported coupon type")
+                }
+                return Result.success(result)
+            }
+
+            Result.success(CouponValidationResult.Invalid("Invalid coupon code"))
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     override suspend fun applyCoupon(userId: String, code: String): Result<Unit> = runCatching {
         val cartId = requireCartId(userId)

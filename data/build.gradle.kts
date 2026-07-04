@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.apollo)
 }
 
 android {
@@ -29,12 +30,20 @@ kotlin {
     }
 }
 
+apollo {
+    service("shopifyAdmin") {
+        packageName.set("shopzen.data.checkout.remote.api")
+    }
+}
+
 dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
     implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.datastore.preferences)
     androidTestImplementation(libs.androidx.junit)
@@ -51,7 +60,7 @@ dependencies {
     //nour
     //ziad
     implementation(libs.bundles.ktor)
-    implementation(libs.bundles.apollo)
+    implementation(libs.apollo.runtime)
     implementation(libs.javax.inject)
     implementation(libs.bundles.room)
     ksp(libs.room.compiler)

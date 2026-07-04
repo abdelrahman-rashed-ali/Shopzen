@@ -11,6 +11,7 @@ interface CartRepository {
     suspend fun removeFromCart(itemId: String, userId: String): Result<Unit>
     suspend fun updateItemQuantity(itemId: String, quantity: Int, userId: String): Result<Unit>
     suspend fun clearCart(userId: String): Result<Unit>
+    suspend fun validateCoupon(code: String): Result<CouponValidationResult>
     suspend fun applyCoupon(userId: String, code: String): Result<Unit>
     suspend fun removeCoupon(userId: String, code: String): Result<Unit>
 }

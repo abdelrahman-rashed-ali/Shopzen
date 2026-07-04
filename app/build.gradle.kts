@@ -28,6 +28,7 @@ android {
         buildConfigField("String", "SHOPIFY_HOSTNAME", "\"${properties["SHOPIFY_HOSTNAME"]}\"")
         buildConfigField("String", "SHOPIFY_API_VERSION", "\"${properties["SHOPIFY_API_VERSION"]}\"")
         buildConfigField("String", "SHOPIFY_API_KEY", "\"${properties["SHOPIFY_API_KEY"]}\"")
+        buildConfigField("String", "SHOPIFY_PASSWORD", "\"${properties["SHOPIFY_PASSWORD"] ?: ""}\"")
         buildConfigField("String", "SHOPIFY_STOREFRONT_TOKEN", "\"${properties["SHOPIFY_STOREFRONT_TOKEN"] ?: ""}\"")
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${properties["GOOGLE_WEB_CLIENT_ID"] ?: ""}\"")
 
@@ -102,7 +103,6 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.bundles.ktor)
-    implementation(libs.bundles.apollo)
     implementation(libs.bundles.room)
     implementation(libs.androidx.hilt.navigation.compose)
     //ziad
