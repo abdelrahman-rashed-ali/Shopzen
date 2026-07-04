@@ -49,6 +49,7 @@ fun VariantDto.toDomain(options: List<OptionDto>): ProductVariant {
         price = price,
         compareAtPrice = compareAtPrice,
         inventoryQuantity = inventoryQuantity,
+        adminGraphqlApiId = adminGraphqlApiId,
         selectedOptions = selectedOptions,
     )
 }

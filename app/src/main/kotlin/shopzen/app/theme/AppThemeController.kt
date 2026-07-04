@@ -6,7 +6,7 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -57,8 +57,5 @@ fun AppThemeController(content: @Composable () -> Unit) {
     }
 
     CompositionLocalProvider(LocalAppTheme provides preferences.theme) {
-        ShopzenTheme(darkTheme = darkTheme) {
-            content()
-        }
     }
 }

@@ -24,8 +24,15 @@ sealed class CartIntent {
     data class NavigateToProduct(val productId: String) : CartIntent()
 
     data object Retry : CartIntent()
+    data object Refresh : CartIntent()
 
     data class AddToCart(
-        val item: CartItem,
+        val productId: String,
+        val variantId: String,
+        val title: String,
+        val variantTitle: String,
+        val price: Double,
+        val maxQuantity: Int,
+        val imageUrl: String
     ) : CartIntent()
 }

@@ -225,6 +225,9 @@ fun AppNavHost(
                 productId = args.productId,
                 onNavigateBack = {
                     navController.navigateUp()
+                },
+                onNavigateToLogin = {
+                    navController.navigate(LoginScreen)
                 }
             )
         }
@@ -233,6 +236,7 @@ fun AppNavHost(
                 onNavigateBack = { navController.navigateUp() },
                 onNavigateToProduct = {},
                 onNavigateToCheckout = {},
+                onNavigateToLogin = { navController.navigate(LoginScreen) },
             )
         }
 

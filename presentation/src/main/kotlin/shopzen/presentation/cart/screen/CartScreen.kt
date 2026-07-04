@@ -56,6 +56,7 @@ fun CartScreen(
     onNavigateBack: () -> Unit,
     onNavigateToCheckout: () -> Unit,
     onNavigateToProduct: (String) -> Unit,
+    onNavigateToLogin: () -> Unit,
     // Scoped to Activity so CartViewModel survives navigation and is shared across screens
     // (e.g. Cart, Checkout, bottom-nav badge).
     viewModel: CartViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
@@ -70,6 +71,7 @@ fun CartScreen(
                 CartEffect.NavigateToCheckout -> onNavigateToCheckout()
                 is CartEffect.NavigateToProduct -> onNavigateToProduct(effect.productId)
                 is CartEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message.asString(context))
+                CartEffect.NavigateToLogin -> onNavigateToLogin()
             }
         }
     }
@@ -92,7 +94,6 @@ fun CartScreenContent(
     onNavigateBack: () -> Unit,
 ) {
     val c = LocalShopzenColors.current
-    val couponSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Box(
         modifier = modifier
@@ -151,12 +152,13 @@ fun CartScreenContent(
         )
     }
 
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     CouponBottomSheet(
         visible = state.showCouponSheet,
         couponCode = state.couponCode,
         couponError = state.couponError?.asString(),
         isCouponLoading = state.isCouponLoading,
-        sheetState = couponSheetState,
+        sheetState = sheetState,
         onCodeChange = { onIntent(CartIntent.UpdateCouponCode(it)) },
         onApply = { onIntent(CartIntent.ApplyCoupon) },
         onDismiss = { onIntent(CartIntent.DismissCouponSheet) },

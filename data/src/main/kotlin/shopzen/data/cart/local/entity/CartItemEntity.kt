@@ -26,5 +26,9 @@ data class CartItemEntity(
     val imageUrl: String,
     val userId: String,
     val currency: String,
+    val subtotalPrice: Double,
+    val totalPrice: Double,
+    val appliedCouponCode: String?,
+    val appliedCouponApplicable: Boolean?,
     val invalidationDate: Long,             // epoch ms — cache expiry timestamp
 )

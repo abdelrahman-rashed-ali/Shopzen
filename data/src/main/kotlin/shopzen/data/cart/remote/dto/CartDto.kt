@@ -17,6 +17,7 @@ data class CartGqlData(
     val cartLinesAdd: CartPayload? = null,
     val cartLinesUpdate: CartPayload? = null,
     val cartLinesRemove: CartPayload? = null,
+    val cartDiscountCodesUpdate: CartPayload? = null,
     val cart: CartDto? = null,
 )
 
@@ -51,6 +52,13 @@ data class CartDto(
     val id: String,
     val lines: CartLinesConnectionDto,
     val cost: CartCostDto,
+    val discountCodes: List<DiscountCodeDto> = emptyList(),
+)
+
+@Serializable
+data class DiscountCodeDto(
+    val code: String,
+    val applicable: Boolean,
 )
 
 @Serializable

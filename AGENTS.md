@@ -344,7 +344,7 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 
 **Responsibility:** Full cart management — add, update, remove items. Enforces real-time stock limits. Totals recalculated locally. Stored in Room; optionally synced as Shopify Draft Order.
 
-**Domain models:** `Cart(items, currency, subtotalPrice, userId)`, `CartItem(id, productId, variantId, title, variantTitle, price, quantity, maxQuantity, imageUrl, userId)`
+**Domain models:** `Cart(items, currency, subtotalPrice, discountAmount, totalPrice, appliedCoupon, userId)`, `CartItem(id, productId, variantId, title, variantTitle, price, quantity, maxQuantity, imageUrl, userId)`, `DiscountCode(code, discountType, value)`, `DiscountType(PERCENTAGE | FIXED_AMOUNT)`
 
 **Use cases:**
 
@@ -354,13 +354,19 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 | `AddToCartUseCase` | Validates stock before insert; updates quantity if variant already in cart |
 | `RemoveFromCartUseCase` | Deletes item — confirmation required |
 | `UpdateCartItemQuantityUseCase` | Clamps quantity to `[1, maxQuantity]` before saving |
-| `GetCartTotalUseCase` | Pure: `sum(item.price * item.quantity)` |
+| `GetCartTotalUseCase` | Pure: `sum(item.price * item.quantity)` minus discount |
 | `ClearCartUseCase` | Deletes all items for user — confirmation required |
+| `ValidateCouponUseCase` | REST — `GET /price_rules/{id}/discount_codes.json` Checks code validity |
+| `ApplyCouponUseCase` | Client-side Deducts discount; updates CartState |
+| `RemoveCouponUseCase` | Client-side Restores original subtotal |
 
 **Business rules:**
 - Quantity increment disabled when `quantity == maxQuantity`
 - Cart badge on bottom nav shows item count reactively
 - Total recalculated on every mutation without a network call
+- Apply Coupon: Users can apply a discount code. The app must validate it against the Shopify REST API (GET /price_rules/{id}/discount_codes.json). If valid, it deducts the discount and updates the checkout state.
+- Remove Coupon: Users can remove an applied coupon, which restores the original subtotal.
+- Error Handling (Coupons): If a user enters an invalid coupon, the app must show an inline field error (do not use a dialog for this).
 
 ---
 
@@ -397,22 +403,18 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 
 **Responsibility:** Order summary, coupon application, shipping address selection, payment method, and final order placement.
 
-**Domain models:** `Checkout(lineItems, shippingAddress, subtotalPrice, discountAmount, totalPrice, currency, appliedCoupon, selectedPaymentMethod)`, `DiscountCode(code, discountType, value)`, `DiscountType(PERCENTAGE | FIXED_AMOUNT)`, `PaymentMethod(CASH_ON_DELIVERY | ONLINE_PAYMENT)`, `OrderConfirmation`
+**Domain models:** `Checkout(lineItems, shippingAddress, subtotalPrice, discountAmount, totalPrice, currency, appliedCoupon, selectedPaymentMethod)`, `PaymentMethod(CASH_ON_DELIVERY | ONLINE_PAYMENT)`, `OrderConfirmation`
 
 **Use cases:**
 
 | Use Case | Source | Description |
 |---|---|---|
-| `ValidateCouponUseCase` | REST — `GET /price_rules/{id}/discount_codes.json` | Checks code validity |
-| `ApplyCouponUseCase` | Client-side | Deducts discount; updates `CheckoutState` |
-| `RemoveCouponUseCase` | Client-side | Restores original subtotal |
 | `GetAvailablePaymentMethodsUseCase` | Client-side | Filters COD based on `MAX_COD_AMOUNT` |
 | `ValidateCashLimitUseCase` | Client-side | Returns `false` if `totalPrice > Constants.MAX_COD_AMOUNT` |
 | `PlaceOrderUseCase` | GraphQL — `orderCreate` mutation | Submits order; Shopify triggers confirmation email |
 
 **Business rules:**
 - COD shown only when `totalPrice <= Constants.MAX_COD_AMOUNT`
-- Invalid coupon shows inline field error — not a dialog
 - Order placement requires `ConfirmationDialog`
 - After successful order: clear Room cart → navigate to `OrderConfirmationScreen`
 

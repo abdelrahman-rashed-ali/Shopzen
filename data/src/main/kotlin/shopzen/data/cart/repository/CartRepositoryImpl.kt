@@ -13,6 +13,7 @@ import shopzen.domain.cart.model.Cart
 import shopzen.domain.cart.model.CartItem
 import shopzen.domain.cart.model.CouponValidationResult
 import shopzen.domain.cart.repository.CartRepository
+import shopzen.data.cart.remote.CouponRemoteDataSource
 import javax.inject.Inject
 
 /**
@@ -38,6 +39,7 @@ class CartRepositoryImpl @Inject constructor(
     private val remote: CartRemoteDataSource,
     private val local: CartLocalDataSource,
     private val syncAdapter: CartSyncAdapter,
+    private val couponRemote: CouponRemoteDataSource,
 ) : CartRepository {
 
     companion object {
@@ -98,16 +100,35 @@ class CartRepositoryImpl @Inject constructor(
     }
 
     override suspend fun clearCart(userId: String): Result<Unit> = runCatching {
-        // Local-only; no Storefront mutation for "clear all".
+        val cartId = requireCartIdOrNull(userId)
+        if (cartId != null) {
+            val cached = local.getCart(userId)
+            val lineIds = cached.map { it.id }
+            if (lineIds.isNotEmpty()) {
+                val refreshedCart = remote.clearLines(cartId, lineIds)
+                upsertCartToLocal(refreshedCart, userId)
+                return@runCatching
+            }
+        }
+        
+        // If there are no remote lines to clear or no remote cart, just clear locally
         local.clearCart(userId)
     }
 
     // ── Coupon / Currency (delegated to other features per AGENTS.md) ──────────
 
-    override suspend fun validateCoupon(code: String): Result<CouponValidationResult> =
-        Result.failure(NotImplementedError("Coupon validation belongs to the checkout feature slice."))
+    override suspend fun applyCoupon(userId: String, code: String): Result<Unit> = runCatching {
+        val cartId = requireCartId(userId)
+        val refreshedCart = remote.updateDiscountCodes(cartId, listOf(code))
+        upsertCartToLocal(refreshedCart, userId)
+    }
 
-    override suspend fun getCurrencySymbol(): String = "USD"
+    override suspend fun removeCoupon(userId: String, code: String): Result<Unit> = runCatching {
+        val cartId = requireCartId(userId)
+        // Storefront API: pass an empty array to remove all discount codes
+        val refreshedCart = remote.updateDiscountCodes(cartId, emptyList())
+        upsertCartToLocal(refreshedCart, userId)
+    }
 
     // ── Private helpers ────────────────────────────────────────────────────────
 
@@ -143,13 +164,24 @@ class CartRepositoryImpl @Inject constructor(
     ) {
         val newInvalidationDate = System.currentTimeMillis() + CACHE_TTL_MS
         val currency = cart.cost.subtotalAmount.currencyCode
+        val subtotal = cart.cost.subtotalAmount.amount.toDoubleOrNull() ?: 0.0
+        val total = cart.cost.totalAmount.amount.toDoubleOrNull() ?: 0.0
+        val appliedCouponCode = cart.discountCodes.firstOrNull()?.code
+        val appliedCouponApplicable = cart.discountCodes.firstOrNull()?.applicable
 
         val entities = cart.lines.edges.map { edge ->
-            edge.node.toEntity(
+            val entity = edge.node.toEntity(
                 cartId           = cart.id,
                 userId           = userId,
                 currency         = currency,
                 invalidationDate = newInvalidationDate,
+            )
+            // Inject cart-level metadata into every line item
+            entity.copy(
+                subtotalPrice = subtotal,
+                totalPrice = total,
+                appliedCouponCode = appliedCouponCode,
+                appliedCouponApplicable = appliedCouponApplicable
             )
         }
 

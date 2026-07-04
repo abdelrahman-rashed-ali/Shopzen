@@ -25,6 +25,7 @@ data class CartState(
     val couponApplied: Boolean = false,
     val appliedCouponLabel: String? = null,
     val isCouponLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val isLoading: Boolean = false,
     val error: UiText? = null,
     val showRemoveItemDialog: Boolean = false,

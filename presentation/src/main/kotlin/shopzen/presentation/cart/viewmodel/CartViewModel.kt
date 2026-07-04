@@ -14,16 +14,21 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shopzen.domain.auth.usecase.GetCurrentUserUseCase
+import shopzen.domain.cart.model.Cart
 import shopzen.domain.cart.model.CartItem
 import shopzen.domain.cart.model.CouponValidationResult
+import shopzen.domain.cart.model.DiscountCode
+import shopzen.domain.cart.model.DiscountType
 import shopzen.domain.cart.usecase.AddToCartUseCase
+import shopzen.domain.cart.usecase.ApplyCouponUseCase
 import shopzen.domain.cart.usecase.ClearCartUseCase
 import shopzen.domain.cart.usecase.GetCartTotalUseCase
 import shopzen.domain.cart.usecase.GetCartUseCase
 import shopzen.domain.cart.usecase.GetCurrencySymbolUseCase
+import shopzen.domain.cart.usecase.RemoveCouponUseCase
 import shopzen.domain.cart.usecase.RemoveFromCartUseCase
 import shopzen.domain.cart.usecase.UpdateCartItemQuantityUseCase
-import shopzen.domain.cart.usecase.ValidateCouponUseCase
+
 import shopzen.presentation.R
 import shopzen.presentation.cart.intent.CartIntent
 import shopzen.presentation.cart.state.CartItemUi
@@ -34,6 +39,7 @@ import javax.inject.Inject
 sealed class CartEffect {
     data class NavigateToProduct(val productId: String) : CartEffect()
     data object NavigateToCheckout : CartEffect()
+    data object NavigateToLogin : CartEffect()
     data class ShowSnackbar(val message: UiText) : CartEffect()
 }
 
@@ -43,8 +49,9 @@ class CartViewModel @Inject constructor(
     private val removeFromCartUseCase: RemoveFromCartUseCase,
     private val updateCartItemQuantityUseCase: UpdateCartItemQuantityUseCase,
     private val clearCartUseCase: ClearCartUseCase,
-    private val validateCouponUseCase: ValidateCouponUseCase,
     private val getCartTotalUseCase: GetCartTotalUseCase,
+    private val applyCouponUseCase: ApplyCouponUseCase,
+    private val removeCouponUseCase: RemoveCouponUseCase,
     private val getCurrencySymbolUseCase: GetCurrencySymbolUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val addToCartUseCase: AddToCartUseCase,
@@ -62,8 +69,7 @@ class CartViewModel @Inject constructor(
     private val _effects = MutableSharedFlow<CartEffect>(extraBufferCapacity = 1)
     val effects = _effects.asSharedFlow()
 
-    private var rawItems: List<CartItem> = emptyList()
-    private var discountMultiplier: Double = 1.0
+    private var currentCart: Cart? = null
 
     init {
         viewModelScope.launch {
@@ -111,39 +117,49 @@ class CartViewModel @Inject constructor(
                 _effects.emit(CartEffect.NavigateToProduct(intent.productId))
             }
             CartIntent.Retry -> loadCurrencyAndCart()
-            is CartIntent.AddToCart -> handleAddToCart(intent.item)
+            CartIntent.Refresh -> loadCurrencyAndCart(forceRefresh = true)
+            is CartIntent.AddToCart -> handleAddToCart(intent)
         }
     }
 
-    private fun loadCurrencyAndCart() {
+    private fun loadCurrencyAndCart(forceRefresh: Boolean = false) {
         val uid = userId ?: return
         viewModelScope.launch {
             val symbol = getCurrencySymbolUseCase()
             _state.update { it.copy(currencySymbol = symbol) }
-            observeCart(uid, symbol)
+            observeCart(uid, symbol, forceRefresh)
         }
     }
 
-    private fun observeCart(uid: String, symbol: String) {
-        _state.update { it.copy(isLoading = true, error = null) }
-        getCartUseCase(uid)
+    private var observeJob: kotlinx.coroutines.Job? = null
+
+    private fun observeCart(uid: String, symbol: String, forceRefresh: Boolean = false) {
+        observeJob?.cancel()
+        if (forceRefresh) {
+            _state.update { it.copy(isRefreshing = true, error = null) }
+        } else {
+            _state.update { it.copy(isLoading = true, error = null) }
+        }
+        observeJob = getCartUseCase(uid, forceRefresh)
             .onEach { result ->
                 result.fold(
                     onSuccess = { cart ->
-                        rawItems = cart.items
+                        currentCart = cart
                         _state.update { current ->
                             val uiItems = cart.items.map { it.toUi(symbol) }
-                            val subtotal = getCartTotalUseCase(cart.items)
-                            val discounted = subtotal * discountMultiplier
                             current.copy(
                                 isLoading = false,
+                                isRefreshing = false,
                                 error = null,
                                 items = uiItems,
-                                formattedSubtotal = symbol.formatPrice(subtotal),
-                                formattedTotal = symbol.formatPrice(discounted),
-                                formattedDiscount = if (discountMultiplier < 1.0) {
-                                    "-${symbol.formatPrice(subtotal - discounted)}"
+                                formattedSubtotal = symbol.formatPrice(cart.subtotalPrice),
+                                formattedTotal = symbol.formatPrice(cart.totalPrice),
+                                formattedDiscount = if (cart.discountAmount > 0) {
+                                    "-${symbol.formatPrice(cart.discountAmount)}"
                                 } else null,
+                                couponApplied = cart.appliedCoupon != null,
+                                appliedCouponLabel = cart.appliedCoupon?.code?.let { "$it" }, // Shopify UI just shows code
+                                couponCode = cart.appliedCoupon?.code ?: "",
                             )
                         }
                     },
@@ -151,7 +167,8 @@ class CartViewModel @Inject constructor(
                         _state.update {
                             it.copy(
                                 isLoading = false,
-                                error = throwable.message?.let { msg -> UiText.DynamicString(msg) }
+                                isRefreshing = false,
+                                error = throwable.message?.let { msg -> UiText.DynamicString(msg) as UiText }
                                     ?: UiText.StringResource(R.string.cart_error_load_failed)
                             )
                         }
@@ -162,63 +179,87 @@ class CartViewModel @Inject constructor(
     }
 
     private fun handleIncrement(itemId: String) {
-        val item = rawItems.find { it.id == itemId } ?: return
+        val cart = currentCart ?: return
+        val item = cart.items.find { it.id == itemId } ?: return
         if (item.quantity >= item.maxQuantity) return
         updateQuantity(itemId, item.quantity + 1)
     }
 
     private fun handleDecrement(itemId: String) {
-        val item = rawItems.find { it.id == itemId } ?: return
+        val cart = currentCart ?: return
+        val item = cart.items.find { it.id == itemId } ?: return
         if (item.quantity <= 1) return
         updateQuantity(itemId, item.quantity - 1)
     }
 
     private fun updateQuantity(itemId: String, newQty: Int) {
-        rawItems = rawItems.map { if (it.id == itemId) it.copy(quantity = newQty) else it }
+        val cart = currentCart ?: return
+        val updatedItems = cart.items.map { if (it.id == itemId) it.copy(quantity = newQty) else it }
+        val updatedCart = cart.copy(items = updatedItems, subtotalPrice = getCartTotalUseCase(updatedItems))
+        currentCart = updatedCart
+        
         val symbol = _state.value.currencySymbol
-        val subtotal = getCartTotalUseCase(rawItems)
-        val discounted = subtotal * discountMultiplier
         _state.update { current ->
             current.copy(
-                items = rawItems.map { it.toUi(symbol) },
-                formattedSubtotal = symbol.formatPrice(subtotal),
-                formattedTotal = symbol.formatPrice(discounted),
-                formattedDiscount = if (discountMultiplier < 1.0) {
-                    "-${symbol.formatPrice(subtotal - discounted)}"
+                items = updatedCart.items.map { it.toUi(symbol) },
+                formattedSubtotal = symbol.formatPrice(updatedCart.subtotalPrice),
+                formattedTotal = symbol.formatPrice(updatedCart.totalPrice),
+                formattedDiscount = if (updatedCart.discountAmount > 0) {
+                    "-${symbol.formatPrice(updatedCart.discountAmount)}"
                 } else null,
             )
         }
         viewModelScope.launch {
-            updateCartItemQuantityUseCase(itemId, newQty, userId ?: return@launch)
+            updateCartItemQuantityUseCase(itemId, newQty, userId ?: return@launch).onFailure { throwable ->
+                // Revert optimistic UI by reloading
+                loadCurrencyAndCart()
+                _effects.emit(
+                    CartEffect.ShowSnackbar(
+                        throwable.message?.let(UiText::DynamicString)
+                            ?: UiText.StringResource(R.string.cart_error_load_failed)
+                    )
+                )
+            }
         }
     }
 
     private fun confirmRemoveItem() {
         val itemId = _state.value.pendingRemovalItemId ?: return
         _state.update { it.copy(showRemoveItemDialog = false, pendingRemovalItemId = null) }
-        rawItems = rawItems.filter { it.id != itemId }
+        
+        val cart = currentCart ?: return
+        val updatedItems = cart.items.filter { it.id != itemId }
+        val updatedCart = cart.copy(items = updatedItems, subtotalPrice = getCartTotalUseCase(updatedItems))
+        currentCart = updatedCart
+        
         val symbol = _state.value.currencySymbol
-        val subtotal = getCartTotalUseCase(rawItems)
-        val discounted = subtotal * discountMultiplier
         _state.update { current ->
             current.copy(
-                items = rawItems.map { it.toUi(symbol) },
-                formattedSubtotal = symbol.formatPrice(subtotal),
-                formattedTotal = symbol.formatPrice(discounted),
-                formattedDiscount = if (discountMultiplier < 1.0) {
-                    "-${symbol.formatPrice(subtotal - discounted)}"
+                items = updatedCart.items.map { it.toUi(symbol) },
+                formattedSubtotal = symbol.formatPrice(updatedCart.subtotalPrice),
+                formattedTotal = symbol.formatPrice(updatedCart.totalPrice),
+                formattedDiscount = if (updatedCart.discountAmount > 0) {
+                    "-${symbol.formatPrice(updatedCart.discountAmount)}"
                 } else null,
             )
         }
         viewModelScope.launch {
-            removeFromCartUseCase(itemId, userId ?: return@launch)
+            removeFromCartUseCase(itemId, userId ?: return@launch).onFailure { throwable ->
+                // Revert optimistic UI by reloading
+                loadCurrencyAndCart()
+                _effects.emit(
+                    CartEffect.ShowSnackbar(
+                        throwable.message?.let(UiText::DynamicString)
+                            ?: UiText.StringResource(R.string.cart_error_load_failed)
+                    )
+                )
+            }
         }
     }
 
     private fun confirmClearCart() {
         _state.update { it.copy(showClearCartDialog = false) }
-        rawItems = emptyList()
-        discountMultiplier = 1.0
+        currentCart = null
         val symbol = _state.value.currencySymbol
         _state.update { current ->
             current.copy(
@@ -230,10 +271,22 @@ class CartViewModel @Inject constructor(
                 appliedCouponLabel = null,
             )
         }
-        viewModelScope.launch { clearCartUseCase(userId ?: return@launch) }
+        viewModelScope.launch {
+            clearCartUseCase(userId ?: return@launch).onFailure { throwable ->
+                // Revert optimistic UI by reloading
+                loadCurrencyAndCart()
+                _effects.emit(
+                    CartEffect.ShowSnackbar(
+                        throwable.message?.let(UiText::DynamicString)
+                            ?: UiText.StringResource(R.string.cart_error_load_failed)
+                    )
+                )
+            }
+        }
     }
 
     private fun handleApplyCoupon() {
+        val uid = userId ?: return
         val code = _state.value.couponCode.trim()
         if (code.isBlank()) {
             _state.update { it.copy(couponError = UiText.StringResource(R.string.cart_coupon_empty_error)) }
@@ -241,51 +294,16 @@ class CartViewModel @Inject constructor(
         }
         _state.update { it.copy(isCouponLoading = true, couponError = null) }
         viewModelScope.launch(Dispatchers.IO) {
-            validateCouponUseCase(code).fold(
-                onSuccess = { result ->
-                    when (result) {
-                        is CouponValidationResult.Valid -> {
-                            val pct = result.discountPercent
-                            val fixed = result.discountFixed
-                            discountMultiplier = when {
-                                pct != null -> 1.0 - (pct / 100.0)
-                                fixed != null -> {
-                                    val subtotal = getCartTotalUseCase(rawItems)
-                                    if (subtotal > 0) 1.0 - (fixed / subtotal) else 1.0
-                                }
-                                else -> 1.0
-                            }
-                            val symbol = _state.value.currencySymbol
-                            val subtotal = getCartTotalUseCase(rawItems)
-                            val discounted = subtotal * discountMultiplier
-                            val label = when {
-                                pct != null -> "${result.code} (-${pct.toInt()}%)"
-                                fixed != null -> "${result.code} (-${symbol.formatPrice(fixed)})"
-                                else -> result.code
-                            }
-                            _state.update { current ->
-                                current.copy(
-                                    isCouponLoading = false,
-                                    couponApplied = true,
-                                    appliedCouponLabel = label,
-                                    couponError = null,
-                                    showCouponSheet = false,
-                                    formattedSubtotal = symbol.formatPrice(subtotal),
-                                    formattedDiscount = "-${symbol.formatPrice(subtotal - discounted)}",
-                                    formattedTotal = symbol.formatPrice(discounted),
-                                )
-                            }
-                            _effects.emit(CartEffect.ShowSnackbar(UiText.StringResource(R.string.cart_coupon_applied)))
-                        }
-                        is CouponValidationResult.Invalid -> {
-                            _state.update {
-                                it.copy(
-                                    isCouponLoading = false,
-                                    couponError = UiText.DynamicString(result.reason)
-                                )
-                            }
-                        }
+            applyCouponUseCase(userId = uid, code = code).fold(
+                onSuccess = {
+                    _state.update {
+                        it.copy(
+                            isCouponLoading = false,
+                            couponError = null,
+                            showCouponSheet = false,
+                        )
                     }
+                    _effects.emit(CartEffect.ShowSnackbar(UiText.StringResource(R.string.cart_coupon_applied)))
                 },
                 onFailure = { throwable ->
                     _state.update {
@@ -301,23 +319,58 @@ class CartViewModel @Inject constructor(
     }
 
     private fun handleRemoveCoupon() {
-        discountMultiplier = 1.0
-        val symbol = _state.value.currencySymbol
-        val subtotal = getCartTotalUseCase(rawItems)
-        _state.update { current ->
-            current.copy(
-                couponApplied = false,
-                appliedCouponLabel = null,
-                couponCode = "",
-                couponError = null,
-                formattedSubtotal = symbol.formatPrice(subtotal),
-                formattedDiscount = null,
-                formattedTotal = symbol.formatPrice(subtotal),
+        val uid = userId ?: return
+        val code = _state.value.couponCode
+        if (code.isBlank()) return
+        
+        viewModelScope.launch(Dispatchers.IO) {
+            _state.update { it.copy(isLoading = true) }
+            removeCouponUseCase(userId = uid, code = code).fold(
+                onSuccess = {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            couponCode = "",
+                            couponApplied = false,
+                            appliedCouponLabel = null,
+                        )
+                    }
+                },
+                onFailure = { throwable ->
+                    _state.update { it.copy(isLoading = false) }
+                    _effects.emit(
+                        CartEffect.ShowSnackbar(
+                            throwable.message?.let(UiText::DynamicString)
+                                ?: UiText.StringResource(R.string.cart_error_add_failed)
+                        )
+                    )
+                }
             )
         }
     }
 
-    private fun handleAddToCart(item: CartItem) {
+    private fun handleAddToCart(intent: CartIntent.AddToCart) {
+        val currentUserId = userId
+        if (currentUserId == null) {
+            viewModelScope.launch {
+                _effects.emit(CartEffect.NavigateToLogin)
+            }
+            return
+        }
+
+        val item = CartItem(
+            id = intent.variantId, // Shopify will generate the real CartLine ID
+            productId = intent.productId,
+            variantId = intent.variantId,
+            title = intent.title,
+            variantTitle = intent.variantTitle,
+            price = intent.price,
+            quantity = 1,
+            maxQuantity = intent.maxQuantity,
+            imageUrl = intent.imageUrl,
+            userId = currentUserId
+        )
+
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 

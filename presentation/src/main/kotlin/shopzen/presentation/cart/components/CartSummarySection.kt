@@ -14,7 +14,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +54,46 @@ fun CartSummarySection(
     ) {
 
         Spacer(Modifier.height(ShopzenSpacing.LG))
+
+        if (couponApplied && appliedCouponLabel != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = ShopzenSpacing.XL)
+                    .background(c.surfaceDialog, shape = shopzen.presentation.theme.ShopzenShapes.SM)
+                    .padding(start = ShopzenSpacing.MD, end = ShopzenSpacing.XS, top = ShopzenSpacing.XS, bottom = ShopzenSpacing.XS),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = appliedCouponLabel,
+                    style = ShopzenBody,
+                    color = c.textPrimary,
+                    fontWeight = FontWeight.SemiBold
+                )
+                IconButton(onClick = onRemoveCoupon) {
+                    Icon(
+                        imageVector = Icons.Outlined.Close,
+                        contentDescription = "Remove coupon",
+                        tint = c.iconSecondary
+                    )
+                }
+            }
+            Spacer(Modifier.height(ShopzenSpacing.MD))
+        } else {
+            TextButton(
+                onClick = onAddCoupon,
+                modifier = Modifier.padding(horizontal = ShopzenSpacing.MD)
+            ) {
+                Text(
+                    text = stringResource(R.string.cart_add_coupon),
+                    style = ShopzenBody,
+                    color = c.textLink,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            Spacer(Modifier.height(ShopzenSpacing.MD))
+        }
 
         SummaryRow(
             label = stringResource(R.string.cart_subtotal),

@@ -30,8 +30,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -44,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import shopzen.domain.cart.model.CartItem
 import shopzen.presentation.cart.intent.CartIntent
+import shopzen.presentation.cart.viewmodel.CartEffect
 import shopzen.presentation.cart.viewmodel.CartViewModel
 import shopzen.presentation.product.components.ErrorContent
 import shopzen.presentation.product.components.ImagePagerIndicator
@@ -66,12 +71,27 @@ fun ProductDetailScreen(
     cartViewModel: CartViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     productId: Long?,
     onNavigateBack: () -> Unit,
+    onNavigateToLogin: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val onIntent = viewModel::processIntent
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
+    LaunchedEffect(cartViewModel) {
+        cartViewModel.effects.collect { effect ->
+            when (effect) {
+                CartEffect.NavigateToLogin -> onNavigateToLogin()
+                is CartEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message.asString(context))
+                else -> {}
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -220,18 +240,13 @@ fun ProductContent(
 
             Button(
                 onClick = { onCartIntent(CartIntent.AddToCart(
-                    item = CartItem(
-                        id = "",
-                        productId = product.id.toString(),
-                        variantId = selectedVariant?.id?.toString() ?: "",
-                        title = product.title,
-                        variantTitle = selectedVariant?.title ?: "",
-                        price = selectedVariant?.price?.toDouble() ?: 0.0,
-                        quantity = 1,
-                        maxQuantity = selectedVariant?.inventoryQuantity ?: 1,
-                        imageUrl = product.images[0].src,
-                        userId = "",
-                    )
+                    productId = product.id.toString(),
+                    variantId = selectedVariant?.adminGraphqlApiId ?: "",
+                    title = product.title,
+                    variantTitle = selectedVariant?.title ?: "",
+                    price = selectedVariant?.price?.toDouble() ?: 0.0,
+                    maxQuantity = selectedVariant?.inventoryQuantity ?: 1,
+                    imageUrl = product.images.firstOrNull()?.src ?: ""
                 )) },
                 modifier = Modifier
                     .fillMaxWidth()

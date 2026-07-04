@@ -23,7 +23,8 @@ object DatabaseModule {
             context,
             ShopzenDatabase::class.java,
             "shopzen_db",
-        ).build()
+        ).fallbackToDestructiveMigration()
+         .build()
 
     @Provides
     @Singleton

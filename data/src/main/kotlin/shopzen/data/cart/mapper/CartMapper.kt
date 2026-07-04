@@ -17,11 +17,16 @@ import shopzen.domain.cart.model.CartItem
 fun CartDto.toDomain(userId: String): Cart {
     val lines = lines.edges.map { it.node.toDomainItem(cartId = id, userId = userId) }
     val subtotal = cost.subtotalAmount.amount.toDoubleOrNull() ?: 0.0
+    val total = cost.totalAmount.amount.toDoubleOrNull() ?: 0.0
     val currency = cost.subtotalAmount.currencyCode
+    val discount = discountCodes.firstOrNull()
     return Cart(
         items         = lines,
         currency      = currency,
         subtotalPrice = subtotal,
+        discountAmount = subtotal - total,
+        totalPrice    = total,
+        appliedCoupon = discount?.let { shopzen.domain.cart.model.DiscountCode(code = it.code, discountType = shopzen.domain.cart.model.DiscountType.PERCENTAGE, value = 0.0) }, // Domain model just needs the code and applied state
         userId        = userId,
     )
 }
@@ -67,6 +72,10 @@ fun CartLineDto.toEntity(
     imageUrl         = merchandise.image?.url ?: "",
     userId           = userId,
     currency         = currency,
+    subtotalPrice    = cartId.hashCode().toDouble(), // Dummy, handled at map level
+    totalPrice       = cartId.hashCode().toDouble(), // Dummy, handled at map level
+    appliedCouponCode= null, // Handled below
+    appliedCouponApplicable = null, // Handled below
     invalidationDate = invalidationDate,
 )
 
@@ -86,9 +95,15 @@ fun CartItemEntity.toDomain(): CartItem = CartItem(
 )
 
 /** Reconstructs a [Cart] from a list of [CartItemEntity]. Returns empty cart when list is empty. */
-fun List<CartItemEntity>.toDomainCart(userId: String): Cart = Cart(
-    items         = map { it.toDomain() },
-    currency      = firstOrNull()?.currency ?: "USD",
-    subtotalPrice = sumOf { it.price * it.quantity },
-    userId        = userId,
-)
+fun List<CartItemEntity>.toDomainCart(userId: String): Cart {
+    val first = firstOrNull()
+    return Cart(
+        items         = map { it.toDomain() },
+        currency      = first?.currency ?: "USD",
+        subtotalPrice = first?.subtotalPrice ?: sumOf { it.price * it.quantity },
+        totalPrice    = first?.totalPrice ?: sumOf { it.price * it.quantity },
+        discountAmount = (first?.subtotalPrice ?: 0.0) - (first?.totalPrice ?: 0.0),
+        appliedCoupon = first?.appliedCouponCode?.let { shopzen.domain.cart.model.DiscountCode(code = it, discountType = shopzen.domain.cart.model.DiscountType.PERCENTAGE, value = 0.0) },
+        userId        = userId,
+    )
+}

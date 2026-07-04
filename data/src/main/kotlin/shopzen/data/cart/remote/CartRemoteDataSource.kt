@@ -132,11 +132,16 @@ class CartRemoteDataSource @Inject constructor(
 
     /** Removes a line from the cart. Returns the updated [CartDto]. */
     suspend fun removeLine(cartId: String, lineId: String): CartDto {
+        return clearLines(cartId, listOf(lineId))
+    }
+
+    /** Removes multiple lines from the cart. Returns the updated [CartDto]. */
+    suspend fun clearLines(cartId: String, lineIds: List<String>): CartDto {
         val body = gqlBody(
             query = MUTATION_CART_LINES_REMOVE,
             variables = buildJsonObject {
                 put("cartId", cartId)
-                putJsonArray("lineIds") { add(lineId) }
+                putJsonArray("lineIds") { lineIds.forEach { add(it) } }
             }
         )
         val response: CartGqlResponse = client.post {
@@ -148,6 +153,29 @@ class CartRemoteDataSource @Inject constructor(
                 response.data?.cartLinesRemove?.userErrors?.firstOrNull()?.message
                     ?: response.errors?.firstOrNull()?.message
                     ?: "cartLinesRemove returned no cart"
+            )
+    }
+
+    /** Updates the discount codes applied to the cart. Returns the updated [CartDto]. */
+    suspend fun updateDiscountCodes(cartId: String, discountCodes: List<String>): CartDto {
+        val body = gqlBody(
+            query = MUTATION_CART_DISCOUNT_CODES_UPDATE,
+            variables = buildJsonObject {
+                put("cartId", cartId)
+                putJsonArray("discountCodes") {
+                    discountCodes.forEach { add(it) }
+                }
+            }
+        )
+        val response: CartGqlResponse = client.post {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+        }.body()
+        return response.data?.cartDiscountCodesUpdate?.cart
+            ?: throw CartRemoteException(
+                response.data?.cartDiscountCodesUpdate?.userErrors?.firstOrNull()?.message
+                    ?: response.errors?.firstOrNull()?.message
+                    ?: "cartDiscountCodesUpdate returned no cart"
             )
     }
 
@@ -167,6 +195,7 @@ class CartRemoteDataSource @Inject constructor(
         private const val CART_FRAGMENT = """
             fragment CartFragment on Cart {
               id
+              discountCodes { code applicable }
               lines(first: 50) {
                 edges {
                   node {
@@ -233,6 +262,16 @@ class CartRemoteDataSource @Inject constructor(
             $CART_FRAGMENT
             mutation cartLinesRemove(${'$'}cartId: ID!, ${'$'}lineIds: [ID!]!) {
               cartLinesRemove(cartId: ${'$'}cartId, lineIds: ${'$'}lineIds) {
+                cart { ...CartFragment }
+                userErrors { field message }
+              }
+            }
+        """.trimIndent()
+
+        val MUTATION_CART_DISCOUNT_CODES_UPDATE = """
+            $CART_FRAGMENT
+            mutation ApplyDiscountCode(${'$'}cartId: ID!, ${'$'}discountCodes: [String!]!) {
+              cartDiscountCodesUpdate(cartId: ${'$'}cartId, discountCodes: ${'$'}discountCodes) {
                 cart { ...CartFragment }
                 userErrors { field message }
               }

@@ -1,9 +1,6 @@
 package shopzen.presentation.cart.screen.content
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,7 +17,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import shopzen.presentation.cart.components.AddCouponSection
 import shopzen.presentation.cart.components.CartItemCard
 import shopzen.presentation.cart.components.CartSummarySection
 import shopzen.presentation.cart.components.CheckoutButton
@@ -30,6 +26,10 @@ import shopzen.presentation.theme.LocalShopzenColors
 import shopzen.presentation.theme.ShopzenMotion
 import shopzen.presentation.theme.ShopzenSpacing
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartListContent(
     state: CartState,
@@ -38,22 +38,23 @@ fun CartListContent(
     val c = LocalShopzenColors.current
 
     Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { onIntent(CartIntent.Refresh) },
             modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(
-                horizontal = ShopzenSpacing.XL,
-                vertical = ShopzenSpacing.LG,
-            ),
-            verticalArrangement = Arrangement.spacedBy(ShopzenSpacing.MD),
         ) {
-            items(
-                items = state.items,
-                key = { it.id },
-            ) { item ->
-                AnimatedVisibility(
-                    visible = true,
-                    exit = shrinkVertically() + fadeOut(tween(ShopzenMotion.DurationSlow)),
-                ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    horizontal = ShopzenSpacing.XL,
+                    vertical = ShopzenSpacing.LG,
+                ),
+                verticalArrangement = Arrangement.spacedBy(ShopzenSpacing.MD),
+            ) {
+                items(
+                    items = state.items,
+                    key = { it.id },
+                ) { item ->
                     CartItemCard(
                         item = item,
                         onIncrement = { onIntent(CartIntent.IncrementQuantity(item.id)) },
@@ -65,11 +66,7 @@ fun CartListContent(
             }
         }
 
-        AddCouponSection(
-            modifier = Modifier.padding(horizontal = ShopzenSpacing.MD),
-            onAddCoupon = { onIntent(CartIntent.OpenCouponSheet) },
-        )
-        Spacer(Modifier.height(ShopzenSpacing.MD))
+
 
         HorizontalDivider(color = c.divider, thickness = 1.dp)
         Column(
