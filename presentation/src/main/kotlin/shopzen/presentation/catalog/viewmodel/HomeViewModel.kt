@@ -16,6 +16,7 @@ import shopzen.domain.catalog.model.Product
 import shopzen.domain.catalog.usecase.GetBrandsUseCase
 import shopzen.domain.catalog.usecase.GetCategoriesUseCase
 import shopzen.domain.catalog.usecase.GetProductsUseCase
+import shopzen.domain.ads.usecase.GetAdsUseCase
 import shopzen.presentation.catalog.intent.HomeIntent
 import shopzen.presentation.catalog.state.HomeState
 import javax.inject.Inject
@@ -29,7 +30,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
     private val getBrandsUseCase: GetBrandsUseCase,
-    private val getCategoriesUseCase: GetCategoriesUseCase
+    private val getCategoriesUseCase: GetCategoriesUseCase,
+    private val getAdsUseCase: GetAdsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -63,14 +65,17 @@ class HomeViewModel @Inject constructor(
                     val productsDeferred = async { getProductsUseCase() }
                     val brandsDeferred = async { getBrandsUseCase() }
                     val categoriesDeferred = async { getCategoriesUseCase() }
+                    val adsDeferred = async { getAdsUseCase() }
 
                     val productsResult = productsDeferred.await()
                     val brandsResult = brandsDeferred.await()
                     val categoriesResult = categoriesDeferred.await()
+                    val adsResult = adsDeferred.await()
 
                     var products = productsResult.getOrNull().orEmpty()
                     var brands = brandsResult.getOrNull().orEmpty()
                     var categories = categoriesResult.getOrNull().orEmpty()
+                    var ads = adsResult.getOrNull().orEmpty()
 
                     // Fallback to premium luxury mock data to guarantee design fidelity
                     if (categories.isEmpty()) {
@@ -144,7 +149,8 @@ class HomeViewModel @Inject constructor(
                         bannerImages = bannerImages,
                         brands = brands,
                         categories = categories,
-                        newArrivals = products
+                        newArrivals = products,
+                        ads = ads
                     )
                 }
             } catch (e: Exception) {
@@ -162,14 +168,16 @@ class HomeViewModel @Inject constructor(
     class Factory(
         private val getProductsUseCase: GetProductsUseCase,
         private val getBrandsUseCase: GetBrandsUseCase,
-        private val getCategoriesUseCase: GetCategoriesUseCase
+        private val getCategoriesUseCase: GetCategoriesUseCase,
+        private val getAdsUseCase: GetAdsUseCase
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return HomeViewModel(
                 getProductsUseCase,
                 getBrandsUseCase,
-                getCategoriesUseCase
+                getCategoriesUseCase,
+                getAdsUseCase
             ) as T
         }
     }

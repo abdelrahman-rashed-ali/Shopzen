@@ -69,4 +69,10 @@ abstract class RepositoryModule {
     abstract fun bindRemoteProfileDataSource(
         impl: RemoteProfileDataSourceImpl
     ): RemoteProfileDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindAdRepository(
+        impl: shopzen.data.ads.repository.AdRepositoryImpl
+    ): shopzen.domain.ads.repository.AdRepository
 }

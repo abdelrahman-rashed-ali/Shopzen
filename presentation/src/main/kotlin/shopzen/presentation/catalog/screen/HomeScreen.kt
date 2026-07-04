@@ -49,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import shopzen.presentation.catalog.components.CategoryChips
 import shopzen.presentation.catalog.components.FeaturedBanner
 import shopzen.presentation.catalog.components.NewArrivalsSection
+import shopzen.presentation.catalog.components.AdBannerSection
 import shopzen.presentation.catalog.intent.HomeIntent
 import shopzen.presentation.catalog.state.HomeState
 import shopzen.presentation.catalog.viewmodel.HomeViewModel
@@ -384,6 +385,12 @@ private fun HomeContent(
         )
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        // 1b. Exclusive Offers (Ads)
+        AdBannerSection(
+            ads = state.ads,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
 
         // 2. Categories (Curations)
         CategoryChips(
