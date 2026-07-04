@@ -124,7 +124,7 @@ fun AppNavHost(
         composable<HomeScreen> {
             HomeScreen(
                 onNavigateToBrand = { brandName ->
-                    // TODO: Handle brand navigation
+                    navController.navigate(BrandProducts(brandName = brandName))
                 },
                 onNavigateToCategory = { categoryId ->
                     // TODO: Handle category navigation
@@ -279,6 +279,31 @@ fun AppNavHost(
             AddEditAddressScreen(
                 addressId = args.addressId,
                 onNavigateBack = { navController.navigateUp() }
+            )
+        }
+
+        composable<BrandListScreen> {
+            shopzen.presentation.brand.screen.BrandListScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onNavigateToBrandProducts = { brandName ->
+                    navController.navigate(BrandProducts(brandName = brandName))
+                }
+            )
+        }
+
+        composable<BrandProducts> { backStackEntry ->
+            val args = backStackEntry.toRoute<BrandProducts>()
+
+            shopzen.presentation.brand.screen.BrandProductsScreen(
+                brandName = args.brandName,
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onNavigateToProduct = { productId ->
+                    navController.navigate(ProductDetail(productId.toLongOrNull() ?: 0L))
+                }
             )
         }
     }
