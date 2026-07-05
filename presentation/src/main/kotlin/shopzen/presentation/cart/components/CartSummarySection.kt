@@ -74,7 +74,7 @@ fun CartSummarySection(
                 IconButton(onClick = onRemoveCoupon) {
                     Icon(
                         imageVector = Icons.Outlined.Close,
-                        contentDescription = "Remove coupon",
+                        contentDescription = stringResource(R.string.cart_remove_coupon_cd),
                         tint = c.iconSecondary
                     )
                 }

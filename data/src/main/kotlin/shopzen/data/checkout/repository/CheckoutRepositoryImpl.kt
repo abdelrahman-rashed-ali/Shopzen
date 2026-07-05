@@ -1,5 +1,6 @@
 package shopzen.data.checkout.repository
 
+import android.util.Log
 import shopzen.data.checkout.mapper.CheckoutMapper
 import shopzen.data.checkout.remote.CheckoutRemoteDataSource
 import shopzen.data.checkout.remote.IdempotencyKey
@@ -20,28 +21,38 @@ class CheckoutRepositoryImpl @Inject constructor(
     override suspend fun placeOrder(checkout: Checkout): Result<OrderConfirmation> {
         return try {
             val idempotencyKey = IdempotencyKey(UUID.randomUUID().toString())
+            val body = mapper.toRestOrderCreateBody(checkout)
+            Log.d(
+                TAG,
+                "placeOrder: start items=${checkout.lineItems.size}, total=${checkout.totalPrice}, " +
+                    "currency=${checkout.currency}, payment=${checkout.selectedPaymentMethod}, " +
+                    "coupon=${checkout.appliedCoupon?.code}, idempotencyKey=${idempotencyKey.value}",
+            )
+            Log.d(TAG, "placeOrder: REST body=$body")
             val response = remoteDataSource.createOrder(
-                variables = mapper.toOrderCreateVariables(checkout),
+                body = body,
                 idempotencyKey = idempotencyKey,
             )
 
-            val payload = response.data?.orderCreate
-            val errors = response.errors
-
-            if (payload?.userErrors?.isNotEmpty() == true) {
-                val errorMessage = payload.userErrors.first().message
-                Result.failure(Exception(errorMessage))
-            } else if (payload?.order != null) {
-                Result.success(mapper.toOrderConfirmation(payload.order))
-            } else if (errors?.isNotEmpty() == true) {
-                Result.failure(Exception(errors.first().message))
+            if (response.order != null) {
+                Log.d(
+                    TAG,
+                    "placeOrder: success orderId=${response.order.id}, orderNumber=${response.order.name}",
+                )
+                Result.success(mapper.toOrderConfirmation(response.order))
             } else {
+                Log.e(TAG, "placeOrder: empty REST response order=null")
                 Result.failure(Exception("Order placement failed with unknown error"))
             }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            Log.e(TAG, "placeOrder: failed", e)
             Result.failure(e)
         }
+    }
+
+    private companion object {
+        const val TAG = "CheckoutRepository"
     }
 }

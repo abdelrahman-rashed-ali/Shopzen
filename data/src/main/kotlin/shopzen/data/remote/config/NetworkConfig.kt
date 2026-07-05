@@ -1,7 +1,5 @@
 package shopzen.data.remote.config
 
-import android.util.Base64
-
 data class NetworkConfig(
     val hostname: String,
     val apiVersion: String,
@@ -25,18 +23,10 @@ data class NetworkConfig(
     val storefrontGqlUrl: String
         get() = "$storefrontBase/graphql.json"
 
-    val basicAuthHeader: String
-        get() {
-            val credentials = "$apiKey:$apiPassword"
-            val encoded = Base64.encodeToString(credentials.toByteArray(), Base64.NO_WRAP)
-            return "Basic $encoded"
-        }
-
     val defaultHeaders: Map<String, String>
         get() = mapOf(
             "Accept"                    to "application/json",
             "Content-Type"              to "application/json",
-            "Authorization"             to basicAuthHeader,
             "X-Shopify-Access-Token"    to apiKey,
         )
 

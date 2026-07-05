@@ -35,3 +35,8 @@ data class UserErrorDto(
 data class GqlErrorDto(
     val message: String,
 )
+
+@Serializable
+data class OrderCreateRestResponse(
+    val order: OrderDto? = null,
+)

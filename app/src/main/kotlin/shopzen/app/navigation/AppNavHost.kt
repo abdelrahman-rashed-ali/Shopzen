@@ -19,6 +19,9 @@ import shopzen.presentation.profile.screen.PersonalDetailsScreen as PersonalDeta
 import shopzen.presentation.profile.screen.ProfileScreen as ProfileRouteScreen
 import shopzen.presentation.profile.screen.SavedAddressesScreen
 import shopzen.presentation.cart.screen.CartScreen
+import shopzen.presentation.checkout.screen.CheckoutSummaryScreen as CheckoutSummaryRouteScreen
+import shopzen.presentation.checkout.screen.OrderConfirmationScreen as OrderConfirmationRouteScreen
+import shopzen.presentation.checkout.screen.PaymentScreen as PaymentRouteScreen
 
 
 @Composable
@@ -235,12 +238,53 @@ fun AppNavHost(
             CartScreen(
                 onNavigateBack = { navController.navigateUp() },
                 onNavigateToProduct = {},
-                onNavigateToCheckout = {},
+                onNavigateToCheckout = { navController.navigate(CheckoutSummaryScreen) },
                 onNavigateToLogin = { navController.navigate(LoginScreen) },
             )
         }
 
         // ── Profile & Settings feature ──
+
+        composable<CheckoutSummaryScreen> {
+            CheckoutSummaryRouteScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToLogin = { navController.navigate(LoginScreen) },
+                onNavigateToAddAddress = {
+                    navController.navigate(AddressEditScreen(addressId = null))
+                },
+                onNavigateToPayment = { navController.navigate(CheckoutPaymentScreen) },
+            )
+        }
+
+        composable<CheckoutPaymentScreen> {
+            PaymentRouteScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToLogin = { navController.navigate(LoginScreen) },
+                onNavigateToOrderConfirmation = { orderId, orderNumber ->
+                    navController.navigate(
+                        OrderConfirmationScreen(
+                            orderId = orderId,
+                            orderNumber = orderNumber,
+                        )
+                    )
+                },
+            )
+        }
+
+        composable<OrderConfirmationScreen> { backStackEntry ->
+            val args = backStackEntry.toRoute<OrderConfirmationScreen>()
+            OrderConfirmationRouteScreen(
+                orderId = args.orderId,
+                orderNumber = args.orderNumber,
+                onNavigateBack = { navController.navigateUp() },
+                onContinueShopping = {
+                    navController.navigate(HomeScreen) {
+                        popUpTo<CartScreen> { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
 
         composable<ProfileScreen> {
             ProfileRouteScreen(

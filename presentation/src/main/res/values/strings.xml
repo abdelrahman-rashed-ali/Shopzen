@@ -138,6 +138,8 @@
     <!-- ── Common ── -->
     <string name="common_back">Back</string>
     <string name="common_retry">Retry</string>
+    <string name="common_confirm">Confirm</string>
+    <string name="common_cancel">Cancel</string>
     <string name="common_loading">Loading…</string>
     <!-- Cart -->
     <string name="cart_title">My Cart</string>
@@ -166,15 +168,61 @@
     <string name="cart_back">Back</string>
     <string name="cart_remove_item_cd">Remove item</string>
     <string name="cart_clear_cart_cd">Clear cart</string>
+    <string name="cart_remove_coupon_cd">Remove coupon</string>
     <string name="cart_decrease_qty">Decrease quantity</string>
     <string name="cart_increase_qty">Increase quantity</string>
 
     <string name="cart_error_load_failed">Failed to load cart</string>
     <string name="cart_coupon_empty_error">Please enter a coupon code</string>
+    <string name="cart_coupon_invalid">Coupon code is not valid</string>
+    <string name="cart_coupon_unsupported">This coupon type is not supported</string>
     <string name="cart_coupon_applied">Coupon applied!</string>
     <string name="cart_coupon_validate_error">Could not validate coupon</string>
     <string name="cart_error_not_authenticated">Please log in to view your cart</string>
     <string name="cart_item_added">Item added to cart.</string>
     <string name="cart_error_add_failed">Failed to add item to cart.</string>
+
+    <!-- Checkout -->
+    <string name="checkout_title">Checkout</string>
+    <string name="checkout_payment_title">Payment</string>
+    <string name="checkout_confirmation_title">Order Confirmation</string>
+    <string name="checkout_items_title">Items</string>
+    <string name="checkout_address_title">Shipping Address</string>
+    <string name="checkout_add_address">Add</string>
+    <string name="checkout_no_addresses">Add a shipping address to continue.</string>
+    <string name="checkout_price_title">Order Summary</string>
+    <string name="checkout_payment_method_title">Payment Method</string>
+    <string name="checkout_payment_cash_on_delivery">Cash on Delivery</string>
+    <string name="checkout_payment_cash_on_delivery_desc">Pay when your order arrives.</string>
+    <string name="checkout_payment_online">Online Payment</string>
+    <string name="checkout_payment_online_desc">Pay securely before delivery.</string>
+    <string name="checkout_subtotal">Subtotal</string>
+    <string name="checkout_discount">Discount</string>
+    <string name="checkout_total">Total</string>
+    <string name="checkout_applied_coupon">Applied coupon</string>
+    <string name="checkout_continue_to_payment">Continue to Payment</string>
+    <string name="checkout_place_order">Place Order</string>
+    <string name="checkout_placing_order">Placing order...</string>
+    <string name="checkout_continue_shopping">Continue Shopping</string>
+    <string name="checkout_loading">Loading checkout...</string>
+    <string name="checkout_empty_cart">Your cart is empty.</string>
+    <string name="checkout_retry">Retry</string>
+    <string name="checkout_dismiss_error">Dismiss</string>
+    <string name="checkout_quantity">Qty %1$d</string>
+    <string name="checkout_confirm_order_title">Place order?</string>
+    <string name="checkout_confirm_order_body">Confirm and place your order?</string>
+    <string name="checkout_confirm_order_confirm">Place Order</string>
+    <string name="checkout_confirm_order_cancel">Cancel</string>
+    <string name="checkout_order_success_title">Order placed</string>
+    <string name="checkout_order_success_body">Order %1$s is confirmed.</string>
+    <string name="checkout_error_load_failed">Could not load checkout.</string>
+    <string name="checkout_error_cart_empty">Add items to your cart before checkout.</string>
+    <string name="checkout_error_address_required">Select a shipping address to continue.</string>
+    <string name="checkout_error_payment_required">Select a payment method to continue.</string>
+    <string name="checkout_error_order_failed">Could not place order. Please try again.</string>
+    <string name="checkout_error_clear_cart_after_order">Order placed, but cart cleanup failed.</string>
+    <string name="checkout_back_cd">Go back</string>
+    <string name="checkout_item_image_cd">%1$s image</string>
+    <string name="checkout_payment_selection_cd">Payment selection</string>
 
 </resources>

@@ -62,13 +62,13 @@ This final iteration focuses on the MVI architecture (Intent, State, ViewModel) 
 ### Cart Presentation Updates
 *   **MVI State & Intents:**
     *   Update `CartState` to track the applied coupon, discount amount, and coupon-specific inline error messages.
-    *   Add intents: `ApplyCoupon(code)`, `RemoveCoupon`, `DismissCouponError`.
+    *   Keep the coupon bottom-sheet flow: `OpenCouponSheet`, `DismissCouponSheet`, `UpdateCouponCode`, `ApplyCoupon`, and `RemoveCoupon`.
 *   **ViewModel:**
-    *   Handle coupon validation. On error, update the inline field error state (no dialogs).
+    *   Handle coupon validation before applying. On error, update the bottom sheet inline field error state (no dialogs).
     *   On success, update the cart state with the new totals and display the applied coupon.
 *   **UI Components:**
-    *   Add a text field for coupon entry on the `CartScreen`.
-    *   Implement an inline error text view below the coupon field that only appears when a validation error occurs.
+    *   Keep coupon entry inside `CouponBottomSheet`, opened from the cart summary.
+    *   Implement an inline error text view below the bottom-sheet coupon field that only appears when a validation error occurs.
     *   Add a "Remove" or "X" button next to applied coupons.
     *   Update the Cart Summary section to reflect the subtotal, discount deduction, and final total.
 
@@ -81,7 +81,7 @@ This final iteration focuses on the MVI architecture (Intent, State, ViewModel) 
     *   Manage the `ConfirmationDialog` state before placing the order.
     *   On successful order placement, trigger cart clearing and navigate to `OrderConfirmationScreen`.
 *   **UI Components:**
-    *   **CheckoutSummaryScreen:** Display line items, shipping address, and the final price breakdown.
+    *   **CheckoutSummaryScreen:** Display line items, shipping address, inherited applied coupon/discount, and the final price breakdown. Checkout does not apply, remove, or validate coupons.
     *   **PaymentScreen:** Radio button selection for payment methods, dynamically disabling/hiding COD if necessary.
     *   **OrderConfirmationScreen:** Success state, order number, and a button to return Home.
     *   **Dialogs:** Implement the mandatory "Confirm and place your order?" confirmation dialog.

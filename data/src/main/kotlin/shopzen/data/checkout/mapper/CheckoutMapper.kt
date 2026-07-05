@@ -14,6 +14,29 @@ import shopzen.domain.checkout.model.OrderConfirmation
 import javax.inject.Inject
 
 class CheckoutMapper @Inject constructor() {
+    fun toRestOrderCreateBody(checkout: Checkout): JsonObject =
+        buildJsonObject {
+            putJsonObject("order") {
+                put("line_items", buildJsonArray {
+                    checkout.lineItems.forEach { item ->
+                        addJsonObject {
+                            put("variant_id", item.variantId.toShopifyRestId())
+                            put("quantity", item.quantity)
+                        }
+                    }
+                })
+                put("financial_status", "pending")
+                put("send_receipt", true)
+                put("inventory_behaviour", "decrement_obeying_policy")
+                put("shipping_address", toRestShippingAddressJson(checkout))
+                checkout.appliedCoupon?.let { coupon ->
+                    put("discount_codes", buildJsonArray {
+                        add(toRestDiscountCodeJson(coupon))
+                    })
+                }
+            }
+        }
+
     fun toOrderCreateVariables(checkout: Checkout): JsonObject =
         buildJsonObject {
             putJsonObject("order") {
@@ -44,6 +67,37 @@ class CheckoutMapper @Inject constructor() {
             orderId = order.id,
             orderNumber = order.name,
         )
+
+    private fun toRestShippingAddressJson(checkout: Checkout): JsonObject {
+        val nameParts = checkout.shippingAddress.recipientName.trim().split(Regex("\\s+"))
+        val firstName = nameParts.firstOrNull().orEmpty()
+        val lastName = nameParts.drop(1).joinToString(" ")
+
+        return buildJsonObject {
+            if (firstName.isNotBlank()) put("first_name", firstName)
+            if (lastName.isNotBlank()) put("last_name", lastName)
+            checkout.shippingAddress.phone?.let { put("phone", it) }
+            put("address1", checkout.shippingAddress.addressLine1)
+            checkout.shippingAddress.addressLine2?.let { put("address2", it) }
+            put("city", checkout.shippingAddress.city)
+            checkout.shippingAddress.stateOrProvince?.let { put("province", it) }
+            put("country", checkout.shippingAddress.country)
+            put("zip", checkout.shippingAddress.postalCode)
+        }
+    }
+
+    private fun toRestDiscountCodeJson(coupon: DiscountCode): JsonObject =
+        buildJsonObject {
+            put("code", coupon.code)
+            put("amount", coupon.value.toString())
+            put(
+                "type",
+                when (coupon.discountType) {
+                    DiscountType.PERCENTAGE -> "percentage"
+                    DiscountType.FIXED_AMOUNT -> "fixed_amount"
+                },
+            )
+        }
 
     private fun toMailingAddressJson(checkout: Checkout): JsonObject {
         val nameParts = checkout.shippingAddress.recipientName.trim().split(Regex("\\s+"))
@@ -85,4 +139,7 @@ class CheckoutMapper @Inject constructor() {
 
     private fun toVariantGid(variantId: String): String =
         if (variantId.startsWith("gid://")) variantId else "gid://shopify/ProductVariant/$variantId"
+
+    private fun String.toShopifyRestId(): String =
+        substringAfterLast("/")
 }

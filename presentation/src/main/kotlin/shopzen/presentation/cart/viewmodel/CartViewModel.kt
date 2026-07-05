@@ -17,8 +17,6 @@ import shopzen.domain.auth.usecase.GetCurrentUserUseCase
 import shopzen.domain.cart.model.Cart
 import shopzen.domain.cart.model.CartItem
 import shopzen.domain.cart.model.CouponValidationResult
-import shopzen.domain.cart.model.DiscountCode
-import shopzen.domain.cart.model.DiscountType
 import shopzen.domain.cart.usecase.AddToCartUseCase
 import shopzen.domain.cart.usecase.ApplyCouponUseCase
 import shopzen.domain.cart.usecase.ClearCartUseCase
@@ -28,6 +26,7 @@ import shopzen.domain.cart.usecase.GetCurrencySymbolUseCase
 import shopzen.domain.cart.usecase.RemoveCouponUseCase
 import shopzen.domain.cart.usecase.RemoveFromCartUseCase
 import shopzen.domain.cart.usecase.UpdateCartItemQuantityUseCase
+import shopzen.domain.cart.usecase.ValidateCouponUseCase
 
 import shopzen.presentation.R
 import shopzen.presentation.cart.intent.CartIntent
@@ -50,6 +49,7 @@ class CartViewModel @Inject constructor(
     private val updateCartItemQuantityUseCase: UpdateCartItemQuantityUseCase,
     private val clearCartUseCase: ClearCartUseCase,
     private val getCartTotalUseCase: GetCartTotalUseCase,
+    private val validateCouponUseCase: ValidateCouponUseCase,
     private val applyCouponUseCase: ApplyCouponUseCase,
     private val removeCouponUseCase: RemoveCouponUseCase,
     private val getCurrencySymbolUseCase: GetCurrencySymbolUseCase,
@@ -294,7 +294,34 @@ class CartViewModel @Inject constructor(
         }
         _state.update { it.copy(isCouponLoading = true, couponError = null) }
         viewModelScope.launch(Dispatchers.IO) {
-            applyCouponUseCase(userId = uid, code = code).fold(
+            validateCouponUseCase(code).fold(
+                onSuccess = { validation ->
+                    when (validation) {
+                        is CouponValidationResult.Invalid -> {
+                            _state.update {
+                                it.copy(
+                                    isCouponLoading = false,
+                                    couponError = validation.toUiText(),
+                                )
+                            }
+                        }
+                        is CouponValidationResult.Valid -> applyValidatedCoupon(uid, validation.code)
+                    }
+                },
+                onFailure = {
+                    _state.update {
+                        it.copy(
+                            isCouponLoading = false,
+                            couponError = UiText.StringResource(R.string.cart_coupon_validate_error),
+                        )
+                    }
+                },
+            )
+        }
+    }
+
+    private suspend fun applyValidatedCoupon(uid: String, code: String) {
+        applyCouponUseCase(userId = uid, code = code).fold(
                 onSuccess = {
                     _state.update {
                         it.copy(
@@ -305,17 +332,15 @@ class CartViewModel @Inject constructor(
                     }
                     _effects.emit(CartEffect.ShowSnackbar(UiText.StringResource(R.string.cart_coupon_applied)))
                 },
-                onFailure = { throwable ->
+                onFailure = {
                     _state.update {
                         it.copy(
                             isCouponLoading = false,
-                            couponError = throwable.message?.let { msg -> UiText.DynamicString(msg) }
-                                ?: UiText.StringResource(R.string.cart_coupon_validate_error),
+                            couponError = UiText.StringResource(R.string.cart_coupon_validate_error),
                         )
                     }
                 }
             )
-        }
     }
 
     private fun handleRemoveCoupon() {
@@ -412,4 +437,12 @@ class CartViewModel @Inject constructor(
 
     private fun String.formatPrice(amount: Double): String =
         "${this}%.2f".format(amount)
+
+    private fun CouponValidationResult.Invalid.toUiText(): UiText =
+        when (reason) {
+            "Coupon code is required" -> UiText.StringResource(R.string.cart_coupon_empty_error)
+            "Invalid coupon code" -> UiText.StringResource(R.string.cart_coupon_invalid)
+            "Unsupported coupon type" -> UiText.StringResource(R.string.cart_coupon_unsupported)
+            else -> UiText.StringResource(R.string.cart_coupon_validate_error)
+        }
 }

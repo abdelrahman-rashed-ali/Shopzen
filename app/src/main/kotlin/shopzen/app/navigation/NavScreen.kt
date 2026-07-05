@@ -54,6 +54,18 @@ data class ProductDetail(val productId: Long) : NavScreen("product-detail")
 object CartScreen : NavScreen("cart")
 
 @Serializable
+data object CheckoutSummaryScreen : NavScreen("checkout-summary")
+
+@Serializable
+data object CheckoutPaymentScreen : NavScreen("checkout-payment")
+
+@Serializable
+data class OrderConfirmationScreen(
+    val orderId: String,
+    val orderNumber: String,
+) : NavScreen("order-confirmation")
+
+@Serializable
 data object ProfileScreen : NavScreen("profile")
 
 @Serializable

@@ -1,23 +1,25 @@
 package shopzen.data.checkout.repository
 
+import android.util.Log
+import io.mockk.every
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import shopzen.data.checkout.mapper.CheckoutMapper
 import shopzen.data.checkout.remote.CheckoutRemoteDataSource
 import shopzen.data.checkout.remote.IdempotencyKey
-import shopzen.data.checkout.remote.dto.OrderCreateDataDto
-import shopzen.data.checkout.remote.dto.OrderCreateGqlResponse
-import shopzen.data.checkout.remote.dto.OrderCreatePayloadDto
 import shopzen.data.checkout.remote.dto.OrderDto
-import shopzen.data.checkout.remote.dto.UserErrorDto
+import shopzen.data.checkout.remote.dto.OrderCreateRestResponse
 import shopzen.domain.checkout.model.Checkout
 import shopzen.domain.checkout.model.OrderConfirmation
 import java.util.UUID
@@ -30,9 +32,18 @@ class CheckoutRepositoryImplTest {
 
     @Before
     fun setup() {
+        mockkStatic(Log::class)
+        every { Log.d(any(), any()) } returns 0
+        every { Log.e(any(), any()) } returns 0
+        every { Log.e(any(), any(), any()) } returns 0
         remoteDataSource = mockk()
         mapper = mockk()
         repository = CheckoutRepositoryImpl(remoteDataSource, mapper)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(Log::class)
     }
 
     @Test
@@ -41,19 +52,12 @@ class CheckoutRepositoryImplTest {
         val variables = JsonObject(emptyMap())
         val order = OrderDto(id = "1", name = "#1001")
 
-        coEvery { mapper.toOrderCreateVariables(checkout) } returns variables
+        coEvery { mapper.toRestOrderCreateBody(checkout) } returns variables
         coEvery { mapper.toOrderConfirmation(order) } returns OrderConfirmation(
             orderId = "1",
             orderNumber = "#1001",
         )
-        coEvery { remoteDataSource.createOrder(any(), any()) } returns OrderCreateGqlResponse(
-            data = OrderCreateDataDto(
-                orderCreate = OrderCreatePayloadDto(
-                    order = order,
-                    userErrors = emptyList(),
-                )
-            )
-        )
+        coEvery { remoteDataSource.createOrder(any(), any()) } returns OrderCreateRestResponse(order = order)
 
         val result = repository.placeOrder(checkout)
 
@@ -67,20 +71,13 @@ class CheckoutRepositoryImplTest {
     fun `placeOrder returns failure when API returns user errors`() = runTest {
         val checkout = mockk<Checkout>(relaxed = true)
 
-        coEvery { mapper.toOrderCreateVariables(checkout) } returns JsonObject(emptyMap())
-        coEvery { remoteDataSource.createOrder(any(), any()) } returns OrderCreateGqlResponse(
-            data = OrderCreateDataDto(
-                orderCreate = OrderCreatePayloadDto(
-                    order = null,
-                    userErrors = listOf(UserErrorDto(field = listOf("lineItems"), message = "Out of stock")),
-                )
-            )
-        )
+        coEvery { mapper.toRestOrderCreateBody(checkout) } returns JsonObject(emptyMap())
+        coEvery { remoteDataSource.createOrder(any(), any()) } returns OrderCreateRestResponse(order = null)
 
         val result = repository.placeOrder(checkout)
 
         assertTrue(result.isFailure)
-        assertEquals("Out of stock", result.exceptionOrNull()?.message)
+        assertEquals("Order placement failed with unknown error", result.exceptionOrNull()?.message)
     }
 
     @Test
@@ -88,15 +85,10 @@ class CheckoutRepositoryImplTest {
         val checkout = mockk<Checkout>(relaxed = true)
         val keySlot = slot<IdempotencyKey>()
 
-        coEvery { mapper.toOrderCreateVariables(checkout) } returns JsonObject(emptyMap())
+        coEvery { mapper.toRestOrderCreateBody(checkout) } returns JsonObject(emptyMap())
         coEvery { mapper.toOrderConfirmation(any()) } returns OrderConfirmation("1", "#1001")
-        coEvery { remoteDataSource.createOrder(any(), capture(keySlot)) } returns OrderCreateGqlResponse(
-            data = OrderCreateDataDto(
-                orderCreate = OrderCreatePayloadDto(
-                    order = OrderDto(id = "1", name = "#1001"),
-                    userErrors = emptyList(),
-                )
-            )
+        coEvery { remoteDataSource.createOrder(any(), capture(keySlot)) } returns OrderCreateRestResponse(
+            order = OrderDto(id = "1", name = "#1001"),
         )
 
         repository.placeOrder(checkout)

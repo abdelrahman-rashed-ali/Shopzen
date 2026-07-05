@@ -37,7 +37,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -82,7 +81,7 @@ fun CouponBottomSheet(
                     .width(32.dp)
                     .height(4.dp)
                     .background(
-                        color = if (c.isDark) Color(0xFF48484C) else Color(0xFFD1D1D6),
+                        color = c.borderDefault,
                         shape = ShopzenShapes.Full,
                     )
             )
@@ -197,7 +196,7 @@ private fun ApplyButton(
             strokeWidth = 2.dp,
             strokeCap = StrokeCap.Round,
             color = c.textLink,
-            trackColor = Color.Transparent,
+            trackColor = c.backgroundSecondary,
         )
     } else {
         TextButton(
