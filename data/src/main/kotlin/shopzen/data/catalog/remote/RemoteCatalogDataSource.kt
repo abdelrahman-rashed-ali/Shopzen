@@ -32,4 +32,11 @@ class RemoteCatalogDataSource @Inject constructor(
     suspend fun getCustomCollections(): CollectionsResponse {
         return client.get("custom_collections.json").body()
     }
+
+    suspend fun getProductsByCategory(categoryTitle: String): ProductsResponse {
+        return client.get("products.json") {
+            parameter("product_type", categoryTitle)
+            parameter("limit", 50)
+        }.body()
+    }
 }

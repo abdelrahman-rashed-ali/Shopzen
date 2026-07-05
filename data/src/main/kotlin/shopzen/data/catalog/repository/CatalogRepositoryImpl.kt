@@ -54,4 +54,16 @@ class CatalogRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun getProductsByCategory(categoryTitle: String): Result<List<Product>> {
+        return try {
+            val response = remoteDataSource.getProductsByCategory(categoryTitle)
+            val products = response.products
+                ?.map { it.toDomain() }
+                .orEmpty()
+            Result.success(products)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
