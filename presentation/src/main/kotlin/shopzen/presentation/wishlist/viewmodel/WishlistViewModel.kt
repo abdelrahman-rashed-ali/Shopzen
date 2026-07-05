@@ -37,10 +37,20 @@ class WishlistViewModel @Inject constructor(
             is WishlistIntent.LoadWishlist -> loadWishlist()
             is WishlistIntent.AddToWishlist -> addToWishlist(intent.product)
             is WishlistIntent.RequestAddToWishlist -> {
-                _state.value = _state.value.copy(
-                    showAddConfirmationDialog = true,
-                    pendingAddProduct = intent.product
-                )
+                viewModelScope.launch {
+                    val user = getCurrentUserUseCase().getOrNull()
+                    if (user == null || user.email.isBlank()) {
+                        _state.value = _state.value.copy(showLoginRequiredDialog = true)
+                    } else {
+                        _state.value = _state.value.copy(
+                            showAddConfirmationDialog = true,
+                            pendingAddProduct = intent.product
+                        )
+                    }
+                }
+            }
+            is WishlistIntent.DismissLoginRequiredDialog -> {
+                _state.value = _state.value.copy(showLoginRequiredDialog = false)
             }
             is WishlistIntent.ConfirmAddToWishlist -> {
                 _state.value = _state.value.copy(

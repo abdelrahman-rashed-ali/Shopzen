@@ -75,6 +75,7 @@ fun HomeScreen(
     onNavigateToProfile: () -> Unit,
     onNavigateToWishlist: () -> Unit,
     onNavigateToCart: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     wishlistViewModel: WishlistViewModel = hiltViewModel()
@@ -138,6 +139,22 @@ fun HomeScreen(
                 )
             }
         }
+    }
+
+    if (wishlistState.showLoginRequiredDialog) {
+        ConfirmationDialog(
+            title = "Login Required",
+            message = "You need to log in to add items to your wishlist.",
+            confirmText = "Log In",
+            dismissText = "Cancel",
+            onConfirm = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissLoginRequiredDialog)
+                onNavigateToLogin()
+            },
+            onDismiss = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissLoginRequiredDialog)
+            }
+        )
     }
 
     if (wishlistState.showRemoveItemDialog && wishlistState.pendingRemovalItemId != null) {
