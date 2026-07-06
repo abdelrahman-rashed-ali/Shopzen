@@ -269,6 +269,8 @@ class CartViewModel @Inject constructor(
                 formattedDiscount = null,
                 couponApplied = false,
                 appliedCouponLabel = null,
+                couponCode = "",
+                couponError = null,
             )
         }
         viewModelScope.launch {

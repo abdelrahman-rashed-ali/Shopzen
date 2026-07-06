@@ -69,6 +69,17 @@ data class OrderConfirmationScreen(
 data object ProfileScreen : NavScreen("profile")
 
 @Serializable
+data object SettingsScreen : NavScreen("main/settings")
+
+@Serializable
+data object OrderHistoryScreen : NavScreen("main/profile/orders")
+
+@Serializable
+data class OrderDetailScreen(
+    val orderId: String,
+) : NavScreen("main/profile/orders/{orderId}")
+
+@Serializable
 data object PersonalDetailsScreen : NavScreen("personal-details")
 
 @Serializable

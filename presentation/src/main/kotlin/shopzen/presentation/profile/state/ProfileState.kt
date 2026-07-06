@@ -1,13 +1,11 @@
 package shopzen.presentation.profile.state
 
-import shopzen.domain.profile.model.UserPreferences
 import shopzen.domain.profile.model.UserProfile
 
 data class ProfileState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val profile: UserProfile? = null,
-    val preferences: UserPreferences = UserPreferences(),
     val isGuest: Boolean = true,
     val showLogoutDialog: Boolean = false,
     val showAuthRequiredDialog: Boolean = false,
@@ -17,5 +15,6 @@ data class ProfileState(
 
 enum class ProfileNavigationTarget {
     PERSONAL_DETAILS,
-    SAVED_LOCATIONS
+    SAVED_LOCATIONS,
+    ORDER_HISTORY
 }

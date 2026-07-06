@@ -1,24 +1,25 @@
 package shopzen.app.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 import shopzen.domain.profile.model.AppTheme
 import shopzen.domain.profile.model.UserPreferences
 import shopzen.domain.profile.usecase.GetUserPreferencesUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import shopzen.presentation.theme.ShopzenTheme
-import javax.inject.Inject
 
 /**
  * The ONLY place in the app allowed to read UserPreferences for the
@@ -32,7 +33,8 @@ class AppThemeViewModel @Inject constructor(
     getUserPreferencesUseCase: GetUserPreferencesUseCase,
 ) : ViewModel() {
     val preferences: StateFlow<UserPreferences> = getUserPreferencesUseCase()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, UserPreferences())
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UserPreferences())
 }
 
 /**
@@ -57,5 +59,8 @@ fun AppThemeController(content: @Composable () -> Unit) {
     }
 
     CompositionLocalProvider(LocalAppTheme provides preferences.theme) {
+        ShopzenTheme(darkTheme = darkTheme) {
+            content()
+        }
     }
 }

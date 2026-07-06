@@ -31,6 +31,7 @@ credentials = "1.3.0"
 googleid = "1.1.1"
 datastoreCore = "1.2.1"
 appcompatVersion = "1.7.1"
+paymobSdk = "1.9.2"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -88,6 +89,7 @@ apollo-normalized-cache = { group = "com.apollographql.apollo", name = "apollo-n
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastoreCore" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompatVersion" }
+paymob-sdk = { group = "com.paymob.sdk", name = "Paymob-SDK", version.ref = "paymobSdk" }
 
 # Room
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }

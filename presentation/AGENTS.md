@@ -938,14 +938,20 @@ sealed class AddressListIntent {
 | `OrderDetailViewModel` | `GetOrderDetailUseCase` |
 | `AddressListViewModel` | `GetAddressesUseCase`, `DeleteAddressUseCase`, `GetCurrentUserUseCase` |
 | `AddressFormViewModel` | `GetCountriesUseCase`, `AddAddressUseCase`, `UpdateAddressUseCase`, `ValidateAddressUseCase`, `GetCurrentUserUseCase` |
-| `SettingsViewModel` | `GetCurrencyRatesUseCase`, `GetCurrentUserUseCase` |
+| `SettingsViewModel` | `GetUserPreferencesUseCase`, `SetCurrencyUseCase`, `SetLanguageUseCase`, `SetThemeUseCase`, `GetCurrentUserUseCase`, `SignOutUseCase` |
 
 #### Screen Behaviours
 
 **`ProfileScreen`**
 - Personalized greeting using `userProfile.firstName`
 - Shows recent order count and `WishlistPreviewGrid` (max 4 items) as a horizontal preview strip
-- Logout button dispatches `RequestLogout` → `ConfirmationDialog` → `ConfirmLogout`
+- Account details, saved addresses, and order history remain auth-gated
+
+**`OrderHistoryScreen`**
+- Order cards show order number, date, payment method, statuses, item count, final total, and discount code/amount when present.
+
+**`OrderDetailScreen`**
+- Shows order number, date, payment method, statuses, subtotal, discount code/amount when present, final total, and line items.
 
 **`AddressFormScreen`**
 - Used for both add (no `id` param) and edit (`?id={addressId}` param)
@@ -955,9 +961,10 @@ sealed class AddressListIntent {
 - On save, `AddAddressUseCase` / `UpdateAddressUseCase` internally calls `ValidateAddressUseCase` for GPS/Places enrichment
 
 **`SettingsScreen`**
-- Currency selector using `CurrencySelector` component
-- Selected currency persisted in `DataStore` (managed in `:data`); applied globally to all price displays
-- Changes dispatch a settings intent that saves via `SettingsViewModel`
+- Currency, language, and theme controls are separate from `ProfileScreen`
+- Settings is available to guests; guest preference changes save locally only
+- Firebase sync requires authentication and redirects guests to Login
+- Shows Login for guests and Logout for signed-in users; Logout requires `ConfirmationDialog`
 
 ---
 
@@ -1103,7 +1110,7 @@ LaunchedEffect(viewModel) {
 | `OrderDetailScreen` | `main/profile/orders/{orderId}` | **Yes** |
 | `AddressListScreen` | `main/profile/addresses` | **Yes** |
 | `AddressFormScreen` | `main/profile/addresses/form?id={id}` | **Yes** |
-| `SettingsScreen` | `main/profile/settings` | **Yes** |
+| `SettingsScreen` | `main/settings` | No |
 | `CheckoutScreen` | `checkout/summary` | **Yes** |
 | `PaymentScreen` | `checkout/payment` | **Yes** |
 | `OrderConfirmationScreen` | `checkout/confirmation/{orderId}` | **Yes** |
@@ -1119,10 +1126,9 @@ Auth-gated destinations must be checked before navigation. The check calls `IsUs
 | 0 | Home | `Icons.Default.Home` | `main/home` | No |
 | 1 | Search | `Icons.Default.Search` | `main/search` | No |
 | 2 | Wishlist | `Icons.Default.FavoriteBorder` | `main/wishlist` | Yes |
-| 3 | Cart | `Icons.Default.ShoppingCart` | `main/cart` | Yes |
-| 4 | Profile | `Icons.Default.Person` | `main/profile` | Yes |
+| 3 | Settings | `Icons.Default.Settings` | `main/settings` | No |
 
-The cart tab badge count is driven reactively by `GetCartUseCase` collected in the bottom navigation's own ViewModel or in `MainActivity`.
+Profile and Cart are top app bar actions, not bottom tabs. Guests still see Wishlist, Profile, and Cart icons; tapping any auth-gated destination redirects to Login. Settings remains accessible to guests. Firebase sync from Settings requires authentication; guest preference changes are saved locally only. The cart top-app-bar badge count is driven reactively by `GetCartUseCase` collected in the app shell's own ViewModel or in `MainActivity`.
 
 ---
 

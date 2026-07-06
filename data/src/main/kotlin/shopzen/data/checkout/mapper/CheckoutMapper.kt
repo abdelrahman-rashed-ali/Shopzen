@@ -28,10 +28,26 @@ class CheckoutMapper @Inject constructor() {
                 put("financial_status", "pending")
                 put("send_receipt", true)
                 put("inventory_behaviour", "decrement_obeying_policy")
+                checkout.customerId?.let { customerId ->
+                    putJsonObject("customer") {
+                        put("id", customerId)
+                    }
+                }
+                if (checkout.customerEmail.isNotBlank()) {
+                    put("email", checkout.customerEmail)
+                }
                 put("shipping_address", toRestShippingAddressJson(checkout))
+                checkout.selectedPaymentMethod?.let { paymentMethod ->
+                    put("note_attributes", buildJsonArray {
+                        addJsonObject {
+                            put("name", PAYMENT_METHOD_NOTE_KEY)
+                            put("value", paymentMethod.name)
+                        }
+                    })
+                }
                 checkout.appliedCoupon?.let { coupon ->
                     put("discount_codes", buildJsonArray {
-                        add(toRestDiscountCodeJson(coupon))
+                        add(toRestDiscountCodeJson(coupon, checkout))
                     })
                 }
             }
@@ -42,6 +58,14 @@ class CheckoutMapper @Inject constructor() {
             putJsonObject("order") {
                 if (checkout.currency.isNotBlank()) {
                     put("currency", checkout.currency)
+                }
+                checkout.customerId?.let { customerId ->
+                    putJsonObject("customer") {
+                        put("id", "gid://shopify/Customer/$customerId")
+                    }
+                }
+                if (checkout.customerEmail.isNotBlank()) {
+                    put("email", checkout.customerEmail)
                 }
                 put("lineItems", buildJsonArray {
                     checkout.lineItems.forEach { item ->
@@ -86,10 +110,19 @@ class CheckoutMapper @Inject constructor() {
         }
     }
 
-    private fun toRestDiscountCodeJson(coupon: DiscountCode): JsonObject =
+    private fun toRestDiscountCodeJson(
+        coupon: DiscountCode,
+        checkout: Checkout,
+    ): JsonObject =
         buildJsonObject {
             put("code", coupon.code)
-            put("amount", coupon.value.toString())
+            put(
+                "amount",
+                when (coupon.discountType) {
+                    DiscountType.PERCENTAGE -> coupon.effectivePercentage(checkout)
+                    DiscountType.FIXED_AMOUNT -> coupon.value
+                }.toString(),
+            )
             put(
                 "type",
                 when (coupon.discountType) {
@@ -98,6 +131,13 @@ class CheckoutMapper @Inject constructor() {
                 },
             )
         }
+
+    private fun DiscountCode.effectivePercentage(checkout: Checkout): Double =
+        value.takeIf { it > 0.0 }
+            ?: checkout.discountAmount
+                .takeIf { checkout.subtotalPrice > 0.0 && it > 0.0 }
+                ?.let { discount -> discount * 100.0 / checkout.subtotalPrice }
+            ?: 0.0
 
     private fun toMailingAddressJson(checkout: Checkout): JsonObject {
         val nameParts = checkout.shippingAddress.recipientName.trim().split(Regex("\\s+"))
@@ -142,4 +182,8 @@ class CheckoutMapper @Inject constructor() {
 
     private fun String.toShopifyRestId(): String =
         substringAfterLast("/")
+
+    private companion object {
+        const val PAYMENT_METHOD_NOTE_KEY = "payment_method"
+    }
 }

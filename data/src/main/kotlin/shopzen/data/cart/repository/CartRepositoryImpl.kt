@@ -102,18 +102,23 @@ class CartRepositoryImpl @Inject constructor(
 
     override suspend fun clearCart(userId: String): Result<Unit> = runCatching {
         val cartId = requireCartIdOrNull(userId)
-        if (cartId != null) {
-            val cached = local.getCart(userId)
-            val lineIds = cached.map { it.id }
-            if (lineIds.isNotEmpty()) {
-                val refreshedCart = remote.clearLines(cartId, lineIds)
-                upsertCartToLocal(refreshedCart, userId)
-                return@runCatching
-            }
+        if (cartId == null) {
+            local.clearCart(userId)
+            return@runCatching
         }
-        
-        // If there are no remote lines to clear or no remote cart, just clear locally
-        local.clearCart(userId)
+
+        val cachedLineIds = local.getCart(userId).map { it.id }
+        val cartWithoutDiscounts = remote.updateDiscountCodes(cartId, emptyList())
+        val lineIds = cachedLineIds.ifEmpty {
+            cartWithoutDiscounts.lines.edges.map { it.node.id }
+        }
+
+        if (lineIds.isNotEmpty()) {
+            val refreshedCart = remote.clearLines(cartId, lineIds)
+            upsertCartToLocal(refreshedCart, userId)
+        } else {
+            upsertCartToLocal(cartWithoutDiscounts, userId)
+        }
     }
 
     // ── Coupon / Currency (delegated to other features per AGENTS.md) ──────────

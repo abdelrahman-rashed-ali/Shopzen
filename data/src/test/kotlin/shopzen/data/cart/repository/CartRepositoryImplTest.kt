@@ -125,6 +125,25 @@ class CartRepositoryImplTest {
         coVerify(exactly = 1) { remote.updateDiscountCodes("cart-1", listOf("SAVE10")) }
     }
 
+    @Test
+    fun `clearCart removes remote discount codes before clearing lines`() = runTest {
+        coEvery { local.getCart("user-1") } returns listOf(sampleEntity())
+        coEvery { remote.updateDiscountCodes("cart-1", emptyList()) } returns sampleCartDto(id = "cart-1")
+        coEvery { remote.clearLines("cart-1", listOf("line-1")) } returns sampleCartDto(
+            id = "cart-1",
+            hasLines = false,
+        )
+        coEvery { local.clearCart("user-1") } returns 0
+        coEvery { local.upsertAll(any()) } returns emptyList()
+
+        val result = repository.clearCart("user-1")
+
+        assertEquals(true, result.isSuccess)
+        coVerify(exactly = 1) { remote.updateDiscountCodes("cart-1", emptyList()) }
+        coVerify(exactly = 1) { remote.clearLines("cart-1", listOf("line-1")) }
+        coVerify(exactly = 1) { local.clearCart("user-1") }
+    }
+
     private fun sampleCartItem() = CartItem(
         id = "line-1",
         productId = "product-1",
@@ -158,30 +177,37 @@ class CartRepositoryImplTest {
         invalidationDate = System.currentTimeMillis(),
     )
 
-    private fun sampleCartDto(id: String) = CartDto(
+    private fun sampleCartDto(
+        id: String,
+        hasLines: Boolean = true,
+    ) = CartDto(
         id = id,
         lines = CartLinesConnectionDto(
-            edges = listOf(
-                CartLineEdgeDto(
-                    node = CartLineDto(
-                        id = "line-1",
-                        quantity = 1,
-                        merchandise = MerchandiseDto(
-                            id = "variant-1",
-                            title = "Size M",
-                            product = ProductRefDto(
-                                id = "product-1",
-                                title = "Blue Hoodie",
+            edges = if (hasLines) {
+                listOf(
+                    CartLineEdgeDto(
+                        node = CartLineDto(
+                            id = "line-1",
+                            quantity = 1,
+                            merchandise = MerchandiseDto(
+                                id = "variant-1",
+                                title = "Size M",
+                                product = ProductRefDto(
+                                    id = "product-1",
+                                    title = "Blue Hoodie",
+                                ),
+                                image = ImageRefDto(url = "https://example.com/hoodie.png"),
+                                quantityAvailable = 3,
                             ),
-                            image = ImageRefDto(url = "https://example.com/hoodie.png"),
-                            quantityAvailable = 3,
+                            cost = CartLineCostDto(
+                                totalAmount = MoneyDto(amount = "45.0", currencyCode = "USD"),
+                            ),
                         ),
-                        cost = CartLineCostDto(
-                            totalAmount = MoneyDto(amount = "45.0", currencyCode = "USD"),
-                        ),
-                    ),
+                    )
                 )
-            )
+            } else {
+                emptyList()
+            }
         ),
         cost = CartCostDto(
             subtotalAmount = MoneyDto(amount = "45.0", currencyCode = "USD"),

@@ -1,5 +1,6 @@
 package shopzen.presentation.checkout.screen
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
@@ -12,12 +13,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,19 +36,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paymob.paymob_sdk.ui.PaymobSdkListener
 import shopzen.presentation.R
 import shopzen.presentation.checkout.components.CheckoutSection
 import shopzen.presentation.checkout.components.CheckoutTopBar
 import shopzen.presentation.checkout.components.PaymentMethodRow
 import shopzen.presentation.checkout.components.PriceBreakdown
 import shopzen.presentation.checkout.intent.CheckoutIntent
+import shopzen.presentation.checkout.paymob.launchPaymobSdk
 import shopzen.presentation.checkout.state.CheckoutState
 import shopzen.presentation.checkout.viewmodel.CheckoutEffect
 import shopzen.presentation.checkout.viewmodel.CheckoutViewModel
@@ -67,19 +76,46 @@ fun PaymentScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val latestOnNavigateToLogin by rememberUpdatedState(onNavigateToLogin)
+    val latestOnNavigateToOrderConfirmation by rememberUpdatedState(onNavigateToOrderConfirmation)
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel) {
         viewModel.processIntent(CheckoutIntent.LoadCheckout)
     }
 
-    LaunchedEffect(viewModel) {
+    LaunchedEffect(viewModel, snackbarHostState, context) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                CheckoutEffect.NavigateToLogin -> onNavigateToLogin()
+                CheckoutEffect.NavigateToLogin -> latestOnNavigateToLogin()
                 is CheckoutEffect.NavigateToOrderConfirmation -> {
-                    onNavigateToOrderConfirmation(effect.orderId, effect.orderNumber)
+                    latestOnNavigateToOrderConfirmation(effect.orderId, effect.orderNumber)
                 }
                 is CheckoutEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message.asString(context))
+                is CheckoutEffect.StartOnlinePayment -> {
+                    launchPaymobSdk(
+                        context = context,
+                        clientSecret = effect.clientSecret.value,
+                        publicKey = effect.publicKey.value,
+                        paymobSdkListener = object : PaymobSdkListener {
+                            override fun onSuccess(payResponse: HashMap<String, String?>) {
+                                Log.d("Tago", "onSuccess: ")
+                                viewModel.processIntent(
+                                    CheckoutIntent.OnlinePaymentSucceeded(payResponse.toMap())
+                                )
+                            }
+
+                            override fun onFailure(msg: String?) {
+                                Log.d("Tago", "onFailure: ")
+                                viewModel.processIntent(CheckoutIntent.OnlinePaymentFailed(msg))
+                            }
+
+                            override fun onPending() {
+                                Log.d("Tago", "onPending: ")
+                                viewModel.processIntent(CheckoutIntent.OnlinePaymentPending)
+                            }
+                        },
+                    )
+                }
                 CheckoutEffect.NavigateToAddAddress -> Unit
                 CheckoutEffect.NavigateToPayment -> Unit
                 CheckoutEffect.NavigateHome -> Unit
@@ -121,6 +157,7 @@ fun PaymentContent(
             PaymentBottomBar(
                 enabled = state.canPlaceOrder,
                 isPlacingOrder = state.isPlacingOrder,
+                isOnlinePaymentInProgress = state.isOnlinePaymentInProgress,
                 onPlaceOrder = { onIntent(CheckoutIntent.RequestPlaceOrder) },
             )
         },
@@ -241,9 +278,15 @@ private fun PaymentBody(
 private fun PaymentBottomBar(
     enabled: Boolean,
     isPlacingOrder: Boolean,
+    isOnlinePaymentInProgress: Boolean,
     onPlaceOrder: () -> Unit,
 ) {
     val c = LocalShopzenColors.current
+    val busyMessage = when {
+        isPlacingOrder -> stringResource(R.string.checkout_placing_order)
+        isOnlinePaymentInProgress -> stringResource(R.string.checkout_online_payment_in_progress)
+        else -> null
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -251,13 +294,15 @@ private fun PaymentBottomBar(
             .navigationBarsPadding()
             .padding(ShopzenSpacing.LG),
     ) {
-        AnimatedVisibility(visible = isPlacingOrder) {
-            Text(
-                text = stringResource(R.string.checkout_placing_order),
-                style = ShopzenBody,
-                color = c.textSecondary,
-                modifier = Modifier.padding(bottom = ShopzenSpacing.SM),
-            )
+        AnimatedVisibility(visible = busyMessage != null) {
+            busyMessage?.let { message ->
+                Text(
+                    text = message,
+                    style = ShopzenBody,
+                    color = c.textSecondary,
+                    modifier = Modifier.padding(bottom = ShopzenSpacing.SM),
+                )
+            }
         }
         Button(
             onClick = onPlaceOrder,
@@ -273,11 +318,39 @@ private fun PaymentBottomBar(
                 disabledContentColor = c.actionDisabledFg,
             ),
         ) {
-            Text(
-                text = stringResource(R.string.checkout_place_order),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-            )
+            AnimatedContent(
+                targetState = isPlacingOrder || isOnlinePaymentInProgress,
+                transitionSpec = {
+                    fadeIn(tween(ShopzenMotion.DurationNormal)) togetherWith
+                        fadeOut(tween(ShopzenMotion.DurationNormal))
+                },
+                label = "paymentButtonContent",
+            ) { isBusy ->
+                if (isBusy) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = c.actionDisabledFg,
+                        )
+                        Spacer(modifier = Modifier.width(ShopzenSpacing.SM))
+                        Text(
+                            text = stringResource(R.string.checkout_processing_payment),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                } else {
+                    Text(
+                        text = stringResource(R.string.checkout_place_order),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
         }
     }
 }

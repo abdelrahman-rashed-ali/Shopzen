@@ -16,11 +16,7 @@ import shopzen.domain.auth.model.User
 import shopzen.domain.auth.usecase.GetCurrentUserUseCase
 import shopzen.domain.auth.usecase.SignOutUseCase
 import shopzen.domain.profile.model.UserProfile
-import shopzen.domain.profile.usecase.GetUserPreferencesUseCase
 import shopzen.domain.profile.usecase.GetUserProfileUseCase
-import shopzen.domain.profile.usecase.SetCurrencyUseCase
-import shopzen.domain.profile.usecase.SetLanguageUseCase
-import shopzen.domain.profile.usecase.SetThemeUseCase
 import shopzen.presentation.profile.intent.ProfileIntent
 import shopzen.presentation.profile.state.ProfileNavigationTarget
 import shopzen.presentation.profile.state.ProfileState
@@ -29,10 +25,6 @@ import shopzen.presentation.profile.state.ProfileState
 class ProfileViewModel @Inject constructor(
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val getUserProfileUseCase: GetUserProfileUseCase,
-    private val getUserPreferencesUseCase: GetUserPreferencesUseCase,
-    private val setCurrencyUseCase: SetCurrencyUseCase,
-    private val setLanguageUseCase: SetLanguageUseCase,
-    private val setThemeUseCase: SetThemeUseCase,
     private val signOutUseCase: SignOutUseCase
 ) : ViewModel() {
 
@@ -42,18 +34,15 @@ class ProfileViewModel @Inject constructor(
     private var profileJob: Job? = null
 
     init {
-        observePreferences()
         loadProfile()
     }
 
     fun processIntent(intent: ProfileIntent) {
         when (intent) {
             ProfileIntent.LoadProfile -> loadProfile()
-            is ProfileIntent.ChangeCurrency -> viewModelScope.launch { setCurrencyUseCase(intent.currency) }
-            is ProfileIntent.ChangeLanguage -> viewModelScope.launch { setLanguageUseCase(intent.language) }
-            is ProfileIntent.ChangeTheme -> viewModelScope.launch { setThemeUseCase(intent.theme) }
             ProfileIntent.PersonalDetailsClicked -> openAuthenticated(ProfileNavigationTarget.PERSONAL_DETAILS)
             ProfileIntent.SavedLocationsClicked -> openAuthenticated(ProfileNavigationTarget.SAVED_LOCATIONS)
+            ProfileIntent.OrderHistoryClicked -> openAuthenticated(ProfileNavigationTarget.ORDER_HISTORY)
             ProfileIntent.RequestSignOut -> _state.update { it.copy(showLogoutDialog = true) }
             ProfileIntent.ConfirmSignOut -> signOut()
             ProfileIntent.DismissDialog -> _state.update {
@@ -61,12 +50,6 @@ class ProfileViewModel @Inject constructor(
             }
             ProfileIntent.NavigationHandled -> _state.update { it.copy(navigationTarget = null) }
         }
-    }
-
-    private fun observePreferences() {
-        getUserPreferencesUseCase()
-            .onEach { preferences -> _state.update { it.copy(preferences = preferences) } }
-            .launchIn(viewModelScope)
     }
 
     private fun loadProfile() {

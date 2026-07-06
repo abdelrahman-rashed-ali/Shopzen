@@ -22,6 +22,7 @@ android {
 
     buildFeatures {
         compose = true
+        dataBinding = true
     }
 
 }
@@ -76,5 +77,6 @@ dependencies {
     //nour
     //ziad
     implementation(libs.androidx.compose.ui.text.google.fonts)
+    implementation(libs.paymob.sdk)
     //ziad
 }

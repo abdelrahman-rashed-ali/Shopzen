@@ -27,6 +27,7 @@ data class CheckoutState(
     val formattedTotal: String = "",
     val appliedCouponLabel: String? = null,
     val isPlacingOrder: Boolean = false,
+    val isOnlinePaymentInProgress: Boolean = false,
     val showPlaceOrderDialog: Boolean = false,
 ) {
     val selectedAddress: Address?
@@ -36,5 +37,8 @@ data class CheckoutState(
         get() = items.isNotEmpty() && selectedAddress != null
 
     val canPlaceOrder: Boolean
-        get() = canContinueToPayment && selectedPaymentMethod != null && !isPlacingOrder
+        get() = canContinueToPayment &&
+            selectedPaymentMethod != null &&
+            !isPlacingOrder &&
+            !isOnlinePaymentInProgress
 }

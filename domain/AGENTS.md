@@ -369,9 +369,13 @@ data class UserProfile(
 
 data class Order(
     val id: String,
-    val orderNumber: Int,
+    val orderNumber: String,
+    val subtotalPrice: Double,
+    val discountAmount: Double,
+    val discountCode: String?,
     val totalPrice: Double,
     val currency: String,
+    val paymentMethod: String,
     val financialStatus: String,
     val fulfillmentStatus: String,
     val createdAt: String,

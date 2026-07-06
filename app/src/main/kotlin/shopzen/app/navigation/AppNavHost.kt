@@ -2,6 +2,7 @@ package shopzen.app.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,9 +16,12 @@ import shopzen.presentation.catalog.screen.HomeScreen
 import shopzen.presentation.onboarding.screen.OnboardingScreen
 import shopzen.presentation.search.screen.SearchScreen as SearchRouteScreen
 import shopzen.presentation.profile.screen.AddEditAddressScreen
+import shopzen.presentation.profile.screen.OrderDetailScreen as OrderDetailRouteScreen
+import shopzen.presentation.profile.screen.OrderHistoryScreen as OrderHistoryRouteScreen
 import shopzen.presentation.profile.screen.PersonalDetailsScreen as PersonalDetailsRouteScreen
 import shopzen.presentation.profile.screen.ProfileScreen as ProfileRouteScreen
 import shopzen.presentation.profile.screen.SavedAddressesScreen
+import shopzen.presentation.profile.screen.SettingsScreen as SettingsRouteScreen
 import shopzen.presentation.cart.screen.CartScreen
 import shopzen.presentation.checkout.screen.CheckoutSummaryScreen as CheckoutSummaryRouteScreen
 import shopzen.presentation.checkout.screen.OrderConfirmationScreen as OrderConfirmationRouteScreen
@@ -38,6 +42,56 @@ fun AppNavHost(
         onError: (String) -> Unit
     ) -> Unit,
 ) {
+    val mainNavigationViewModel: MainNavigationViewModel = hiltViewModel()
+
+    fun navigateSingleTop(destination: NavScreen) {
+        navController.navigate(destination) {
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateTopLevel(destination: NavScreen) {
+        navController.navigate(destination) {
+            popUpTo<HomeScreen> {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
+    fun navigateClearingBackStack(destination: NavScreen) {
+        navController.navigate(destination) {
+            popUpTo(navController.graph.id) {
+                inclusive = true
+            }
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateBackOrHome() {
+        if (!navController.navigateUp()) {
+            navigateClearingBackStack(HomeScreen)
+        }
+    }
+
+    fun navigateToLogin() {
+        navigateSingleTop(LoginScreen)
+    }
+
+    fun navigateToProduct(productId: String) {
+        navController.navigate(ProductDetail(productId.toLongOrNull() ?: 0L)) {
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateAuthRequired(destination: NavScreen) {
+        mainNavigationViewModel.openAuthenticated(
+            onAuthenticated = { navigateTopLevel(destination) },
+            onGuest = { navigateToLogin() },
+        )
+    }
+
     NavHost(
         modifier = modifier,
         navController = navController,
@@ -46,14 +100,10 @@ fun AppNavHost(
         composable<SplashScreen> {
             SplashRouteScreen(
                 navigateToHome = {
-                    navController.navigate(HomeScreen) {
-                        popUpTo<SplashScreen> { inclusive = true }
-                    }
+                    navigateClearingBackStack(HomeScreen)
                 },
                 navigateToLogin = {
-                    navController.navigate(LoginScreen) {
-                        popUpTo<SplashScreen> { inclusive = true }
-                    }
+                    navigateClearingBackStack(LoginScreen)
                 },
                 navigateToOnboarding = {
                     navController.navigate(shopzen.app.navigation.OnboardingScreen) {
@@ -65,24 +115,20 @@ fun AppNavHost(
         composable<shopzen.app.navigation.OnboardingScreen> {
             OnboardingScreen(
                 onFinish = {
-                    navController.navigate(LoginScreen) {
-                        popUpTo<shopzen.app.navigation.OnboardingScreen> { inclusive = true }
-                    }
+                    navigateClearingBackStack(LoginScreen)
                 }
             )
         }
         composable<LoginScreen> {
             LoginRouteScreen(
                 navigateToHome = {
-                    navController.navigate(HomeScreen) {
-                        popUpTo<LoginScreen> { inclusive = true }
-                    }
+                    navigateClearingBackStack(HomeScreen)
                 },
                 navigateToRegister = {
-                    navController.navigate(RegisterScreen)
+                    navigateSingleTop(RegisterScreen)
                 },
                 navigateToForgotPassword = {
-                    navController.navigate(ForgotPasswordScreen)
+                    navigateSingleTop(ForgotPasswordScreen)
                 },
                 launchGoogleSignIn = launchGoogleSignIn,
                 launchAppleSignIn = launchAppleSignIn
@@ -91,15 +137,13 @@ fun AppNavHost(
         composable<ForgotPasswordScreen> {
             LoginRouteScreen(
                 navigateToHome = {
-                    navController.navigate(HomeScreen) {
-                        popUpTo<LoginScreen> { inclusive = true }
-                    }
+                    navigateClearingBackStack(HomeScreen)
                 },
                 navigateToRegister = {
-                    navController.navigate(RegisterScreen)
+                    navigateSingleTop(RegisterScreen)
                 },
                 navigateToForgotPassword = {
-                    navController.navigateUp()
+                    navigateBackOrHome()
                 },
                 launchGoogleSignIn = launchGoogleSignIn,
                 launchAppleSignIn = launchAppleSignIn
@@ -108,10 +152,20 @@ fun AppNavHost(
         composable<RegisterScreen> {
             RegisterScreen(
                 navigateToLogin = {
-                    navController.navigate(LoginScreen)
+                    navController.navigate(LoginScreen) {
+                        popUpTo<LoginScreen> {
+                            inclusive = false
+                        }
+                        launchSingleTop = true
+                    }
                 },
                 navigateToEmailVerification = {
-                    navController.navigate(EmailVerificationScreen)
+                    navController.navigate(EmailVerificationScreen) {
+                        popUpTo<RegisterScreen> {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
                 }
             )
         }
@@ -119,7 +173,7 @@ fun AppNavHost(
         composable<EmailVerificationScreen> {
             EmailVerificationScreen(
                 navigateHome = {
-                    navController.navigate(HomeScreen)
+                    navigateClearingBackStack(HomeScreen)
                 }
             )
         }
@@ -133,91 +187,87 @@ fun AppNavHost(
                     // TODO: Handle category navigation
                 },
                 onNavigateToProduct = { productId ->
-                    navController.navigate(
-                        ProductDetail(
-                            productId.toLongOrNull() ?: 0L
-                        )
-                    )
+                    navigateToProduct(productId)
                 },
                 onNavigateToProducts = {
                     // TODO: Handle view all products
                 },
                 onNavigateToSearch = {
-                    navController.navigate(SearchScreen)
+                    navigateTopLevel(SearchScreen)
                 },
                 onNavigateToProfile = {
-                    navController.navigate(ProfileScreen) {
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    navigateAuthRequired(ProfileScreen)
                 },
                 onNavigateToWishlist = {
-                    navController.navigate(WishlistScreen)
+                    navigateAuthRequired(WishlistScreen)
                 },
                 onNavigateToCart = {
-                    navController.navigate(CartScreen)
-                }
+                    navigateAuthRequired(CartScreen)
+                },
+                onNavigateToSettings = {
+                    navigateTopLevel(SettingsScreen)
+                },
             )
         }
 
         composable<SearchScreen> {
             SearchRouteScreen(
                 onNavigateToHome = {
-                    navController.navigate(HomeScreen) {
-                        popUpTo<HomeScreen> { inclusive = false }
-                    }
+                    navigateTopLevel(HomeScreen)
                 },
                 onNavigateToWishlist = {
-                    navController.navigate(WishlistScreen)
+                    navigateAuthRequired(WishlistScreen)
                 },
                 onNavigateToProduct = { productId ->
-                    navController.navigate(
-                        ProductDetail(
-                            productId.toLongOrNull() ?: 0L
-                        )
-                    )
+                    navigateToProduct(productId)
                 },
                 onNavigateToCategory = { categoryId ->
                     // TODO: Handle category navigation
                 },
-                onNavigateToSearch = {},
+                onNavigateToSearch = { navigateTopLevel(SearchScreen) },
                 onNavigateToCart = {
-                    navController.navigate(CartScreen)
+                    navigateAuthRequired(CartScreen)
                 },
                 onNavigateToProfile = {
-                    navController.navigate(ProfileScreen) {
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
+                    navigateAuthRequired(ProfileScreen)
+                },
+                onNavigateToSettings = {
+                    navigateTopLevel(SettingsScreen)
+                },
             )
         }
 
         composable<WishlistScreen> {
             shopzen.presentation.wishlist.screen.WishlistScreen(
                 onNavigateToHome = {
-                    navController.navigate(HomeScreen) {
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    navigateTopLevel(HomeScreen)
                 },
                 onNavigateToProduct = { productId ->
-                    navController.navigate(
-                        ProductDetail(productId.toLongOrNull() ?: 0L)
-                    )
+                    navigateToProduct(productId)
                 },
                 onNavigateToSearch = {
-
+                    navigateTopLevel(SearchScreen)
                 },
                 onNavigateToCart = {
-
+                    navigateAuthRequired(CartScreen)
                 },
                 onNavigateToProfile = {
-                    navController.navigate(ProfileScreen) {
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
+                    navigateAuthRequired(ProfileScreen)
+                },
+                onNavigateToSettings = {
+                    navigateTopLevel(SettingsScreen)
+                },
+            )
+        }
+
+        composable<SettingsScreen> {
+            SettingsRouteScreen(
+                onNavigateToDiscover = { navigateTopLevel(HomeScreen) },
+                onNavigateToSearch = { navigateTopLevel(SearchScreen) },
+                onNavigateToWishlist = { navigateAuthRequired(WishlistScreen) },
+                onNavigateToProfile = { navigateAuthRequired(ProfileScreen) },
+                onNavigateToCart = { navigateAuthRequired(CartScreen) },
+                onNavigateToLogin = { navigateToLogin() },
             )
         }
 
@@ -227,19 +277,19 @@ fun AppNavHost(
             ProductDetailScreen(
                 productId = args.productId,
                 onNavigateBack = {
-                    navController.navigateUp()
+                    navigateBackOrHome()
                 },
                 onNavigateToLogin = {
-                    navController.navigate(LoginScreen)
+                    navigateToLogin()
                 }
             )
         }
         composable<CartScreen> {
             CartScreen(
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToProduct = {},
-                onNavigateToCheckout = { navController.navigate(CheckoutSummaryScreen) },
-                onNavigateToLogin = { navController.navigate(LoginScreen) },
+                onNavigateBack = { navigateBackOrHome() },
+                onNavigateToProduct = { productId -> navigateToProduct(productId) },
+                onNavigateToCheckout = { navigateSingleTop(CheckoutSummaryScreen) },
+                onNavigateToLogin = { navigateToLogin() },
             )
         }
 
@@ -247,26 +297,31 @@ fun AppNavHost(
 
         composable<CheckoutSummaryScreen> {
             CheckoutSummaryRouteScreen(
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToLogin = { navController.navigate(LoginScreen) },
+                onNavigateBack = { navigateBackOrHome() },
+                onNavigateToLogin = { navigateToLogin() },
                 onNavigateToAddAddress = {
-                    navController.navigate(AddressEditScreen(addressId = null))
+                    navigateSingleTop(AddressEditScreen(addressId = null))
                 },
-                onNavigateToPayment = { navController.navigate(CheckoutPaymentScreen) },
+                onNavigateToPayment = { navigateSingleTop(CheckoutPaymentScreen) },
             )
         }
 
         composable<CheckoutPaymentScreen> {
             PaymentRouteScreen(
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToLogin = { navController.navigate(LoginScreen) },
+                onNavigateBack = { navigateBackOrHome() },
+                onNavigateToLogin = { navigateToLogin() },
                 onNavigateToOrderConfirmation = { orderId, orderNumber ->
                     navController.navigate(
                         OrderConfirmationScreen(
                             orderId = orderId,
                             orderNumber = orderNumber,
                         )
-                    )
+                    ) {
+                        popUpTo<CartScreen> {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
                 },
             )
         }
@@ -276,54 +331,56 @@ fun AppNavHost(
             OrderConfirmationRouteScreen(
                 orderId = args.orderId,
                 orderNumber = args.orderNumber,
-                onNavigateBack = { navController.navigateUp() },
+                onNavigateBack = { navigateBackOrHome() },
                 onContinueShopping = {
-                    navController.navigate(HomeScreen) {
-                        popUpTo<CartScreen> { inclusive = true }
-                        launchSingleTop = true
-                    }
+                    navigateClearingBackStack(HomeScreen)
                 },
             )
         }
 
         composable<ProfileScreen> {
             ProfileRouteScreen(
-                onNavigateToHome = {
-                    navController.navigate(HomeScreen) {
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
                 onNavigateToLogin = {
-                    navController.navigate(LoginScreen)
+                    navigateToLogin()
                 },
-                onNavigateToPersonalDetails = { navController.navigate(PersonalDetailsScreen) },
-                onNavigateToAddresses = { navController.navigate(AddressesScreen) },
-                onNavigateToSearch = {},
-                onNavigateToCart = {},
-                onNavigateToWishlist = {
-                    navController.navigate(WishlistScreen)
-                },
+                onNavigateToPersonalDetails = { navigateSingleTop(PersonalDetailsScreen) },
+                onNavigateToAddresses = { navigateSingleTop(AddressesScreen) },
+                onNavigateToOrderHistory = { navigateSingleTop(OrderHistoryScreen) },
                 onSignedOut = {
-                    navController.navigate(LoginScreen) {
-                        popUpTo(navController.graph.id) { inclusive = true }
-                    }
+                    navigateClearingBackStack(LoginScreen)
                 }
             )
         }
 
         composable<PersonalDetailsScreen> {
             PersonalDetailsRouteScreen(
-                onNavigateBack = { navController.navigateUp() }
+                onNavigateBack = { navigateBackOrHome() }
+            )
+        }
+
+        composable<OrderHistoryScreen> {
+            OrderHistoryRouteScreen(
+                onNavigateBack = { navigateBackOrHome() },
+                onOrderClick = { orderId ->
+                    navigateSingleTop(OrderDetailScreen(orderId = orderId))
+                },
+            )
+        }
+
+        composable<OrderDetailScreen> { backStackEntry ->
+            val args = backStackEntry.toRoute<OrderDetailScreen>()
+            OrderDetailRouteScreen(
+                orderId = args.orderId,
+                onNavigateBack = { navigateBackOrHome() },
             )
         }
 
         composable<AddressesScreen> {
             SavedAddressesScreen(
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToLogin = { navController.navigate(LoginScreen) },
+                onNavigateBack = { navigateBackOrHome() },
+                onNavigateToLogin = { navigateToLogin() },
                 onNavigateToEdit = { addressId ->
-                    navController.navigate(AddressEditScreen(addressId = addressId))
+                    navigateSingleTop(AddressEditScreen(addressId = addressId))
                 }
             )
         }
@@ -333,7 +390,7 @@ fun AppNavHost(
 
             AddEditAddressScreen(
                 addressId = args.addressId,
-                onNavigateBack = { navController.navigateUp() }
+                onNavigateBack = { navigateBackOrHome() }
             )
         }
     }

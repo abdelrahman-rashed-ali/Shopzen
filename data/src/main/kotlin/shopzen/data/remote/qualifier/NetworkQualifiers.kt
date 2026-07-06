@@ -17,3 +17,19 @@ annotation class RestClient
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class GraphQLClient
+
+/**
+ * Qualifies the Ktor [io.ktor.client.HttpClient] configured for Paymob
+ * acceptance APIs.
+ */
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class PaymobClient
+
+/**
+ * Qualifies the Ktor [io.ktor.client.HttpClient] configured for live exchange
+ * rate lookups.
+ */
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class ExchangeRateClient

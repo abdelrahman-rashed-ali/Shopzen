@@ -12,5 +12,7 @@ data class Checkout(
     val totalPrice: Double,
     val currency: String,
     val appliedCoupon: DiscountCode?,
-    val selectedPaymentMethod: PaymentMethod?
+    val selectedPaymentMethod: PaymentMethod?,
+    val customerId: Long? = null,
+    val customerEmail: String = "",
 )

@@ -84,6 +84,7 @@ fun CheckoutSummaryScreen(
                 CheckoutEffect.NavigateToAddAddress -> onNavigateToAddAddress()
                 CheckoutEffect.NavigateToPayment -> onNavigateToPayment()
                 is CheckoutEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message.asString(context))
+                is CheckoutEffect.StartOnlinePayment -> Unit
                 is CheckoutEffect.NavigateToOrderConfirmation -> Unit
                 CheckoutEffect.NavigateHome -> Unit
             }

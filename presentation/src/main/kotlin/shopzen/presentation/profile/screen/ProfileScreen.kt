@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,21 +13,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -47,17 +43,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import shopzen.domain.profile.model.AppCurrency
-import shopzen.domain.profile.model.AppLanguage
-import shopzen.domain.profile.model.AppTheme
 import shopzen.presentation.R
 import shopzen.presentation.common.components.AuthRequiredDialog
-import shopzen.presentation.common.components.BottomBarTab
 import shopzen.presentation.common.components.ConfirmationDialog
-import shopzen.presentation.common.components.HomeBottomBar
 import shopzen.presentation.common.components.LoadingIndicator
-import shopzen.presentation.common.components.MainBottomNavigationBar
-import shopzen.presentation.common.components.MainTab
 import shopzen.presentation.profile.intent.ProfileIntent
 import shopzen.presentation.profile.state.ProfileNavigationTarget
 import shopzen.presentation.profile.state.ProfileState
@@ -65,13 +54,10 @@ import shopzen.presentation.profile.viewmodel.ProfileViewModel
 
 @Composable
 fun ProfileScreen(
-    onNavigateToHome: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToPersonalDetails: () -> Unit,
     onNavigateToAddresses: () -> Unit,
-    onNavigateToSearch: () -> Unit,
-    onNavigateToCart: () -> Unit,
-    onNavigateToWishlist: () -> Unit,
+    onNavigateToOrderHistory: () -> Unit,
     onSignedOut: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel()
@@ -89,6 +75,10 @@ fun ProfileScreen(
                 onNavigateToAddresses()
                 onIntent(ProfileIntent.NavigationHandled)
             }
+            ProfileNavigationTarget.ORDER_HISTORY -> {
+                onNavigateToOrderHistory()
+                onIntent(ProfileIntent.NavigationHandled)
+            }
             null -> Unit
         }
     }
@@ -100,11 +90,7 @@ fun ProfileScreen(
     ProfileContent(
         state = state,
         onIntent = onIntent,
-        onNavigateToHome = onNavigateToHome,
         onNavigateToLogin = onNavigateToLogin,
-        onNavigateToSearch = onNavigateToSearch,
-        onNavigateToCart = onNavigateToCart,
-        onNavigateToWishlist = onNavigateToWishlist,
         modifier = modifier
     )
 }
@@ -114,11 +100,7 @@ fun ProfileScreen(
 private fun ProfileContent(
     state: ProfileState,
     onIntent: (ProfileIntent) -> Unit,
-    onNavigateToHome: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    onNavigateToSearch: () -> Unit,
-    onNavigateToCart: () -> Unit,
-    onNavigateToWishlist: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -136,16 +118,6 @@ private fun ProfileContent(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
-            )
-        },
-        bottomBar = {
-            HomeBottomBar(
-                currentTab = BottomBarTab.PROFILE,
-                onNavigateToHome = onNavigateToHome,
-                onNavigateToSearch = onNavigateToSearch,
-                onNavigateToWishlist = onNavigateToWishlist,
-                onNavigateToCart = onNavigateToCart,
-                onNavigateToProfile = { }
             )
         }
     ) { innerPadding ->
@@ -179,7 +151,6 @@ private fun ProfileContent(
                     state = state,
                     onNavigateToLogin = onNavigateToLogin
                 )
-                PreferencesCard(state = state, onIntent = onIntent)
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     ProfileActionCard(
                         title = stringResource(R.string.profile_personal_details),
@@ -194,6 +165,12 @@ private fun ProfileContent(
                         onClick = { onIntent(ProfileIntent.SavedLocationsClicked) }
                     )
                 }
+                ProfileActionCard(
+                    title = stringResource(R.string.profile_order_history),
+                    icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onIntent(ProfileIntent.OrderHistoryClicked) }
+                )
                 if (!state.isGuest) {
                     TextButton(
                         onClick = { onIntent(ProfileIntent.RequestSignOut) },
@@ -279,96 +256,6 @@ private fun ProfileIdentity(
             }
         }
     }
-}
-
-@Composable
-private fun PreferencesCard(
-    state: ProfileState,
-    onIntent: (ProfileIntent) -> Unit
-) {
-    ElevatedCard(
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.profile_preferences_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Icon(Icons.Outlined.Language, contentDescription = null)
-            }
-            PreferenceGroup(label = stringResource(R.string.profile_currency_label)) {
-                AppCurrency.entries.forEach { currency ->
-                    FilterChip(
-                        selected = state.preferences.currency == currency,
-                        onClick = { onIntent(ProfileIntent.ChangeCurrency(currency)) },
-                        label = { Text(currency.name) }
-                    )
-                }
-            }
-            PreferenceGroup(label = stringResource(R.string.profile_language_label)) {
-                FilterChip(
-                    selected = state.preferences.language == AppLanguage.ENGLISH,
-                    onClick = { onIntent(ProfileIntent.ChangeLanguage(AppLanguage.ENGLISH)) },
-                    label = { Text(stringResource(R.string.profile_language_english)) }
-                )
-                FilterChip(
-                    selected = state.preferences.language == AppLanguage.ARABIC,
-                    onClick = { onIntent(ProfileIntent.ChangeLanguage(AppLanguage.ARABIC)) },
-                    label = { Text(stringResource(R.string.profile_language_arabic)) }
-                )
-            }
-            PreferenceGroup(label = stringResource(R.string.profile_theme_label)) {
-                ThemeChip(state, AppTheme.SYSTEM, R.string.profile_theme_system, onIntent)
-                ThemeChip(state, AppTheme.LIGHT, R.string.profile_theme_light, onIntent)
-                ThemeChip(state, AppTheme.DARK, R.string.profile_theme_dark, onIntent)
-            }
-        }
-    }
-}
-
-@Composable
-private fun PreferenceGroup(
-    label: String,
-    content: @Composable RowScope.() -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            content = content
-        )
-    }
-}
-
-@Composable
-private fun ThemeChip(
-    state: ProfileState,
-    theme: AppTheme,
-    labelRes: Int,
-    onIntent: (ProfileIntent) -> Unit
-) {
-    FilterChip(
-        selected = state.preferences.theme == theme,
-        onClick = { onIntent(ProfileIntent.ChangeTheme(theme)) },
-        label = { Text(stringResource(labelRes)) }
-    )
 }
 
 @Composable

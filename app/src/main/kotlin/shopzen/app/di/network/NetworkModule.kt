@@ -1,9 +1,14 @@
 package shopzen.app.di.network
 
 import shopzen.data.remote.config.NetworkConfig
+import shopzen.data.remote.config.PaymobConfig
 import shopzen.data.remote.graphql.KtorGraphQLClient
+import shopzen.data.remote.qualifier.ExchangeRateClient
 import shopzen.data.remote.qualifier.GraphQLClient
+import shopzen.data.remote.qualifier.PaymobClient
 import shopzen.data.remote.qualifier.RestClient
+import shopzen.data.remote.rest.KtorExchangeRateClient
+import shopzen.data.remote.rest.KtorPaymobClient
 import shopzen.data.remote.rest.KtorRestClient
 import dagger.Module
 import dagger.Provides
@@ -29,6 +34,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun providePaymobConfig(): PaymobConfig = PaymobConfig(
+        baseUrl = BuildConfig.PAYMOB_BASE_URL,
+        publicKey = BuildConfig.PAYMOB_PUBLIC_KEY,
+        secretKey = BuildConfig.PAYMOB_SECRET_KEY,
+        currency = BuildConfig.PAYMOB_CURRENCY,
+        onlineCardIntegrationId = BuildConfig.PAYMOB_ONLINE_CARD_INTEGRATION_ID,
+    )
+
+    @Provides
+    @Singleton
     @RestClient
     fun provideRestClient(config: NetworkConfig): HttpClient =
         KtorRestClient.build(config)
@@ -38,4 +53,16 @@ object NetworkModule {
     @GraphQLClient
     fun provideGraphQLClient(config: NetworkConfig): HttpClient =
         KtorGraphQLClient.build(config)
+
+    @Provides
+    @Singleton
+    @PaymobClient
+    fun providePaymobClient(config: PaymobConfig): HttpClient =
+        KtorPaymobClient.build(config)
+
+    @Provides
+    @Singleton
+    @ExchangeRateClient
+    fun provideExchangeRateClient(): HttpClient =
+        KtorExchangeRateClient.build()
 }
