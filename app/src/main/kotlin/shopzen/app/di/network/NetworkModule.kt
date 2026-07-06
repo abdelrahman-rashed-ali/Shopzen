@@ -26,4 +26,9 @@ object NetworkModule {
     @Singleton
     fun provideRestClient(config: NetworkConfig): HttpClient =
         KtorRestClient.build(config)
+
+    @Provides
+    @Singleton
+    fun provideRemoteAdDataSource(): shopzen.data.ads.remote.RemoteAdDataSource =
+        shopzen.data.ads.remote.RemoteAdDataSource()
 }
