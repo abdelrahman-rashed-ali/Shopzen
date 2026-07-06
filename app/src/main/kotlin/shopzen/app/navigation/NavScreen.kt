@@ -72,3 +72,6 @@ data object BrandListScreen : NavScreen("brand-list")
 
 @Serializable
 data class BrandProducts(val brandName: String) : NavScreen("brand-products")
+
+@Serializable
+data class CategoryProductsScreen(val categoryTitle: String) : NavScreen("category-products")

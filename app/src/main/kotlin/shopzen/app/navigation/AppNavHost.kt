@@ -19,6 +19,8 @@ import shopzen.presentation.profile.screen.AddEditAddressScreen
 import shopzen.presentation.profile.screen.PersonalDetailsScreen as PersonalDetailsRouteScreen
 import shopzen.presentation.profile.screen.ProfileScreen as ProfileRouteScreen
 import shopzen.presentation.profile.screen.SavedAddressesScreen
+import shopzen.presentation.category.screen.CategoryProductsScreen as CategoryProductsRouteScreen
+
 
 
 @Composable
@@ -126,8 +128,8 @@ fun AppNavHost(
                 onNavigateToBrand = { brandName ->
                     navController.navigate(BrandProducts(brandName = brandName))
                 },
-                onNavigateToCategory = { categoryId ->
-                    // TODO: Handle category navigation
+                onNavigateToCategory = { categoryTitle ->
+                    navController.navigate(CategoryProductsScreen(categoryTitle))
                 },
                 onNavigateToProduct = { productId ->
                     navController.navigate(
@@ -177,8 +179,8 @@ fun AppNavHost(
                         )
                     )
                 },
-                onNavigateToCategory = { categoryId ->
-                    // TODO: Handle category navigation
+                onNavigateToCategory = { categoryTitle ->
+                    navController.navigate(CategoryProductsScreen(categoryTitle))
                 },
                 onNavigateToSearch = {},
                 onNavigateToCart = {
@@ -306,6 +308,22 @@ fun AppNavHost(
                 },
                 onNavigateToProduct = { productId ->
                     navController.navigate(ProductDetail(productId.toLongOrNull() ?: 0L))
+                }
+            )
+        }
+
+        composable<CategoryProductsScreen> { backStackEntry ->
+            val args = backStackEntry.toRoute<CategoryProductsScreen>()
+
+            CategoryProductsRouteScreen(
+                categoryTitle = args.categoryTitle,
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToProduct = { productId ->
+                    navController.navigate(
+                        ProductDetail(
+                            productId.toLongOrNull() ?: 0L
+                        )
+                    )
                 }
             )
         }
