@@ -27,7 +27,7 @@ import shopzen.presentation.category.screen.CategoryProductsScreen as CategoryPr
 fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: NavScreen = HomeScreen,
+    startDestination: NavScreen = SplashScreen,
     launchGoogleSignIn: (
         onToken: (String) -> Unit,
         onError: (String) -> Unit
@@ -126,7 +126,7 @@ fun AppNavHost(
         composable<HomeScreen> {
             HomeScreen(
                 onNavigateToBrand = { brandName ->
-                    // TODO: Handle brand navigation
+                    navController.navigate(BrandProducts(brandName = brandName))
                 },
                 onNavigateToCategory = { categoryTitle ->
                     navController.navigate(CategoryProductsScreen(categoryTitle))
@@ -155,6 +155,9 @@ fun AppNavHost(
                 },
                 onNavigateToCart = {
                     navController.navigate(CartScreen)
+                },
+                onNavigateToLogin = {
+                    navController.navigate(LoginScreen)
                 }
             )
         }
@@ -281,6 +284,31 @@ fun AppNavHost(
             AddEditAddressScreen(
                 addressId = args.addressId,
                 onNavigateBack = { navController.navigateUp() }
+            )
+        }
+
+        composable<BrandListScreen> {
+            shopzen.presentation.brand.screen.BrandListScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onNavigateToBrandProducts = { brandName ->
+                    navController.navigate(BrandProducts(brandName = brandName))
+                }
+            )
+        }
+
+        composable<BrandProducts> { backStackEntry ->
+            val args = backStackEntry.toRoute<BrandProducts>()
+
+            shopzen.presentation.brand.screen.BrandProductsScreen(
+                brandName = args.brandName,
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onNavigateToProduct = { productId ->
+                    navController.navigate(ProductDetail(productId.toLongOrNull() ?: 0L))
+                }
             )
         }
 
