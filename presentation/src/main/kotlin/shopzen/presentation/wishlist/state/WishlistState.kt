@@ -9,5 +9,6 @@ data class WishlistState(
     val showRemoveItemDialog: Boolean = false,
     val pendingRemovalItemId: String? = null,
     val showAddConfirmationDialog: Boolean = false,
-    val pendingAddProduct: shopzen.domain.catalog.model.Product? = null
+    val pendingAddProduct: shopzen.domain.catalog.model.Product? = null,
+    val showLoginRequiredDialog: Boolean = false
 )

@@ -3,27 +3,32 @@ package shopzen.presentation.product.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import shopzen.presentation.product.intent.ProductDetailIntent
-import shopzen.presentation.product.state.ProductDetailState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import shopzen.domain.product.usecase.GetProductByIdUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import shopzen.domain.product.usecase.GetProductByIdUseCase
+import shopzen.domain.profile.model.AppCurrency
+import shopzen.domain.profile.usecase.GetUserPreferencesUseCase
+import shopzen.presentation.product.intent.ProductDetailIntent
+import shopzen.presentation.product.state.ProductDetailState
 import javax.inject.Inject
 
 /**
  * @HiltViewModel for the Product Detail screen.
  *
- * - Reads `productId` from [SavedStateHandle] (injected from nav arguments)
+ * - Reads `productId` from [SavedStateHandle]
  * - Processes [ProductDetailIntent]s via [processIntent]
+ * - Observes user preferences and reactively converts prices when currency changes
  * - Exposes a single [StateFlow] of [ProductDetailState]
  */
 @HiltViewModel
 class ProductDetailViewModel @Inject constructor(
     private val getProductByIdUseCase: GetProductByIdUseCase,
+    private val getUserPreferencesUseCase: GetUserPreferencesUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -33,6 +38,7 @@ class ProductDetailViewModel @Inject constructor(
     val state: StateFlow<ProductDetailState> = _state.asStateFlow()
 
     init {
+        observeCurrency()
         processIntent(ProductDetailIntent.LoadProduct(productId))
     }
 
@@ -45,19 +51,46 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
+    // ── Currency observation ───────────────────────────────────────────────────
+
+    private fun observeCurrency() {
+        viewModelScope.launch {
+            getUserPreferencesUseCase().collectLatest { prefs ->
+                _state.update { current ->
+                    current.copy(
+                        currency = prefs.currency,
+                        convertedPrice = convertPrice(current.rawPrice(), prefs.currency),
+                        convertedCompareAtPrice = convertPrice(current.rawCompareAtPrice(), prefs.currency),
+                    )
+                }
+            }
+        }
+    }
+
+    // ── Product loading ────────────────────────────────────────────────────────
+
     private fun loadProduct(id: Long) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
             getProductByIdUseCase(id)
                 .onSuccess { product ->
-                    val initialVariantId = if (product.variants.size == 1) product.variants.first().id else null
-                    _state.update {
-                        it.copy(
+                    val initialVariantId =
+                        if (product.variants.size == 1) product.variants.first().id else null
+                    _state.update { current ->
+                        val rawPrice = product.variants
+                            .find { it.id == initialVariantId }
+                            ?.price ?: product.price
+                        val rawCompare = product.variants
+                            .find { it.id == initialVariantId }
+                            ?.compareAtPrice ?: product.compareAtPrice
+                        current.copy(
                             isLoading = false,
                             product = product,
                             selectedVariantId = initialVariantId,
                             error = null,
+                            convertedPrice = convertPrice(rawPrice, current.currency),
+                            convertedCompareAtPrice = convertPrice(rawCompare, current.currency),
                         )
                     }
                 }
@@ -72,16 +105,39 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
+    // ── Variant selection ──────────────────────────────────────────────────────
+
     private fun selectVariant(variantId: Long) {
-        _state.update {
-            it.copy(
+        _state.update { current ->
+            val variant = current.product?.variants?.find { it.id == variantId }
+            current.copy(
                 selectedVariantId = variantId,
                 showSizeRequiredError = false,
+                convertedPrice = convertPrice(variant?.price, current.currency),
+                convertedCompareAtPrice = convertPrice(variant?.compareAtPrice, current.currency),
             )
         }
     }
 
     private fun addToCart() {
         // TODO: Delegate cart handling to dedicated cart feature/use case
+    }
+
+    // ── Price conversion helpers ───────────────────────────────────────────────
+
+    private fun convertPrice(rawUsd: String?, currency: AppCurrency): Double? {
+        val usd = rawUsd?.toDoubleOrNull() ?: return null
+        return usd * currency.rateFromUsd
+    }
+
+    /** Returns the raw (USD) price for the currently selected variant or product default. */
+    private fun ProductDetailState.rawPrice(): String? {
+        val variant = product?.variants?.find { it.id == selectedVariantId }
+        return variant?.price ?: product?.price
+    }
+
+    private fun ProductDetailState.rawCompareAtPrice(): String? {
+        val variant = product?.variants?.find { it.id == selectedVariantId }
+        return variant?.compareAtPrice ?: product?.compareAtPrice
     }
 }

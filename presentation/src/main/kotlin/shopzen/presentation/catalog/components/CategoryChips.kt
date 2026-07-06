@@ -62,7 +62,7 @@ fun CategoryChips(
             items(categories) { category ->
                 CategoryItemCard(
                     category = category,
-                    onClick = { onCategoryClick(category.id) }
+                    onClick = { onCategoryClick(category.title) }
                 )
             }
         }

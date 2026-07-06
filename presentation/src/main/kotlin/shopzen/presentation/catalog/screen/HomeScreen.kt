@@ -76,6 +76,7 @@ fun HomeScreen(
     onNavigateToProfile: () -> Unit,
     onNavigateToWishlist: () -> Unit,
     onNavigateToCart: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     wishlistViewModel: WishlistViewModel = hiltViewModel()
@@ -114,9 +115,10 @@ fun HomeScreen(
             }
 
             else -> {
-                HomeContent(
+                 HomeContent(
                     state = state,
                     wishlistProductIds = wishlistProductIds,
+                    onNavigateToBrand = onNavigateToBrand,
                     onNavigateToCategory = onCategoryClick@{ categoryId ->
                         onNavigateToCategory(categoryId)
                     },
@@ -139,6 +141,22 @@ fun HomeScreen(
                 )
             }
         }
+    }
+
+    if (wishlistState.showLoginRequiredDialog) {
+        ConfirmationDialog(
+            title = "Login Required",
+            message = "You need to log in to add items to your wishlist.",
+            confirmText = "Log In",
+            dismissText = "Cancel",
+            onConfirm = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissLoginRequiredDialog)
+                onNavigateToLogin()
+            },
+            onDismiss = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissLoginRequiredDialog)
+            }
+        )
     }
 
     if (wishlistState.showRemoveItemDialog && wishlistState.pendingRemovalItemId != null) {
@@ -363,6 +381,7 @@ private fun HomeBottomBar(onSearchClick: () -> Unit) {
 private fun HomeContent(
     state: HomeState,
     wishlistProductIds: Set<String>,
+    onNavigateToBrand: (String) -> Unit,
     onNavigateToCategory: (String) -> Unit,
     onNavigateToProduct: (String) -> Unit,
     onWishlistClick: (shopzen.domain.catalog.model.Product) -> Unit,
@@ -382,6 +401,14 @@ private fun HomeContent(
             bannerImages = state.bannerImages,
             title = "The Art of Elegance",
             subtitle = "Discover our curated collection of timeless pieces designed for the modern connoisseur."
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // 2b. Brands Selector
+        shopzen.presentation.catalog.components.BrandChips(
+            brands = state.brands,
+            onBrandClick = onNavigateToBrand
         )
 
         Spacer(modifier = Modifier.height(32.dp))

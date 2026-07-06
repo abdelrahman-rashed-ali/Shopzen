@@ -17,8 +17,15 @@ enum class AppTheme {
     DARK,
 }
 
-enum class AppCurrency(val symbol: String) {
-    USD("$"),
-    EUR("EUR"),
-    GBP("GBP"),
+enum class AppCurrency(
+    val symbol: String,
+    /** Exchange rate relative to 1 USD. */
+    val rateFromUsd: Double,
+) {
+    USD("$", 1.0),
+    EUR("€", 0.92),
+    GBP("£", 0.79),
+    EGP("EGP", 49.0),
+    SAR("SAR", 3.75),
+    AED("AED", 3.67),
 }

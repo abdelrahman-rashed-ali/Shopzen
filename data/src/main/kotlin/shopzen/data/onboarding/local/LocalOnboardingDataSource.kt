@@ -20,6 +20,6 @@ class LocalOnboardingDataSource @Inject constructor(application: Application) {
     }
 
     companion object {
-        private const val KEY_HAS_COMPLETED = "has_completed"
+        private const val KEY_HAS_COMPLETED = "has_completed_v2"
     }
 }

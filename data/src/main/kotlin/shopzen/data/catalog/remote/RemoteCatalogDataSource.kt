@@ -25,11 +25,24 @@ class RemoteCatalogDataSource @Inject constructor(
 
     suspend fun getProductVendors(): ProductsResponse {
         return client.get("products.json") {
-            parameter("fields", "id,vendor")
+            parameter("fields", "id,vendor,images")
+        }.body()
+    }
+
+    suspend fun getProductsByVendor(vendorName: String): ProductsResponse {
+        return client.get("products.json") {
+            parameter("vendor", vendorName)
         }.body()
     }
 
     suspend fun getCustomCollections(): CollectionsResponse {
         return client.get("custom_collections.json").body()
+    }
+
+    suspend fun getProductsByCategory(categoryTitle: String): ProductsResponse {
+        return client.get("products.json") {
+            parameter("product_type", categoryTitle)
+            parameter("limit", 50)
+        }.body()
     }
 }

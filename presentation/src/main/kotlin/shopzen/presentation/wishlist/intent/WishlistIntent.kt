@@ -11,4 +11,5 @@ sealed class WishlistIntent {
     object DismissAddConfirmDialog : WishlistIntent()
     data class AddToWishlist(val product: shopzen.domain.catalog.model.Product) : WishlistIntent()
     data class AddToCart(val productId: String) : WishlistIntent()
+    object DismissLoginRequiredDialog : WishlistIntent()
 }
