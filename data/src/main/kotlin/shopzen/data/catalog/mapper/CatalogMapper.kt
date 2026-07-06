@@ -32,9 +32,13 @@ object CatalogMapper {
 
     fun List<ProductDto>.toDistinctBrands(): List<Brand> {
         return this
-            .map { it.vendor.orEmpty() }
-            .filter { it.isNotEmpty() }
-            .distinct()
-            .map { Brand(name = it) }
+            .groupBy { it.vendor.orEmpty() }
+            .filter { it.key.isNotEmpty() }
+            .map { (vendor, products) ->
+                Brand(
+                    name = vendor,
+                    imageUrl = products.firstOrNull()?.images?.firstOrNull()?.src.orEmpty()
+                )
+            }
     }
 }

@@ -114,9 +114,10 @@ fun HomeScreen(
             }
 
             else -> {
-                HomeContent(
+                 HomeContent(
                     state = state,
                     wishlistProductIds = wishlistProductIds,
+                    onNavigateToBrand = onNavigateToBrand,
                     onNavigateToCategory = onCategoryClick@{ categoryId ->
                         onNavigateToCategory(categoryId)
                     },
@@ -379,6 +380,7 @@ private fun HomeBottomBar(onSearchClick: () -> Unit) {
 private fun HomeContent(
     state: HomeState,
     wishlistProductIds: Set<String>,
+    onNavigateToBrand: (String) -> Unit,
     onNavigateToCategory: (String) -> Unit,
     onNavigateToProduct: (String) -> Unit,
     onWishlistClick: (shopzen.domain.catalog.model.Product) -> Unit,
@@ -398,6 +400,14 @@ private fun HomeContent(
             bannerImages = state.bannerImages,
             title = "The Art of Elegance",
             subtitle = "Discover our curated collection of timeless pieces designed for the modern connoisseur."
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // 2b. Brands Selector
+        shopzen.presentation.catalog.components.BrandChips(
+            brands = state.brands,
+            onBrandClick = onNavigateToBrand
         )
 
         Spacer(modifier = Modifier.height(32.dp))
