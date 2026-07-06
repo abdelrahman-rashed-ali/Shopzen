@@ -11,17 +11,13 @@ kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
-}
 
-dependencies {
-    implementation(kotlin("stdlib"))
-    //rashed
-    api(libs.kotlinx.coroutines.core)
-    //rashed
-    //ziad
-    implementation(libs.javax.inject)
-    //ziad
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlinx.coroutines.test)
+    dependencies {
+        //rashed
+        implementation(libs.kotlinx.coroutines.core)
+        //rashed
+        //ziad
+        implementation(libs.javax.inject)
+        //ziad
+    }
 }

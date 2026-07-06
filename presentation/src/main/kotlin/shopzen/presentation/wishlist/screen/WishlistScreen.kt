@@ -34,13 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import shopzen.presentation.common.components.BottomBarTab
 import shopzen.presentation.common.components.ConfirmationDialog
 import shopzen.presentation.common.components.EmptyStateView
 import shopzen.presentation.common.components.ErrorScreen
+import shopzen.presentation.common.components.HomeBottomBar
 import shopzen.presentation.common.components.LoadingIndicator
-import shopzen.presentation.common.components.MainShellTab
-import shopzen.presentation.common.components.ShopzenBottomBar
-import shopzen.presentation.common.components.ShopzenTopAppBar
 import shopzen.presentation.wishlist.components.WishlistItemCard
 import shopzen.presentation.wishlist.intent.WishlistIntent
 import shopzen.presentation.wishlist.state.WishlistState
@@ -53,7 +52,6 @@ fun WishlistScreen(
     onNavigateToSearch: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToProfile: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: WishlistViewModel = hiltViewModel()
 ) {
@@ -61,19 +59,15 @@ fun WishlistScreen(
     val onIntent = viewModel::processIntent
 
     Scaffold(
-        topBar = {
-            ShopzenTopAppBar(
-                onProfileClick = onNavigateToProfile,
-                onCartClick = onNavigateToCart,
-            )
-        },
+        topBar = { WishlistTopBar() },
         bottomBar = {
-            ShopzenBottomBar(
-                currentTab = MainShellTab.WISHLIST,
-                onDiscoverClick = onNavigateToHome,
-                onSearchClick = onNavigateToSearch,
-                onWishlistClick = {},
-                onSettingsClick = onNavigateToSettings,
+            HomeBottomBar(
+                currentTab = BottomBarTab.WISHLIST,
+                onNavigateToHome = onNavigateToHome,
+                onNavigateToSearch = onNavigateToSearch,
+                onNavigateToWishlist = {},
+                onNavigateToCart = onNavigateToCart,
+                onNavigateToProfile = onNavigateToProfile
             )
         },
         modifier = modifier.background(Color.White)

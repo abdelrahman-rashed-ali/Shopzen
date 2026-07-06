@@ -6,5 +6,6 @@ package shopzen.presentation.product.intent
 sealed class ProductDetailIntent {
     data class LoadProduct(val productId: Long) : ProductDetailIntent()
     data class SelectVariant(val variantId: Long) : ProductDetailIntent()
+    data object AddToCart : ProductDetailIntent()
     data object Retry : ProductDetailIntent()
 }

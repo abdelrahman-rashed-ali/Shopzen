@@ -3,7 +3,6 @@ package shopzen.data.customer.repository
 import shopzen.data.customer.remote.RemoteShopifyCustomerDataSource
 import shopzen.data.profile.remote.RemoteProfileDataSource
 import shopzen.domain.customer.repository.ShopifyCustomerRepository
-import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 
 /**
@@ -39,13 +38,4 @@ class ShopifyCustomerRepositoryImpl @Inject constructor(
 
     override suspend fun getShopifyCustomerId(uid: String): Result<Long?> =
         remoteProfileDataSource.getShopifyCustomerId(uid)
-
-    override suspend fun findShopifyCustomerIdByEmail(email: String): Result<Long?> =
-        try {
-            Result.success(remoteShopifyCustomerDataSource.getCustomerByEmail(email)?.id)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
 }

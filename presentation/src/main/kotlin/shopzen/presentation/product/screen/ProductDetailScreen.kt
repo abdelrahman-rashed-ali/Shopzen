@@ -1,6 +1,5 @@
 package shopzen.presentation.product.screen
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,26 +29,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.activity.compose.LocalActivity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import shopzen.domain.cart.model.CartItem
-import shopzen.presentation.cart.intent.CartIntent
-import shopzen.presentation.cart.viewmodel.CartEffect
-import shopzen.presentation.cart.viewmodel.CartViewModel
 import shopzen.presentation.product.components.ErrorContent
 import shopzen.presentation.product.components.ImagePagerIndicator
 import shopzen.presentation.product.components.LoadingContent
@@ -68,30 +57,14 @@ import shopzen.presentation.product.viewmodel.ProductDetailViewModel
 fun ProductDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: ProductDetailViewModel = hiltViewModel(),
-    cartViewModel: CartViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     productId: Long?,
     onNavigateBack: () -> Unit,
-    onNavigateToLogin: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val onIntent = viewModel::processIntent
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
-
-    LaunchedEffect(cartViewModel) {
-        cartViewModel.effects.collect { effect ->
-            when (effect) {
-                CartEffect.NavigateToLogin -> onNavigateToLogin()
-                is CartEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message.asString(context))
-                else -> {}
-            }
-        }
-    }
-
     Scaffold(
         modifier = modifier,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -128,8 +101,7 @@ fun ProductDetailScreen(
                 )
                 state.product != null -> ProductContent(
                     state = state,
-                    onProductIntent = onIntent,
-                    onCartIntent = cartViewModel::processIntent
+                    onIntent = onIntent,
                 )
             }
         }
@@ -141,8 +113,7 @@ fun ProductDetailScreen(
 @Composable
 fun ProductContent(
     state: ProductDetailState,
-    onProductIntent: (ProductDetailIntent) -> Unit,
-    onCartIntent: (CartIntent) -> Unit,
+    onIntent: (ProductDetailIntent) -> Unit,
 ) {
     val product = state.product ?: return
     val scrollState = rememberScrollState()
@@ -213,7 +184,7 @@ fun ProductContent(
                         variants = product.variants,
                         selectedVariantId = state.selectedVariantId,
                         onSelectVariant = { variantId ->
-                            onProductIntent(ProductDetailIntent.SelectVariant(variantId))
+                            onIntent(ProductDetailIntent.SelectVariant(variantId))
                         },
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -239,15 +210,7 @@ fun ProductContent(
             val isOutOfStock = selectedVariant?.inventoryQuantity == 0
 
             Button(
-                onClick = { onCartIntent(CartIntent.AddToCart(
-                    productId = product.id.toString(),
-                    variantId = selectedVariant?.adminGraphqlApiId ?: "",
-                    title = product.title,
-                    variantTitle = selectedVariant?.title ?: "",
-                    price = selectedVariant?.price?.toDouble() ?: 0.0,
-                    maxQuantity = selectedVariant?.inventoryQuantity ?: 1,
-                    imageUrl = product.images.firstOrNull()?.src ?: ""
-                )) },
+                onClick = { onIntent(ProductDetailIntent.AddToCart) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

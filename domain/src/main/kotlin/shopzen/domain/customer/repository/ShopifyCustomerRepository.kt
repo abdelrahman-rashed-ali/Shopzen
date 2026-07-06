@@ -36,9 +36,4 @@ interface ShopifyCustomerRepository {
      * Never calls the Shopify API — Firestore is the cache.
      */
     suspend fun getShopifyCustomerId(uid: String): Result<Long?>
-
-    /**
-     * Finds an existing Shopify customer ID by email when Firestore cache is missing.
-     */
-    suspend fun findShopifyCustomerIdByEmail(email: String): Result<Long?>
 }

@@ -9,15 +9,13 @@ import shopzen.data.catalog.remote.dto.ProductsResponse
 import javax.inject.Inject
 import javax.inject.Singleton
 
-import shopzen.data.remote.qualifier.RestClient
-
 /**
  * Ktor-based remote data source for Shopify catalog endpoints.
  * Base URL, headers, and serialisation are pre-configured on [HttpClient] by the DI module.
  */
 @Singleton
 class RemoteCatalogDataSource @Inject constructor(
-    @RestClient private val client: HttpClient
+    private val client: HttpClient
 ) {
     suspend fun getProducts(): ProductsResponse {
         return client.get("products.json") {

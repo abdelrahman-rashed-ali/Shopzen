@@ -59,14 +59,13 @@ Reference design: <https://pocket-shop-style.lovable.app>
 | Architecture | Clean Architecture + Multi-Module + Feature-Based packages |
 | UI Pattern | MVI |
 | DI | Hilt |
-| Networking | Ktor Client (REST) · Apollo Android (GraphQL) |
+| Networking | Retrofit + OkHttp (REST) · Apollo Android (GraphQL) |
 | Auth | Firebase Auth (Email/Password + Google Sign-In) |
 | Local DB | Room |
 | Async | Kotlin Coroutines + Flow + StateFlow |
 | Navigation | Jetpack Compose Navigation |
 | Address | Google Places API or HERE Maps SDK |
 | Currency | External exchange-rate API (e.g. Open Exchange Rates) |
-| Payment Gateway | Paymob Mobile SDK + Ktor intention API |
 | Images | Coil |
 | Testing | JUnit 5, MockK, kotlinx-coroutines-test, Turbine |
 
@@ -117,7 +116,7 @@ com.shopzen.domain/
 com.shopzen.data/
 ├── {feature}/
 │   ├── remote/
-│   │   ├── api/                    ← Ktor request contracts + Apollo operations (.graphql)
+│   │   ├── api/                    ← Retrofit interfaces + Apollo operations (.graphql)
 │   │   ├── dto/                    ← JSON/GraphQL response shapes
 │   │   └── Remote{Feature}DataSource.kt
 │   ├── local/
@@ -232,7 +231,7 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 | | OrderDetailScreen | `main/profile/orders/{orderId}` | **Yes** |
 | | AddressListScreen | `main/profile/addresses` | **Yes** |
 | | AddressFormScreen | `main/profile/addresses/form?id={id}` | **Yes** |
-| | SettingsScreen | `main/settings` | No |
+| | SettingsScreen | `main/profile/settings` | **Yes** |
 | **checkout** | CheckoutScreen | `checkout/summary` | **Yes** |
 | | PaymentScreen | `checkout/payment` | **Yes** |
 | | OrderConfirmationScreen | `checkout/confirmation/{orderId}` | **Yes** |
@@ -345,7 +344,7 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 
 **Responsibility:** Full cart management — add, update, remove items. Enforces real-time stock limits. Totals recalculated locally. Stored in Room; optionally synced as Shopify Draft Order.
 
-**Domain models:** `Cart(items, currency, subtotalPrice, discountAmount, totalPrice, appliedCoupon, userId)`, `CartItem(id, productId, variantId, title, variantTitle, price, quantity, maxQuantity, imageUrl, userId)`, `DiscountCode(code, discountType, value)`, `DiscountType(PERCENTAGE | FIXED_AMOUNT)`
+**Domain models:** `Cart(items, currency, subtotalPrice, userId)`, `CartItem(id, productId, variantId, title, variantTitle, price, quantity, maxQuantity, imageUrl, userId)`
 
 **Use cases:**
 
@@ -355,19 +354,13 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 | `AddToCartUseCase` | Validates stock before insert; updates quantity if variant already in cart |
 | `RemoveFromCartUseCase` | Deletes item — confirmation required |
 | `UpdateCartItemQuantityUseCase` | Clamps quantity to `[1, maxQuantity]` before saving |
-| `GetCartTotalUseCase` | Pure: `sum(item.price * item.quantity)` minus discount |
+| `GetCartTotalUseCase` | Pure: `sum(item.price * item.quantity)` |
 | `ClearCartUseCase` | Deletes all items for user — confirmation required |
-| `ValidateCouponUseCase` | REST — `GET /price_rules/{id}/discount_codes.json` Checks code validity |
-| `ApplyCouponUseCase` | Client-side Deducts discount; updates CartState |
-| `RemoveCouponUseCase` | Client-side Restores original subtotal |
 
 **Business rules:**
 - Quantity increment disabled when `quantity == maxQuantity`
 - Cart badge on bottom nav shows item count reactively
 - Total recalculated on every mutation without a network call
-- Apply Coupon: Users can apply a discount code. The app must validate it against the Shopify REST API (GET /price_rules/{id}/discount_codes.json). If valid, it deducts the discount and updates the checkout state.
-- Remove Coupon: Users can remove an applied coupon, which restores the original subtotal.
-- Error Handling (Coupons): If a user enters an invalid coupon, the app must show an inline field error (do not use a dialog for this).
 
 ---
 
@@ -377,15 +370,13 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 
 **Domain models:** `UserProfile`, `Order`, `OrderLineItem`, `Address(id?, firstName, lastName, phone, address1, city, province, country, countryCode, zip, latitude, longitude)`, `Country`, `Province`, `CurrencyRate(base, rates, fetchedAt)`
 
-`Order` includes `subtotalPrice`, `discountAmount`, optional `discountCode`, `totalPrice`, and `paymentMethod` so order history and details show the same final pricing and payment selection users saw at checkout.
-
 **Use cases & data sources:**
 
 | Use Case | Source | Description |
 |---|---|---|
 | `GetUserProfileUseCase` | REST — `GET /customers/{id}.json` | Shopify customer record |
 | `GetOrderHistoryUseCase` | REST — `GET /customers/{id}/orders.json` | All past orders |
-| `GetOrderDetailUseCase` | REST — `GET /orders/{order_id}.json` | Full order with line items |
+| `GetOrderDetailUseCase` | GraphQL — `order(id:)` query | Full order with line items |
 | `GetAddressesUseCase` | REST — `GET /customers/{id}/addresses.json` | Saved addresses |
 | `AddAddressUseCase` | REST — `POST /customers/{id}/addresses.json` | Creates address |
 | `UpdateAddressUseCase` | REST — `PUT /customers/{id}/addresses/{addr_id}.json` | Updates address |
@@ -399,8 +390,6 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 - Country dropdown populated from `GetCountriesUseCase` — never hardcoded
 - Selected currency persisted in `DataStore`; applied globally to all price displays
 - `ProfileScreen` shows: personalized greeting, recent order count, `WishlistPreviewGrid` (max 4 items)
-- `SettingsScreen` is separate from `ProfileScreen`; it is available to guests and stores preferences locally when unauthenticated
-- `OrderHistoryScreen` and `OrderDetailScreen` show payment method plus discount code/amount when present.
 
 ---
 
@@ -408,21 +397,22 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 
 **Responsibility:** Order summary, coupon application, shipping address selection, payment method, and final order placement.
 
-**Domain models:** `Checkout(lineItems, shippingAddress, subtotalPrice, discountAmount, totalPrice, currency, appliedCoupon, selectedPaymentMethod)`, `PaymentMethod(CASH_ON_DELIVERY | ONLINE_PAYMENT)`, `OrderConfirmation`
+**Domain models:** `Checkout(lineItems, shippingAddress, subtotalPrice, discountAmount, totalPrice, currency, appliedCoupon, selectedPaymentMethod)`, `DiscountCode(code, discountType, value)`, `DiscountType(PERCENTAGE | FIXED_AMOUNT)`, `PaymentMethod(CASH_ON_DELIVERY | ONLINE_PAYMENT)`, `OrderConfirmation`
 
 **Use cases:**
 
 | Use Case | Source | Description |
 |---|---|---|
+| `ValidateCouponUseCase` | REST — `GET /price_rules/{id}/discount_codes.json` | Checks code validity |
+| `ApplyCouponUseCase` | Client-side | Deducts discount; updates `CheckoutState` |
+| `RemoveCouponUseCase` | Client-side | Restores original subtotal |
 | `GetAvailablePaymentMethodsUseCase` | Client-side | Filters COD based on `MAX_COD_AMOUNT` |
 | `ValidateCashLimitUseCase` | Client-side | Returns `false` if `totalPrice > Constants.MAX_COD_AMOUNT` |
-| `CreatePaymobPaymentIntentionUseCase` | Ktor — Paymob `POST /v1/intention/` | Creates the client secret for Paymob card SDK checkout |
 | `PlaceOrderUseCase` | GraphQL — `orderCreate` mutation | Submits order; Shopify triggers confirmation email |
 
 **Business rules:**
 - COD shown only when `totalPrice <= Constants.MAX_COD_AMOUNT`
-- Online payment uses Paymob Mobile SDK. The app creates a Paymob intention through `:data` using Ktor, launches the SDK from `:presentation`, and creates the Shopify order only after the SDK reports success.
-- Order creation persists the selected payment method and actual discount amount in the Shopify order payload so account order history remains accurate.
+- Invalid coupon shows inline field error — not a dialog
 - Order placement requires `ConfirmationDialog`
 - After successful order: clear Room cart → navigate to `OrderConfirmationScreen`
 
@@ -439,7 +429,7 @@ Shopzen uses **both** the Shopify REST Admin API and the Shopify GraphQL Admin A
 | REST | `https://{hostname}/admin/api/{version}/{resource}.json` |
 | GraphQL | `https://{hostname}/admin/api/{version}/graphql.json` |
 
-All credentials come from `BuildConfig`. REST calls use Ktor clients configured in `NetworkModule`; Shopify Admin requests send `X-Shopify-Access-Token`, and Paymob intention requests send `Authorization: Token {secret}`.
+All credentials come from `BuildConfig`. REST calls are authenticated via `ShopifyAuthInterceptor` (HTTP Basic — `apiKey:password`). GraphQL calls use the same interceptor.
 
 ### REST — Key Endpoints
 
@@ -451,7 +441,6 @@ All credentials come from `BuildConfig`. REST calls use Ktor clients configured 
 | Custom collections | GET | `/custom_collections.json` |
 | Customer record | GET | `/customers/{id}.json` |
 | Customer orders | GET | `/customers/{id}/orders.json` |
-| Single order | GET | `/orders/{order_id}.json` |
 | Customer addresses | GET/POST | `/customers/{id}/addresses.json` |
 | Single address | PUT/DELETE | `/customers/{id}/addresses/{addr_id}.json` |
 | Discount codes | GET | `/price_rules/{id}/discount_codes.json` |
@@ -462,6 +451,7 @@ All credentials come from `BuildConfig`. REST calls use Ktor clients configured 
 | Operation | Type | Description |
 |---|---|---|
 | `product(id:)` | Query | Full product detail with variants and images |
+| `order(id:)` | Query | Full order with line items |
 | `orderCreate` | Mutation | Place a new order |
 
 Place `.graphql` files in `data/{feature}/remote/api/`. Use Apollo Android for type-safe GraphQL — generated types live alongside the operation files.
@@ -500,7 +490,7 @@ All DI modules live in `:app/di/`. They are the only place that imports from bot
 
 | Module | Provides |
 |---|---|
-| `NetworkModule` | Ktor `HttpClient` instances, `ApolloClient`, network configuration objects (`@Singleton`) |
+| `NetworkModule` | `OkHttpClient`, `Retrofit`, `ApolloClient`, all Retrofit API interfaces (`@Singleton`) |
 | `DatabaseModule` | `ShopzenDatabase`, all DAOs |
 | `RepositoryModule` | `@Binds` — each `RepositoryImpl` bound to its interface (`@Singleton`) |
 | `UseCaseModule` | Use case instances where manual wiring is needed |
@@ -550,9 +540,8 @@ AppNavGraph (single graph — all destinations registered flat)
 | 0 | Home | `Icons.Default.Home` | `main/home` | No |
 | 1 | Search | `Icons.Default.Search` | `main/search` | No |
 | 2 | Wishlist | `Icons.Default.FavoriteBorder` | `main/wishlist` | Yes |
-| 3 | Settings | `Icons.Default.Settings` | `main/settings` | No |
-
-Profile and Cart are top app bar actions, not bottom tabs. Guests still see Wishlist, Profile, and Cart icons; tapping any auth-gated destination redirects to Login. Settings remains accessible to guests. Firebase sync from Settings requires authentication; guest preference changes are saved locally only.
+| 3 | Cart | `Icons.Default.ShoppingCart` | `main/cart` | Yes |
+| 4 | Profile | `Icons.Default.Person` | `main/profile` | Yes |
 
 ### Auth Guard
 
@@ -679,11 +668,6 @@ SHOPIFY_API_VERSION=2024-01
 GOOGLE_WEB_CLIENT_ID=
 CURRENCY_API_KEY=
 GOOGLE_PLACES_API_KEY=
-PAYMOB_BASE_URL=https://accept.paymob.com
-PAYMOB_PUBLIC_KEY=
-PAYMOB_SECRET_KEY=
-PAYMOB_CURRENCY=EGP
-PAYMOB_ONLINE_CARD_INTEGRATION_ID=
 ```
 
 Injected via `buildConfigField` in `app/build.gradle.kts`. Access at runtime via `BuildConfig.*`.

@@ -46,6 +46,7 @@ class ProductDetailViewModel @Inject constructor(
         when (intent) {
             is ProductDetailIntent.LoadProduct -> loadProduct(intent.productId)
             is ProductDetailIntent.SelectVariant -> selectVariant(intent.variantId)
+            is ProductDetailIntent.AddToCart -> addToCart()
             is ProductDetailIntent.Retry -> loadProduct(productId)
         }
     }

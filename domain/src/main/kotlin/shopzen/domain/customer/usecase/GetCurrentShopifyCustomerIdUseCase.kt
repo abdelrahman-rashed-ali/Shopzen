@@ -33,29 +33,14 @@ class GetCurrentShopifyCustomerIdUseCase @Inject constructor(
             ?: return Result.failure(IllegalStateException("No authenticated user"))
 
         // ── 2. Read cached Shopify ID from Firestore ──────────────────────────
-        val cachedCustomerId = shopifyCustomerRepository
+        return shopifyCustomerRepository
             .getShopifyCustomerId(uid = user.uid)
-            .getOrElse { cause -> return Result.failure(cause) }
-
-        if (cachedCustomerId != null) {
-            return Result.success(cachedCustomerId)
-        }
-
-        val email = user.email.takeIf { it.isNotBlank() }
-            ?: return Result.failure(IllegalStateException("Current user has no email"))
-
-        val foundCustomerId = shopifyCustomerRepository
-            .findShopifyCustomerIdByEmail(email)
-            .getOrElse { cause -> return Result.failure(cause) }
-            ?: return Result.failure(
-                IllegalStateException(
-                    "No Shopify customer ID found for uid=${user.uid} or email=$email."
-                )
-            )
-
-        shopifyCustomerRepository.saveShopifyCustomerId(user.uid, foundCustomerId)
-            .getOrElse { cause -> return Result.failure(cause) }
-
-        return Result.success(foundCustomerId)
+            .mapCatching { customerId ->
+                customerId
+                    ?: error(
+                        "No Shopify customer ID found for uid=${user.uid}. " +
+                        "This should have been written during registration."
+                    )
+            }
     }
 }

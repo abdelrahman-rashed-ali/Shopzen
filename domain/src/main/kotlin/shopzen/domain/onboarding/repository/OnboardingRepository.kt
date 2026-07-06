@@ -4,5 +4,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface OnboardingRepository {
     fun hasCompletedOnboarding(): Flow<Boolean>
-    suspend fun completeOnboarding(): Unit
+    suspend fun completeOnboarding()
 }

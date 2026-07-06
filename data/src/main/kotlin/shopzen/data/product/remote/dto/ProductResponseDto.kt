@@ -34,7 +34,6 @@ data class VariantDto(
     val price: String = "0.00",
     @SerialName("compare_at_price") val compareAtPrice: String? = null,
     @SerialName("inventory_quantity") val inventoryQuantity: Int = 0,
-    @SerialName("admin_graphql_api_id") val adminGraphqlApiId: String = "",
     val option1: String? = null,
     val option2: String? = null,
     val option3: String? = null,

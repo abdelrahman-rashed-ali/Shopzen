@@ -11,6 +11,5 @@ data class ProductVariant(
     val price: String,
     val compareAtPrice: String?,
     val inventoryQuantity: Int,
-    val adminGraphqlApiId: String,
     val selectedOptions: List<SelectedOption>,
 )

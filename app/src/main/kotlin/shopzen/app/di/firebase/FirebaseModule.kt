@@ -22,11 +22,6 @@ abstract class FirebaseModule {
             return FirebaseAuth.getInstance()
         }
 
-        @Provides
-        @Singleton
-        fun provideFirebaseFirestore(): com.google.firebase.firestore.FirebaseFirestore {
-            return com.google.firebase.firestore.FirebaseFirestore.getInstance()
-        }
     }
 
     @Binds

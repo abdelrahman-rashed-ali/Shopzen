@@ -134,8 +134,7 @@ com.shopzen.domain/
 │       ├── RemoveFromCartUseCase.kt
 │       ├── UpdateCartItemQuantityUseCase.kt
 │       ├── GetCartTotalUseCase.kt
-│       ├── ClearCartUseCase.kt
-│       └── ValidateCouponUseCase.kt
+│       └── ClearCartUseCase.kt
 │
 ├── account/
 │   ├── model/
@@ -170,6 +169,9 @@ com.shopzen.domain/
     ├── repository/
     │   └── CheckoutRepository.kt
     └── usecase/
+        ├── ValidateCouponUseCase.kt
+        ├── ApplyCouponUseCase.kt
+        ├── RemoveCouponUseCase.kt
         ├── GetAvailablePaymentMethodsUseCase.kt
         ├── ValidateCashLimitUseCase.kt
         └── PlaceOrderUseCase.kt
@@ -332,9 +334,6 @@ data class Cart(
     val items: List<CartItem>,
     val currency: String,
     val subtotalPrice: Double,
-    val discountAmount: Double,
-    val totalPrice: Double,
-    val appliedCoupon: DiscountCode?,
     val userId: String
 )
 
@@ -369,13 +368,9 @@ data class UserProfile(
 
 data class Order(
     val id: String,
-    val orderNumber: String,
-    val subtotalPrice: Double,
-    val discountAmount: Double,
-    val discountCode: String?,
+    val orderNumber: Int,
     val totalPrice: Double,
     val currency: String,
-    val paymentMethod: String,
     val financialStatus: String,
     val fulfillmentStatus: String,
     val createdAt: String,
@@ -587,9 +582,6 @@ interface CartRepository {
 
     /** Remove all cart items belonging to the user. */
     suspend fun clearCart(userId: String): Result<Unit>
-
-    /** Validate a coupon code against Shopify price rules. */
-    suspend fun validateCoupon(code: String): Result<CouponValidationResult>
 }
 ```
 
@@ -633,6 +625,9 @@ interface AccountRepository {
 
 ```kotlin
 interface CheckoutRepository {
+    /** Validate a coupon code against Shopify price rules. */
+    suspend fun validateCoupon(code: String): Result<DiscountCode>
+
     /** Submit a new order via GraphQL orderCreate mutation. */
     suspend fun placeOrder(checkout: Checkout): Result<OrderConfirmation>
 }
@@ -780,7 +775,6 @@ class VerbNounUseCase @Inject constructor(
 | `UpdateCartItemQuantityUseCase` | `suspend operator fun invoke(itemId: String, quantity: Int, maxQuantity: Int): Result<Unit>` | Clamps quantity to `[1, maxQuantity]` before delegating |
 | `GetCartTotalUseCase` | `operator fun invoke(items: List<CartItem>): Double` | Pure: `Σ(item.price × item.quantity)` |
 | `ClearCartUseCase` | `suspend operator fun invoke(userId: String): Result<Unit>` | Removes all cart items for user |
-| `ValidateCouponUseCase` | `suspend operator fun invoke(code: String): Result<CouponValidationResult>` | Checks code validity via Shopify price rules |
 
 #### Business Rules Enforced in Use Cases
 
@@ -827,6 +821,9 @@ class VerbNounUseCase @Inject constructor(
 
 | Class | Signature | Description |
 |---|---|---|
+| `ValidateCouponUseCase` | `suspend operator fun invoke(code: String): Result<DiscountCode>` | Checks code validity via Shopify price rules |
+| `ApplyCouponUseCase` | `operator fun invoke(checkout: Checkout, coupon: DiscountCode): Checkout` | Pure: deducts discount, returns updated `Checkout` |
+| `RemoveCouponUseCase` | `operator fun invoke(checkout: Checkout): Checkout` | Pure: restores original subtotal, returns updated `Checkout` |
 | `GetAvailablePaymentMethodsUseCase` | `operator fun invoke(totalPrice: Double): List<PaymentMethod>` | Filters COD based on `MAX_COD_AMOUNT` |
 | `ValidateCashLimitUseCase` | `operator fun invoke(totalPrice: Double): Boolean` | Returns `false` if `totalPrice > Constants.MAX_COD_AMOUNT` |
 | `PlaceOrderUseCase` | `suspend operator fun invoke(checkout: Checkout): Result<OrderConfirmation>` | Submits order; Shopify triggers confirmation email |
@@ -834,6 +831,8 @@ class VerbNounUseCase @Inject constructor(
 #### Business Rules Enforced in Use Cases
 
 - `GetAvailablePaymentMethodsUseCase` calls `ValidateCashLimitUseCase` internally — `PaymentMethod.CASH_ON_DELIVERY` is only in the returned list when `totalPrice <= Constants.MAX_COD_AMOUNT`
+- `ApplyCouponUseCase` is a **pure function**: takes the current `Checkout` and a valid `DiscountCode`, computes `discountAmount` and new `totalPrice`, returns a new `Checkout` copy — no repository call
+- `RemoveCouponUseCase` is a **pure function**: resets `discountAmount = 0.0`, recalculates `totalPrice = subtotalPrice`, clears `appliedCoupon = null`
 - `PlaceOrderUseCase` must **not** clear the cart — clearing the Room cart after successful order is the ViewModel's responsibility (call `ClearCartUseCase` after `PlaceOrderUseCase` succeeds)
 - Invalid coupon results (`Result.failure`) are surfaced as inline field errors in the UI — not as dialogs; this is a presentation concern, but use cases must return descriptive error messages
 

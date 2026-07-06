@@ -13,5 +13,4 @@ interface ProfileRepository {
     suspend fun updateAddress(uid: String, address: Address): Result<Unit>
     suspend fun deleteAddress(uid: String, addressId: String): Result<Unit>
     suspend fun setDefaultAddress(uid: String, addressId: String): Result<Unit>
-    suspend fun getUserCurrency(email: String): String
 }
