@@ -19,4 +19,9 @@ interface RemoteShopifyCustomerDataSource {
         firstName: String,
         lastName: String,
     ): Long
+
+    /**
+     * Gets a customer by email. Returns null if not found.
+     */
+    suspend fun getCustomerByEmail(email: String): shopzen.data.customer.remote.dto.CustomerDto?
 }

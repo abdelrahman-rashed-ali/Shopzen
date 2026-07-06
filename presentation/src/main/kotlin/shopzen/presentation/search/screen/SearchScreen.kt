@@ -46,11 +46,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import shopzen.presentation.common.components.BottomBarTab
 import shopzen.presentation.common.components.ErrorScreen
 import shopzen.presentation.common.components.LoadingIndicator
-import shopzen.presentation.common.components.HomeBottomBar
+import shopzen.presentation.common.components.MainShellTab
 import shopzen.presentation.common.components.ProductCard
+import shopzen.presentation.common.components.ShopzenBottomBar
+import shopzen.presentation.common.components.ShopzenTopAppBar
 import shopzen.presentation.search.components.CollectionCard
 import shopzen.presentation.search.components.FilterDialog
 import shopzen.presentation.search.components.SuggestionChip
@@ -67,6 +68,7 @@ fun SearchScreen(
     onNavigateToSearch: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
@@ -91,15 +93,19 @@ fun SearchScreen(
     }
 
     Scaffold(
-        topBar = { SearchTopBar() },
+        topBar = {
+            ShopzenTopAppBar(
+                onProfileClick = onNavigateToProfile,
+                onCartClick = onNavigateToCart,
+            )
+        },
         bottomBar = {
-            HomeBottomBar(
-                currentTab = BottomBarTab.SEARCH,
-                onNavigateToHome = onNavigateToHome,
-                onNavigateToSearch = onNavigateToSearch,
-                onNavigateToWishlist = onNavigateToWishlist,
-                onNavigateToCart = onNavigateToCart,
-                onNavigateToProfile = onNavigateToProfile
+            ShopzenBottomBar(
+                currentTab = MainShellTab.SEARCH,
+                onDiscoverClick = onNavigateToHome,
+                onSearchClick = onNavigateToSearch,
+                onWishlistClick = onNavigateToWishlist,
+                onSettingsClick = onNavigateToSettings,
             )
         },
         modifier = modifier.background(Color.White)

@@ -1,5 +1,7 @@
 package shopzen.app.di
 
+import shopzen.data.checkout.repository.CheckoutRepositoryImpl
+import shopzen.domain.checkout.repository.CheckoutRepository
 import shopzen.data.catalog.repository.CatalogRepositoryImpl
 import shopzen.domain.catalog.repository.CatalogRepository
 import shopzen.data.auth.repository.AuthRepositoryImpl
@@ -8,17 +10,21 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import shopzen.data.cart.repository.CartRepositoryImpl
 import shopzen.data.product.repository.ProductRepositoryImpl
+import shopzen.domain.cart.repository.CartRepository
 import shopzen.domain.product.repository.ProductRepository
 import shopzen.data.onboarding.repository.OnboardingRepositoryImpl
 import shopzen.data.profile.remote.RemoteProfileDataSource
 import shopzen.data.profile.remote.RemoteProfileDataSourceImpl
 import shopzen.data.profile.repository.PreferencesRepositoryImpl
+import shopzen.data.profile.repository.OrderRepositoryImpl
 import shopzen.data.profile.repository.ProfileRepositoryImpl
 import shopzen.domain.onboarding.repository.OnboardingRepository
 import shopzen.data.wishlist.repository.WishlistRepositoryImpl
 import shopzen.domain.wishlist.repository.WishlistRepository
 import shopzen.domain.profile.repository.PreferencesRepository
+import shopzen.domain.profile.repository.OrderRepository
 import shopzen.domain.profile.repository.ProfileRepository
 import javax.inject.Singleton
 
@@ -52,6 +58,12 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindCartRepository(
+        impl: CartRepositoryImpl
+    ): CartRepository
+
+    @Binds
+    @Singleton
     abstract fun bindOnboardingRepository(
         impl: OnboardingRepositoryImpl
     ): OnboardingRepository
@@ -66,10 +78,20 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindOrderRepository(impl: OrderRepositoryImpl): OrderRepository
+
+    @Binds
+    @Singleton
     abstract fun bindRemoteProfileDataSource(
         impl: RemoteProfileDataSourceImpl
     ): RemoteProfileDataSource
 
+    @Binds
+    @Singleton
+    abstract fun bindCheckoutRepository(
+        impl: CheckoutRepositoryImpl
+    ): CheckoutRepository
+  
     @Binds
     @Singleton
     abstract fun bindAdRepository(

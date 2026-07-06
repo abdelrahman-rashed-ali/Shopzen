@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -17,19 +16,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import shopzen.presentation.R
+import shopzen.presentation.theme.ShopzenBorderWidth
+import shopzen.presentation.theme.ShopzenShapes
+import shopzen.presentation.theme.ShopzenSpacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfirmationDialog(
     title: String,
     message: String,
-    confirmText: String = "Confirm",
-    dismissText: String = "Cancel",
+    confirmText: String = stringResource(R.string.common_confirm),
+    dismissText: String = stringResource(R.string.common_cancel),
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -41,23 +42,22 @@ fun ConfirmationDialog(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            shape = CutCornerShape(0.dp),
+                .padding(ShopzenSpacing.LG),
+            shape = ShopzenShapes.LG,
             color = colors.surface,
-            tonalElevation = 8.dp
+            tonalElevation = ShopzenSpacing.SM
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(ShopzenSpacing.XL),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(ShopzenSpacing.LG)
             ) {
 
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold
                     ),
                     color = colors.onSurface
@@ -65,25 +65,22 @@ fun ConfirmationDialog(
 
                 Text(
                     text = message,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 15.sp,
-                        lineHeight = 22.sp
-                    ),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = colors.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(ShopzenSpacing.MD)
                 ) {
 
                     Button(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f),
-                        shape = CutCornerShape(0.dp),
+                        shape = ShopzenShapes.MD,
                         border = BorderStroke(
-                            1.dp,
+                            ShopzenBorderWidth.Default,
                             colors.outline
                         ),
                         colors = ButtonDefaults.buttonColors(
@@ -95,8 +92,6 @@ fun ConfirmationDialog(
                             text = dismissText.uppercase(),
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
-                                letterSpacing = 0.5.sp
                             )
                         )
                     }
@@ -104,7 +99,7 @@ fun ConfirmationDialog(
                     Button(
                         onClick = onConfirm,
                         modifier = Modifier.weight(1f),
-                        shape = CutCornerShape(0.dp),
+                        shape = ShopzenShapes.MD,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = colors.primary,
                             contentColor = colors.onPrimary
@@ -114,8 +109,6 @@ fun ConfirmationDialog(
                             text = confirmText.uppercase(),
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
-                                letterSpacing = 0.5.sp
                             )
                         )
                     }

@@ -3,12 +3,15 @@ package shopzen.data.customer.remote
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
+import io.ktor.client.request.get
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import shopzen.data.customer.remote.dto.CreateCustomerRequestDto
 import shopzen.data.customer.remote.dto.CreateCustomerResponseDto
 import shopzen.data.customer.remote.dto.CustomerRequestBodyDto
+import shopzen.data.customer.remote.dto.CustomerSearchResponseDto
+import shopzen.data.customer.remote.dto.CustomerDto
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,7 +26,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class RemoteShopifyCustomerDataSourceImpl @Inject constructor(
-    private val client: HttpClient,
+    @shopzen.data.remote.qualifier.RestClient private val client: HttpClient,
 ) : RemoteShopifyCustomerDataSource {
 
     override suspend fun createCustomer(
@@ -45,5 +48,15 @@ class RemoteShopifyCustomerDataSourceImpl @Inject constructor(
         }.body()
 
         return response.customer.id
+    }
+
+    override suspend fun getCustomerByEmail(email: String): CustomerDto? {
+        val response: CustomerSearchResponseDto = client.get("customers/search.json") {
+            url {
+                parameters.append("query", "email:$email")
+            }
+        }.body()
+        
+        return response.customers.firstOrNull()
     }
 }

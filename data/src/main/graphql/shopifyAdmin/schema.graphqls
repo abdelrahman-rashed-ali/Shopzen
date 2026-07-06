@@ -1,0 +1,84 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  shop: Shop
+}
+
+type Shop {
+  id: ID!
+}
+
+type Mutation {
+  orderCreate(order: OrderCreateOrderInput!, options: OrderCreateOptionsInput): OrderCreatePayload
+}
+
+input OrderCreateOrderInput {
+  currency: String
+  discountCode: OrderCreateDiscountCodeInput
+  lineItems: [OrderCreateLineItemInput!]
+  phone: String
+  shippingAddress: MailingAddressInput
+}
+
+input OrderCreateLineItemInput {
+  variantId: ID
+  quantity: Int!
+}
+
+input MailingAddressInput {
+  firstName: String
+  lastName: String
+  phone: String
+  address1: String
+  address2: String
+  city: String
+  province: String
+  country: String
+  zip: String
+}
+
+input OrderCreateDiscountCodeInput {
+  itemFixedDiscountCode: OrderCreateFixedDiscountCodeAttributesInput
+  itemPercentageDiscountCode: OrderCreatePercentageDiscountCodeAttributesInput
+}
+
+input OrderCreateFixedDiscountCodeAttributesInput {
+  amountSet: MoneyBagInput
+  code: String!
+}
+
+input OrderCreatePercentageDiscountCodeAttributesInput {
+  code: String!
+  percentage: Float
+}
+
+input MoneyBagInput {
+  shopMoney: MoneyInput
+}
+
+input MoneyInput {
+  amount: String!
+  currencyCode: String!
+}
+
+input OrderCreateOptionsInput {
+  sendReceipt: Boolean
+}
+
+type OrderCreatePayload {
+  order: Order
+  userErrors: [OrderCreateUserError!]!
+}
+
+type Order {
+  id: ID!
+  name: String!
+}
+
+type OrderCreateUserError {
+  field: [String!]
+  message: String!
+}

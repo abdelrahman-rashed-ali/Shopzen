@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    // alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
@@ -21,14 +22,9 @@ android {
 
     buildFeatures {
         compose = true
+        dataBinding = true
     }
 
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
-    }
 }
 
 kotlin {
@@ -49,8 +45,13 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.foundation)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     //yousef
@@ -59,6 +60,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.activity.compose)
+
     //yousef
     //rashed
     implementation(libs.androidx.compose.material.icons.extended)
@@ -74,5 +77,6 @@ dependencies {
     //nour
     //ziad
     implementation(libs.androidx.compose.ui.text.google.fonts)
+    implementation(libs.paymob.sdk)
     //ziad
 }

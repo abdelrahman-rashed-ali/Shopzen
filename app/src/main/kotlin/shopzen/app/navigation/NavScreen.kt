@@ -51,7 +51,33 @@ data object WishlistScreen : NavScreen(
 data class ProductDetail(val productId: Long) : NavScreen("product-detail")
 
 @Serializable
+object CartScreen : NavScreen("cart")
+
+@Serializable
+data object CheckoutSummaryScreen : NavScreen("checkout-summary")
+
+@Serializable
+data object CheckoutPaymentScreen : NavScreen("checkout-payment")
+
+@Serializable
+data class OrderConfirmationScreen(
+    val orderId: String,
+    val orderNumber: String,
+) : NavScreen("order-confirmation")
+
+@Serializable
 data object ProfileScreen : NavScreen("profile")
+
+@Serializable
+data object SettingsScreen : NavScreen("main/settings")
+
+@Serializable
+data object OrderHistoryScreen : NavScreen("main/profile/orders")
+
+@Serializable
+data class OrderDetailScreen(
+    val orderId: String,
+) : NavScreen("main/profile/orders/{orderId}")
 
 @Serializable
 data object PersonalDetailsScreen : NavScreen("personal-details")
@@ -63,7 +89,11 @@ data object AddressesScreen : NavScreen("addresses")
 data object SearchScreen : NavScreen("search")
 
 @Serializable
+data class AddressEditScreen(val addressId: String? = null) : NavScreen("address-edit")
+
+@Serializable
 data object CartScreen : NavScreen("cart")
+
 @Serializable
 data class AddressEditScreen(val addressId: String? = null) : NavScreen("address-edit")
 

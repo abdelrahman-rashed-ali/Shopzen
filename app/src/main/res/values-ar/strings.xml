@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">شوبزن</string>
+    <string name="error_google_client_id_missing">تسجيل الدخول بحساب جوجل يفتقد GOOGLE_WEB_CLIENT_ID في ملف local.properties.</string>
+    <string name="error_google_cancelled">تم إلغاء تسجيل الدخول بحساب جوجل.</string>
+    <string name="error_google_failed">فشل تسجيل الدخول بحساب جوجل. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_apple_cancelled">تم إلغاء تسجيل الدخول بحساب آبل.</string>
+    <string name="error_apple_failed">فشل تسجيل الدخول بحساب آبل. يرجى المحاولة مرة أخرى.</string>
+    <string name="default_web_client_id" translatable="false">dummy_google_client_id</string>
+</resources>

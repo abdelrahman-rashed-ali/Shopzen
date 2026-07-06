@@ -53,11 +53,12 @@ import shopzen.presentation.catalog.components.AdBannerSection
 import shopzen.presentation.catalog.intent.HomeIntent
 import shopzen.presentation.catalog.state.HomeState
 import shopzen.presentation.catalog.viewmodel.HomeViewModel
-import shopzen.presentation.common.components.BottomBarTab
 import shopzen.presentation.common.components.ErrorScreen
 import shopzen.presentation.common.components.LoadingIndicator
 import shopzen.presentation.common.components.ConfirmationDialog
-import shopzen.presentation.common.components.HomeBottomBar
+import shopzen.presentation.common.components.MainShellTab
+import shopzen.presentation.common.components.ShopzenBottomBar
+import shopzen.presentation.common.components.ShopzenTopAppBar
 import shopzen.presentation.wishlist.intent.WishlistIntent
 import shopzen.presentation.wishlist.viewmodel.WishlistViewModel
 
@@ -76,6 +77,7 @@ fun HomeScreen(
     onNavigateToProfile: () -> Unit,
     onNavigateToWishlist: () -> Unit,
     onNavigateToCart: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
@@ -88,15 +90,19 @@ fun HomeScreen(
     val wishlistProductIds = wishlistState.items.map { it.productId }.toSet()
 
     Scaffold(
-        topBar = { HomeTopBar() },
+        topBar = {
+            ShopzenTopAppBar(
+                onProfileClick = onNavigateToProfile,
+                onCartClick = onNavigateToCart,
+            )
+        },
         bottomBar = {
-            HomeBottomBar(
-                currentTab = BottomBarTab.HOME,
-                onNavigateToHome = {},
-                onNavigateToSearch = onNavigateToSearch,
-                onNavigateToWishlist = onNavigateToWishlist,
-                onNavigateToCart = onNavigateToCart,
-                onNavigateToProfile = onNavigateToProfile
+            ShopzenBottomBar(
+                currentTab = MainShellTab.DISCOVER,
+                onDiscoverClick = {},
+                onSearchClick = onNavigateToSearch,
+                onWishlistClick = onNavigateToWishlist,
+                onSettingsClick = onNavigateToSettings,
             )
         },
         modifier = modifier.background(Color.White)

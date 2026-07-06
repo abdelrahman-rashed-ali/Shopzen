@@ -19,6 +19,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = rootProject.projectDir.toURI().resolve("libs/")
+        }
+        maven {
+            url = uri("https://jitpack.io")
+        }
     }
 }
 

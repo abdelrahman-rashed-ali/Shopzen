@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import shopzen.data.cart.local.dao.CartDao
 import shopzen.data.database.ShopzenDatabase
 import shopzen.data.wishlist.local.dao.WishlistDao
 import javax.inject.Singleton
@@ -17,21 +18,19 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(
-        @ApplicationContext context: Context
-    ): ShopzenDatabase {
-        return Room.databaseBuilder(
+    fun provideDatabase(@ApplicationContext context: Context): ShopzenDatabase =
+        Room.databaseBuilder(
             context,
             ShopzenDatabase::class.java,
-            "shopzen_db"
-        ).build()
-    }
+            "shopzen_db",
+        ).fallbackToDestructiveMigration()
+         .build()
 
     @Provides
     @Singleton
-    fun provideWishlistDao(
-        database: ShopzenDatabase
-    ): WishlistDao {
-        return database.wishlistDao()
-    }
+    fun provideCartDao(db: ShopzenDatabase): CartDao = db.cartDao()
+
+    @Provides
+    @Singleton
+    fun provideWishlistDao(db: ShopzenDatabase): WishlistDao = db.wishlistDao()
 }

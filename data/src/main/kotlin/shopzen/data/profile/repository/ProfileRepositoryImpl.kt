@@ -13,6 +13,7 @@ import javax.inject.Inject
 
 class ProfileRepositoryImpl @Inject constructor(
     private val remoteProfileDataSource: RemoteProfileDataSource,
+    private val shopifyCustomerDataSource: shopzen.data.customer.remote.RemoteShopifyCustomerDataSource,
 ) : ProfileRepository {
 
     override fun getUserProfile(uid: String): Flow<Result<UserProfile>> =
@@ -39,4 +40,13 @@ class ProfileRepositoryImpl @Inject constructor(
 
     override suspend fun setDefaultAddress(uid: String, addressId: String): Result<Unit> =
         remoteProfileDataSource.setDefaultAddress(uid, addressId)
+
+    override suspend fun getUserCurrency(email: String): String {
+        return try {
+            val customer = shopifyCustomerDataSource.getCustomerByEmail(email)
+            customer?.currency ?: "USD"
+        } catch (e: Exception) {
+            "USD"
+        }
+    }
 }

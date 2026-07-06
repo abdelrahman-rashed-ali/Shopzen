@@ -11,11 +11,17 @@ data class CreateCustomerResponseDto(
 )
 
 @Serializable
+data class CustomerSearchResponseDto(
+    @SerialName("customers") val customers: List<CustomerDto>,
+)
+
+@Serializable
 data class CustomerDto(
     @SerialName("id")         val id: Long,
     @SerialName("email")      val email: String? = null,
     @SerialName("first_name") val firstName: String? = null,
     @SerialName("last_name")  val lastName: String? = null,
+    @SerialName("currency")   val currency: String? = null,
 )
 
 // ── Request ───────────────────────────────────────────────────────────────────
