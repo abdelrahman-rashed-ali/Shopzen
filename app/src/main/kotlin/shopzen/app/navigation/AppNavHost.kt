@@ -26,6 +26,8 @@ import shopzen.presentation.cart.screen.CartScreen
 import shopzen.presentation.checkout.screen.CheckoutSummaryScreen as CheckoutSummaryRouteScreen
 import shopzen.presentation.checkout.screen.OrderConfirmationScreen as OrderConfirmationRouteScreen
 import shopzen.presentation.checkout.screen.PaymentScreen as PaymentRouteScreen
+import shopzen.presentation.category.screen.CategoryProductsScreen as CategoryProductsRouteScreen
+
 
 
 @Composable
@@ -181,10 +183,10 @@ fun AppNavHost(
         composable<HomeScreen> {
             HomeScreen(
                 onNavigateToBrand = { brandName ->
-                    // TODO: Handle brand navigation
+                    navController.navigate(BrandProducts(brandName = brandName))
                 },
-                onNavigateToCategory = { categoryId ->
-                    // TODO: Handle category navigation
+                onNavigateToCategory = { categoryTitle ->
+                    navController.navigate(CategoryProductsScreen(categoryTitle))
                 },
                 onNavigateToProduct = { productId ->
                     navigateToProduct(productId)
@@ -207,6 +209,9 @@ fun AppNavHost(
                 onNavigateToSettings = {
                     navigateTopLevel(SettingsScreen)
                 },
+                onNavigateToLogin = {
+                    navController.navigate(LoginScreen)
+                }
             )
         }
 
@@ -221,8 +226,8 @@ fun AppNavHost(
                 onNavigateToProduct = { productId ->
                     navigateToProduct(productId)
                 },
-                onNavigateToCategory = { categoryId ->
-                    // TODO: Handle category navigation
+                onNavigateToCategory = { categoryTitle ->
+                    navController.navigate(CategoryProductsScreen(categoryTitle))
                 },
                 onNavigateToSearch = { navigateTopLevel(SearchScreen) },
                 onNavigateToCart = {
@@ -391,6 +396,47 @@ fun AppNavHost(
             AddEditAddressScreen(
                 addressId = args.addressId,
                 onNavigateBack = { navigateBackOrHome() }
+            )
+        }
+
+        composable<BrandListScreen> {
+            shopzen.presentation.brand.screen.BrandListScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onNavigateToBrandProducts = { brandName ->
+                    navController.navigate(BrandProducts(brandName = brandName))
+                }
+            )
+        }
+
+        composable<BrandProducts> { backStackEntry ->
+            val args = backStackEntry.toRoute<BrandProducts>()
+
+            shopzen.presentation.brand.screen.BrandProductsScreen(
+                brandName = args.brandName,
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onNavigateToProduct = { productId ->
+                    navController.navigate(ProductDetail(productId.toLongOrNull() ?: 0L))
+                }
+            )
+        }
+
+        composable<CategoryProductsScreen> { backStackEntry ->
+            val args = backStackEntry.toRoute<CategoryProductsScreen>()
+
+            CategoryProductsRouteScreen(
+                categoryTitle = args.categoryTitle,
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToProduct = { productId ->
+                    navController.navigate(
+                        ProductDetail(
+                            productId.toLongOrNull() ?: 0L
+                        )
+                    )
+                }
             )
         }
     }

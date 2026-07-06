@@ -49,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import shopzen.presentation.catalog.components.CategoryChips
 import shopzen.presentation.catalog.components.FeaturedBanner
 import shopzen.presentation.catalog.components.NewArrivalsSection
+import shopzen.presentation.catalog.components.AdBannerSection
 import shopzen.presentation.catalog.intent.HomeIntent
 import shopzen.presentation.catalog.state.HomeState
 import shopzen.presentation.catalog.viewmodel.HomeViewModel
@@ -77,6 +78,7 @@ fun HomeScreen(
     onNavigateToWishlist: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     wishlistViewModel: WishlistViewModel = hiltViewModel()
@@ -119,9 +121,10 @@ fun HomeScreen(
             }
 
             else -> {
-                HomeContent(
+                 HomeContent(
                     state = state,
                     wishlistProductIds = wishlistProductIds,
+                    onNavigateToBrand = onNavigateToBrand,
                     onNavigateToCategory = onCategoryClick@{ categoryId ->
                         onNavigateToCategory(categoryId)
                     },
@@ -144,6 +147,22 @@ fun HomeScreen(
                 )
             }
         }
+    }
+
+    if (wishlistState.showLoginRequiredDialog) {
+        ConfirmationDialog(
+            title = "Login Required",
+            message = "You need to log in to add items to your wishlist.",
+            confirmText = "Log In",
+            dismissText = "Cancel",
+            onConfirm = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissLoginRequiredDialog)
+                onNavigateToLogin()
+            },
+            onDismiss = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissLoginRequiredDialog)
+            }
+        )
     }
 
     if (wishlistState.showRemoveItemDialog && wishlistState.pendingRemovalItemId != null) {
@@ -368,6 +387,7 @@ private fun HomeBottomBar(onSearchClick: () -> Unit) {
 private fun HomeContent(
     state: HomeState,
     wishlistProductIds: Set<String>,
+    onNavigateToBrand: (String) -> Unit,
     onNavigateToCategory: (String) -> Unit,
     onNavigateToProduct: (String) -> Unit,
     onWishlistClick: (shopzen.domain.catalog.model.Product) -> Unit,
@@ -390,6 +410,20 @@ private fun HomeContent(
         )
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        // 2b. Brands Selector
+        shopzen.presentation.catalog.components.BrandChips(
+            brands = state.brands,
+            onBrandClick = onNavigateToBrand
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // 1b. Exclusive Offers (Ads)
+        AdBannerSection(
+            ads = state.ads,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
 
         // 2. Categories (Curations)
         CategoryChips(

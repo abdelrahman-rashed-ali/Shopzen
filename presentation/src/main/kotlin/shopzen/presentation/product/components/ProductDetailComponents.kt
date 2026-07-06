@@ -67,25 +67,23 @@ fun ErrorContent(
 
 @Composable
 fun PriceRow(state: ProductDetailState) {
-    val product = state.product ?: return
+    if (state.product == null) return
 
-    val selectedVariant = state.selectedVariantId?.let { id ->
-        product.variants.find { it.id == id }
-    }
-    val displayPrice = selectedVariant?.price ?: product.price
-    val displayCompareAt = selectedVariant?.compareAtPrice ?: product.compareAtPrice
+    val displayPrice = state.convertedPrice ?: return
+    val displayCompareAt = state.convertedCompareAtPrice
+    val symbol = state.currency.symbol
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "$$displayPrice",
+            text = "$symbol${String.format("%.2f", displayPrice)}",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
         )
-        if (!displayCompareAt.isNullOrBlank() && displayCompareAt != displayPrice) {
+        if (displayCompareAt != null && displayCompareAt != displayPrice) {
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "$$displayCompareAt",
+                text = "$symbol${String.format("%.2f", displayCompareAt)}",
                 style = MaterialTheme.typography.bodyLarge,
                 textDecoration = TextDecoration.LineThrough,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),

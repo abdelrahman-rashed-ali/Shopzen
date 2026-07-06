@@ -91,4 +91,10 @@ abstract class RepositoryModule {
     abstract fun bindCheckoutRepository(
         impl: CheckoutRepositoryImpl
     ): CheckoutRepository
+  
+    @Binds
+    @Singleton
+    abstract fun bindAdRepository(
+        impl: shopzen.data.ads.repository.AdRepositoryImpl
+    ): shopzen.domain.ads.repository.AdRepository
 }

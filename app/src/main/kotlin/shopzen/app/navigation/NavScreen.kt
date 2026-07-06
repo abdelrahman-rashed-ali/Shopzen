@@ -90,3 +90,18 @@ data object SearchScreen : NavScreen("search")
 
 @Serializable
 data class AddressEditScreen(val addressId: String? = null) : NavScreen("address-edit")
+
+@Serializable
+data object CartScreen : NavScreen("cart")
+
+@Serializable
+data class AddressEditScreen(val addressId: String? = null) : NavScreen("address-edit")
+
+@Serializable
+data object BrandListScreen : NavScreen("brand-list")
+
+@Serializable
+data class BrandProducts(val brandName: String) : NavScreen("brand-products")
+
+@Serializable
+data class CategoryProductsScreen(val categoryTitle: String) : NavScreen("category-products")
