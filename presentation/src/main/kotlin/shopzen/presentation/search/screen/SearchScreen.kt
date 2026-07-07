@@ -46,6 +46,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import shopzen.presentation.search.util.ImageCompressor
 import shopzen.presentation.common.components.ErrorScreen
 import shopzen.presentation.common.components.LoadingIndicator
 import shopzen.presentation.common.components.MainShellTab
@@ -203,6 +211,43 @@ private fun SearchContent(
     ) {
         // 1. Search Bar
         item {
+            val context = LocalContext.current
+            val cameraLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.TakePicturePreview()
+            ) { bitmap ->
+                if (bitmap != null) {
+                    onIntent(SearchIntent.SearchByImageBitmap(bitmap))
+                }
+            }
+
+            val galleryLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.PickVisualMedia()
+            ) { uri ->
+                if (uri != null) {
+                    onIntent(SearchIntent.SearchByImageUri(uri))
+                }
+            }
+
+            if (state.selectedImageUri != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AsyncImage(
+                        model = state.selectedImageUri,
+                        contentDescription = "Selected Image",
+                        modifier = Modifier.size(56.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(text = "Searching by image...", modifier = Modifier.weight(1f))
+                    IconButton(onClick = { onIntent(SearchIntent.ClearImageSearch) }) {
+                        Icon(imageVector = Icons.Outlined.Close, contentDescription = "Clear Image Search")
+                    }
+                }
+            }
+
             OutlinedTextField(
                 value = state.query,
                 onValueChange = { onIntent(SearchIntent.UpdateQuery(it)) },
@@ -226,6 +271,37 @@ private fun SearchContent(
                         modifier = Modifier.size(20.dp)
                     )
                 },
+                trailingIcon = {
+                    if (state.selectedImageUri == null) {
+                        Row {
+                            IconButton(onClick = {
+                                // Since we're using TakePicturePreview, we just launch it without a URI.
+                                // In a real app we might use TakePicture with a FileProvider URI, but Preview is fine for < 10MB upload if scaled up or we just use it as is.
+                                // However, TakePicturePreview returns a small thumbnail. Let's use it for now as it's the simplest standard contract without FileProvider setup.
+                                cameraLauncher.launch(null)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.CameraAlt,
+                                    contentDescription = "Camera",
+                                    tint = Color.Gray
+                                )
+                            }
+                            IconButton(onClick = {
+                                galleryLauncher.launch(
+                                    androidx.activity.result.PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.PhotoLibrary,
+                                    contentDescription = "Gallery",
+                                    tint = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -236,6 +312,17 @@ private fun SearchContent(
                     cursorColor = Color.Black
                 )
             )
+        }
+
+        if (state.isImageUploading) {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LoadingIndicator()
+                }
+            }
         }
 
         // 2. Suggestions Section

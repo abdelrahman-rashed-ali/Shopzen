@@ -5,9 +5,11 @@ import shopzen.data.remote.config.PaymobConfig
 import shopzen.data.remote.graphql.KtorGraphQLClient
 import shopzen.data.remote.qualifier.ExchangeRateClient
 import shopzen.data.remote.qualifier.GraphQLClient
+import shopzen.data.remote.qualifier.ImageSearchClient
 import shopzen.data.remote.qualifier.PaymobClient
 import shopzen.data.remote.qualifier.RestClient
 import shopzen.data.remote.rest.KtorExchangeRateClient
+import shopzen.data.remote.rest.KtorImageSearchClient
 import shopzen.data.remote.rest.KtorPaymobClient
 import shopzen.data.remote.rest.KtorRestClient
 import dagger.Module
@@ -65,6 +67,12 @@ object NetworkModule {
     @ExchangeRateClient
     fun provideExchangeRateClient(): HttpClient =
         KtorExchangeRateClient.build()
+
+    @Provides
+    @Singleton
+    @ImageSearchClient
+    fun provideImageSearchClient(): HttpClient =
+        KtorImageSearchClient.build()
         
     @Provides
     @Singleton
