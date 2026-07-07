@@ -16,4 +16,7 @@ sealed class SearchIntent {
         val brand: String?,
         val sortOption: SortOption
     ) : SearchIntent()
+    data class SearchByImageUri(val uri: android.net.Uri) : SearchIntent()
+    data class SearchByImageBitmap(val bitmap: android.graphics.Bitmap) : SearchIntent()
+    object ClearImageSearch : SearchIntent()
 }
