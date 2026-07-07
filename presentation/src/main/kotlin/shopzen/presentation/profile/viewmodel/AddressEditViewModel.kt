@@ -11,12 +11,18 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shopzen.domain.auth.usecase.GetCurrentUserUseCase
-import shopzen.domain.profile.model.Address
 import shopzen.domain.profile.usecase.AddAddressUseCase
 import shopzen.domain.profile.usecase.GetSavedAddressesUseCase
 import shopzen.domain.profile.usecase.UpdateAddressUseCase
 import shopzen.presentation.profile.intent.AddressEditIntent
 import shopzen.presentation.profile.state.AddressEditState
+import shopzen.presentation.profile.state.hasMissingRequiredFields
+import shopzen.presentation.profile.state.mapPinSuggestion
+import shopzen.presentation.profile.state.toDomainAddress
+import shopzen.presentation.profile.state.toEditState
+import shopzen.presentation.profile.state.withPlaceQuery
+import shopzen.presentation.profile.state.withPlaceSuggestion
+import shopzen.presentation.profile.state.withRecipientName
 
 @HiltViewModel
 class AddressEditViewModel @Inject constructor(
@@ -34,15 +40,21 @@ class AddressEditViewModel @Inject constructor(
     fun processIntent(intent: AddressEditIntent) {
         when (intent) {
             is AddressEditIntent.LoadAddress -> loadAddress(intent.addressId)
+            is AddressEditIntent.EntryModeChanged -> _state.update { it.copy(entryMode = intent.mode) }
+            is AddressEditIntent.PlaceQueryChanged -> _state.update { it.withPlaceQuery(intent.value) }
+            is AddressEditIntent.PlaceSuggestionSelected -> _state.update { it.withPlaceSuggestion(intent.suggestion) }
+            AddressEditIntent.UseMapPin -> _state.update { it.withPlaceSuggestion(it.mapPinSuggestion()) }
             is AddressEditIntent.LabelChanged -> _state.update { it.copy(label = intent.value, fieldError = null) }
-            is AddressEditIntent.RecipientNameChanged -> _state.update { it.copy(recipientName = intent.value, fieldError = null) }
-            is AddressEditIntent.AddressLine1Changed -> _state.update { it.copy(addressLine1 = intent.value, fieldError = null) }
-            is AddressEditIntent.AddressLine2Changed -> _state.update { it.copy(addressLine2 = intent.value) }
-            is AddressEditIntent.CityChanged -> _state.update { it.copy(city = intent.value, fieldError = null) }
-            is AddressEditIntent.StateChanged -> _state.update { it.copy(stateOrProvince = intent.value) }
-            is AddressEditIntent.PostalCodeChanged -> _state.update { it.copy(postalCode = intent.value, fieldError = null) }
-            is AddressEditIntent.CountryChanged -> _state.update { it.copy(country = intent.value, fieldError = null) }
-            is AddressEditIntent.PhoneChanged -> _state.update { it.copy(phone = intent.value) }
+            is AddressEditIntent.FirstNameChanged -> _state.update { it.copy(firstName = intent.value, fieldError = null, hasManualOverride = it.isAutofilled) }
+            is AddressEditIntent.LastNameChanged -> _state.update { it.copy(lastName = intent.value, fieldError = null, hasManualOverride = it.isAutofilled) }
+            is AddressEditIntent.RecipientNameChanged -> _state.update { it.withRecipientName(intent.value) }
+            is AddressEditIntent.AddressLine1Changed -> _state.update { it.copy(addressLine1 = intent.value, fieldError = null, hasManualOverride = it.isAutofilled) }
+            is AddressEditIntent.AddressLine2Changed -> _state.update { it.copy(addressLine2 = intent.value, hasManualOverride = it.isAutofilled) }
+            is AddressEditIntent.CityChanged -> _state.update { it.copy(city = intent.value, fieldError = null, hasManualOverride = it.isAutofilled) }
+            is AddressEditIntent.StateChanged -> _state.update { it.copy(stateOrProvince = intent.value, hasManualOverride = it.isAutofilled) }
+            is AddressEditIntent.PostalCodeChanged -> _state.update { it.copy(postalCode = intent.value, fieldError = null, hasManualOverride = it.isAutofilled) }
+            is AddressEditIntent.CountryChanged -> _state.update { it.copy(country = intent.value, fieldError = null, hasManualOverride = it.isAutofilled) }
+            is AddressEditIntent.PhoneChanged -> _state.update { it.copy(phone = intent.value, fieldError = null, hasManualOverride = it.isAutofilled) }
             AddressEditIntent.Save -> save()
         }
     }
@@ -67,20 +79,7 @@ class AddressEditViewModel @Inject constructor(
                 if (address == null) {
                     it.copy(isLoading = false, isGuest = false, error = "Location not found")
                 } else {
-                    it.copy(
-                        isLoading = false,
-                        isGuest = false,
-                        label = address.label,
-                        recipientName = address.recipientName,
-                        addressLine1 = address.addressLine1,
-                        addressLine2 = address.addressLine2.orEmpty(),
-                        city = address.city,
-                        stateOrProvince = address.stateOrProvince.orEmpty(),
-                        postalCode = address.postalCode,
-                        country = address.country,
-                        phone = address.phone.orEmpty(),
-                        isDefault = address.isDefault
-                    )
+                    address.toEditState(it)
                 }
             }
         }
@@ -88,30 +87,12 @@ class AddressEditViewModel @Inject constructor(
 
     private fun save() {
         val current = _state.value
-        if (
-            current.recipientName.isBlank() ||
-            current.addressLine1.isBlank() ||
-            current.city.isBlank() ||
-            current.postalCode.isBlank() ||
-            current.country.isBlank()
-        ) {
+        if (current.hasMissingRequiredFields()) {
             _state.update { it.copy(fieldError = "Please fill in all required fields") }
             return
         }
         val uid = currentUid ?: return
-        val address = Address(
-            id = current.addressId.orEmpty(),
-            label = current.label.trim(),
-            recipientName = current.recipientName.trim(),
-            addressLine1 = current.addressLine1.trim(),
-            addressLine2 = current.addressLine2.trim().ifBlank { null },
-            city = current.city.trim(),
-            stateOrProvince = current.stateOrProvince.trim().ifBlank { null },
-            postalCode = current.postalCode.trim(),
-            country = current.country.trim(),
-            phone = current.phone.trim().ifBlank { null },
-            isDefault = current.isDefault
-        )
+        val address = current.toDomainAddress()
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             val result = if (current.addressId == null) {
@@ -127,4 +108,5 @@ class AddressEditViewModel @Inject constructor(
             )
         }
     }
+
 }

@@ -23,8 +23,6 @@ import shopzen.domain.cart.usecase.ClearCartUseCase
 import shopzen.domain.cart.usecase.GetCartUseCase
 import shopzen.domain.checkout.model.Checkout
 import shopzen.domain.checkout.model.PaymentMethod
-import shopzen.domain.checkout.model.PaymobClientSecret
-import shopzen.domain.checkout.model.PaymobPublicKey
 import shopzen.domain.checkout.usecase.CreatePaymobPaymentIntentionUseCase
 import shopzen.domain.checkout.usecase.GetAvailablePaymentMethodsUseCase
 import shopzen.domain.checkout.usecase.PlaceOrderUseCase
@@ -35,6 +33,7 @@ import shopzen.presentation.R
 import shopzen.presentation.checkout.intent.CheckoutIntent
 import shopzen.presentation.checkout.state.CheckoutItemUi
 import shopzen.presentation.checkout.state.CheckoutState
+import shopzen.presentation.checkout.state.PendingPaymobLaunch
 import shopzen.presentation.common.util.UiText
 
 sealed class CheckoutEffect {
@@ -44,10 +43,6 @@ sealed class CheckoutEffect {
     data class NavigateToOrderConfirmation(
         val orderId: String,
         val orderNumber: String,
-    ) : CheckoutEffect()
-    data class StartOnlinePayment(
-        val clientSecret: PaymobClientSecret,
-        val publicKey: PaymobPublicKey,
     ) : CheckoutEffect()
     data object NavigateHome : CheckoutEffect()
     data class ShowSnackbar(val message: UiText) : CheckoutEffect()
@@ -99,6 +94,13 @@ class CheckoutViewModel @Inject constructor(
             }
             CheckoutIntent.RequestPlaceOrder -> requestPlaceOrder()
             CheckoutIntent.ConfirmPlaceOrder -> confirmPlaceOrder()
+            is CheckoutIntent.ConsumePendingPaymobLaunch -> _state.update { current ->
+                if (current.pendingPaymobLaunch?.intentionId == intent.intentionId) {
+                    current.copy(pendingPaymobLaunch = null)
+                } else {
+                    current
+                }
+            }
             is CheckoutIntent.OnlinePaymentSucceeded -> handleOnlinePaymentSucceeded(intent.payResponse)
             is CheckoutIntent.OnlinePaymentFailed -> handleOnlinePaymentFailed(intent.message)
             CheckoutIntent.OnlinePaymentPending -> handleOnlinePaymentPending()
@@ -186,6 +188,7 @@ class CheckoutViewModel @Inject constructor(
                     isLoading = false,
                     error = null,
                     isOnlinePaymentInProgress = false,
+                    pendingPaymobLaunch = null,
                     items = cart.items.map { it.toUi(cart.currency) },
                     addresses = addresses,
                     selectedAddressId = selectedAddressId,
@@ -217,6 +220,11 @@ class CheckoutViewModel @Inject constructor(
     }
 
     private fun requestPlaceOrder() {
+        val current = _state.value
+        if (current.isPlacingOrder || current.isOnlinePaymentInProgress || current.showPlaceOrderDialog) {
+            Log.d(TAG, "requestPlaceOrder: ignored while checkout action already in progress")
+            return
+        }
         val error = validateOrderState() ?: validateOnlinePaymentState()
         if (error != null) {
             Log.w(TAG, "requestPlaceOrder: validation failed=$error")
@@ -228,6 +236,14 @@ class CheckoutViewModel @Inject constructor(
     }
 
     private fun confirmPlaceOrder() {
+        val currentState = _state.value
+        if (!currentState.showPlaceOrderDialog ||
+            currentState.isPlacingOrder ||
+            currentState.isOnlinePaymentInProgress
+        ) {
+            Log.d(TAG, "confirmPlaceOrder: ignored duplicate or stale confirm")
+            return
+        }
         val uid = userId ?: run {
             Log.e(TAG, "confirmPlaceOrder: missing userId")
             return
@@ -264,23 +280,42 @@ class CheckoutViewModel @Inject constructor(
                 "addressId=${checkout.shippingAddress.id}, payment=${checkout.selectedPaymentMethod}, " +
                 "coupon=${checkout.appliedCoupon?.code}",
         )
+        _state.update {
+            it.copy(
+                isPlacingOrder = true,
+                isOnlinePaymentInProgress = false,
+                pendingPaymobLaunch = null,
+                showPlaceOrderDialog = false,
+                error = null,
+            )
+        }
 
         if (paymentMethod == PaymentMethod.ONLINE_PAYMENT) {
-            startOnlinePayment(checkout)
+            startOnlinePayment(checkout, alreadySubmitting = true)
         } else {
-            placeConfirmedOrder(uid = uid, checkout = checkout)
+            placeConfirmedOrder(
+                uid = uid,
+                checkout = checkout,
+                alreadySubmitting = true,
+            )
         }
     }
 
-    private fun startOnlinePayment(checkout: Checkout) {
+    private fun startOnlinePayment(
+        checkout: Checkout,
+        alreadySubmitting: Boolean = false,
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            _state.update {
-                it.copy(
-                    isPlacingOrder = true,
-                    isOnlinePaymentInProgress = false,
-                    showPlaceOrderDialog = false,
-                    error = null,
-                )
+            if (!alreadySubmitting) {
+                _state.update {
+                    it.copy(
+                        isPlacingOrder = true,
+                        isOnlinePaymentInProgress = false,
+                        pendingPaymobLaunch = null,
+                        showPlaceOrderDialog = false,
+                        error = null,
+                    )
+                }
             }
             createPaymobPaymentIntentionUseCase(checkout).fold(
                 onSuccess = { intention ->
@@ -293,14 +328,13 @@ class CheckoutViewModel @Inject constructor(
                         it.copy(
                             isPlacingOrder = false,
                             isOnlinePaymentInProgress = true,
+                            pendingPaymobLaunch = PendingPaymobLaunch(
+                                intentionId = intention.intentionId,
+                                clientSecret = intention.clientSecret,
+                                publicKey = intention.publicKey,
+                            ),
                         )
                     }
-                    effectsChannel.send(
-                        CheckoutEffect.StartOnlinePayment(
-                            clientSecret = intention.clientSecret,
-                            publicKey = intention.publicKey,
-                        )
-                    )
                 },
                 onFailure = { throwable ->
                     Log.e(TAG, "startOnlinePayment: failed", throwable)
@@ -313,6 +347,7 @@ class CheckoutViewModel @Inject constructor(
                         it.copy(
                             isPlacingOrder = false,
                             isOnlinePaymentInProgress = false,
+                            pendingPaymobLaunch = null,
                             error = error,
                         )
                     }
@@ -364,6 +399,7 @@ class CheckoutViewModel @Inject constructor(
             it.copy(
                 isPlacingOrder = false,
                 isOnlinePaymentInProgress = false,
+                pendingPaymobLaunch = null,
                 error = message
                     ?.takeIf { value -> value.isNotBlank() }
                     ?.let { value -> UiText.DynamicString(value) }
@@ -476,6 +512,7 @@ class CheckoutViewModel @Inject constructor(
             it.copy(
                 isPlacingOrder = false,
                 isOnlinePaymentInProgress = false,
+                pendingPaymobLaunch = null,
                 error = UiText.StringResource(R.string.checkout_payment_pending),
             )
         }
@@ -484,15 +521,19 @@ class CheckoutViewModel @Inject constructor(
     private fun placeConfirmedOrder(
         uid: String,
         checkout: Checkout,
+        alreadySubmitting: Boolean = false,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            _state.update {
-                it.copy(
-                    isPlacingOrder = true,
-                    isOnlinePaymentInProgress = false,
-                    showPlaceOrderDialog = false,
-                    error = null,
-                )
+            if (!alreadySubmitting) {
+                _state.update {
+                    it.copy(
+                        isPlacingOrder = true,
+                        isOnlinePaymentInProgress = false,
+                        pendingPaymobLaunch = null,
+                        showPlaceOrderDialog = false,
+                        error = null,
+                    )
+                }
             }
 
             placeOrderUseCase(checkout).fold(
@@ -507,6 +548,7 @@ class CheckoutViewModel @Inject constructor(
                         it.copy(
                             isPlacingOrder = false,
                             isOnlinePaymentInProgress = false,
+                            pendingPaymobLaunch = null,
                         )
                     }
                     if (clearResult.isFailure) {
@@ -530,6 +572,7 @@ class CheckoutViewModel @Inject constructor(
                         it.copy(
                             isPlacingOrder = false,
                             isOnlinePaymentInProgress = false,
+                            pendingPaymobLaunch = null,
                             error = UiText.StringResource(R.string.checkout_error_order_failed),
                         )
                     }

@@ -2,7 +2,7 @@ package shopzen.app.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,7 +26,6 @@ import shopzen.presentation.cart.screen.CartScreen
 import shopzen.presentation.checkout.screen.CheckoutSummaryScreen as CheckoutSummaryRouteScreen
 import shopzen.presentation.checkout.screen.OrderConfirmationScreen as OrderConfirmationRouteScreen
 import shopzen.presentation.checkout.screen.PaymentScreen as PaymentRouteScreen
-
 
 @Composable
 fun AppNavHost(
@@ -88,6 +87,13 @@ fun AppNavHost(
     fun navigateAuthRequired(destination: NavScreen) {
         mainNavigationViewModel.openAuthenticated(
             onAuthenticated = { navigateTopLevel(destination) },
+            onGuest = { navigateToLogin() },
+        )
+    }
+
+    fun navigateAuthRequiredSingle(destination: NavScreen) {
+        mainNavigationViewModel.openAuthenticated(
+            onAuthenticated = { navigateSingleTop(destination) },
             onGuest = { navigateToLogin() },
         )
     }
@@ -268,6 +274,7 @@ fun AppNavHost(
                 onNavigateToProfile = { navigateAuthRequired(ProfileScreen) },
                 onNavigateToCart = { navigateAuthRequired(CartScreen) },
                 onNavigateToLogin = { navigateToLogin() },
+                onNavigateToAddresses = { navigateAuthRequiredSingle(AddressesScreen) },
             )
         }
 

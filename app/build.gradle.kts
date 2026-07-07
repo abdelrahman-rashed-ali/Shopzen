@@ -46,7 +46,7 @@ android {
             "PAYMOB_ONLINE_CARD_INTEGRATION_ID",
             "${properties.intProperty("PAYMOB_ONLINE_CARD_INTEGRATION_ID")}"
         )
-
+        buildConfigField("String", "LLM_API_KEY", "\"${properties.stringProperty("LLM_API_KEY")}\"")
     }
 
     buildTypes {

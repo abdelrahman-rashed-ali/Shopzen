@@ -91,36 +91,41 @@ fun PaymentScreen(
                     latestOnNavigateToOrderConfirmation(effect.orderId, effect.orderNumber)
                 }
                 is CheckoutEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message.asString(context))
-                is CheckoutEffect.StartOnlinePayment -> {
-                    launchPaymobSdk(
-                        context = context,
-                        clientSecret = effect.clientSecret.value,
-                        publicKey = effect.publicKey.value,
-                        paymobSdkListener = object : PaymobSdkListener {
-                            override fun onSuccess(payResponse: HashMap<String, String?>) {
-                                Log.d("Tago", "onSuccess: ")
-                                viewModel.processIntent(
-                                    CheckoutIntent.OnlinePaymentSucceeded(payResponse.toMap())
-                                )
-                            }
-
-                            override fun onFailure(msg: String?) {
-                                Log.d("Tago", "onFailure: ")
-                                viewModel.processIntent(CheckoutIntent.OnlinePaymentFailed(msg))
-                            }
-
-                            override fun onPending() {
-                                Log.d("Tago", "onPending: ")
-                                viewModel.processIntent(CheckoutIntent.OnlinePaymentPending)
-                            }
-                        },
-                    )
-                }
                 CheckoutEffect.NavigateToAddAddress -> Unit
                 CheckoutEffect.NavigateToPayment -> Unit
                 CheckoutEffect.NavigateHome -> Unit
             }
         }
+    }
+
+    LaunchedEffect(state.pendingPaymobLaunch, viewModel, context) {
+        val pendingLaunch = state.pendingPaymobLaunch ?: return@LaunchedEffect
+        viewModel.processIntent(
+            CheckoutIntent.ConsumePendingPaymobLaunch(pendingLaunch.intentionId)
+        )
+        launchPaymobSdk(
+            context = context,
+            clientSecret = pendingLaunch.clientSecret.value,
+            publicKey = pendingLaunch.publicKey.value,
+            paymobSdkListener = object : PaymobSdkListener {
+                override fun onSuccess(payResponse: HashMap<String, String?>) {
+                    Log.d("Tago", "onSuccess: ")
+                    viewModel.processIntent(
+                        CheckoutIntent.OnlinePaymentSucceeded(payResponse.toMap())
+                    )
+                }
+
+                override fun onFailure(msg: String?) {
+                    Log.d("Tago", "onFailure: ")
+                    viewModel.processIntent(CheckoutIntent.OnlinePaymentFailed(msg))
+                }
+
+                override fun onPending() {
+                    Log.d("Tago", "onPending: ")
+                    viewModel.processIntent(CheckoutIntent.OnlinePaymentPending)
+                }
+            },
+        )
     }
 
     PaymentContent(

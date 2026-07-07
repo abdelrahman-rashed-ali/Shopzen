@@ -42,7 +42,7 @@ Reference design: <https://pocket-shop-style.lovable.app>
 | Destructive Actions | All delete / logout / order-submit actions require a `ConfirmationDialog` |
 | Stock Enforcement | Cart item quantity cannot exceed real-time Shopify `inventoryQuantity` |
 | COD Limit | Cash on Delivery is blocked when `totalPrice > Constants.MAX_COD_AMOUNT` |
-| Address Validation | Addresses must be validated via GPS or Google Places autocomplete |
+| Address Validation | Addresses must be validated via GPS, Google Places autocomplete, HERE Maps, or Mapbox search/map pick |
 | Verification Email | Sent automatically on successful registration |
 | Order Email | Shopify sends a confirmation email automatically on order creation with `send_receipt: true` |
 
@@ -64,7 +64,7 @@ Reference design: <https://pocket-shop-style.lovable.app>
 | Local DB | Room |
 | Async | Kotlin Coroutines + Flow + StateFlow |
 | Navigation | Jetpack Compose Navigation |
-| Address | Google Places API or HERE Maps SDK |
+| Address | Google Places API, HERE Maps SDK, or Mapbox Search/Maps SDK |
 | Currency | External exchange-rate API (e.g. Open Exchange Rates) |
 | Payment Gateway | Paymob Mobile SDK + Ktor intention API |
 | Images | Coil |
@@ -391,7 +391,7 @@ Every feature state includes: `isLoading: Boolean`, `error: String?`, and `show*
 | `UpdateAddressUseCase` | REST — `PUT /customers/{id}/addresses/{addr_id}.json` | Updates address |
 | `DeleteAddressUseCase` | REST — `DELETE /customers/{id}/addresses/{addr_id}.json` | Deletes — confirmation required |
 | `GetCountriesUseCase` | External countries API | Dynamic country + province list |
-| `ValidateAddressUseCase` | Google Places / HERE Maps | GPS or autocomplete validation |
+| `ValidateAddressUseCase` | Google Places / HERE Maps / Mapbox | GPS, autocomplete, or map-pick validation |
 | `GetCurrencyRatesUseCase` | External exchange rate API | Live rates; cached 1 hour |
 
 **Business rules:**
@@ -679,6 +679,7 @@ SHOPIFY_API_VERSION=2024-01
 GOOGLE_WEB_CLIENT_ID=
 CURRENCY_API_KEY=
 GOOGLE_PLACES_API_KEY=
+MAPBOX_ACCESS_TOKEN=
 PAYMOB_BASE_URL=https://accept.paymob.com
 PAYMOB_PUBLIC_KEY=
 PAYMOB_SECRET_KEY=

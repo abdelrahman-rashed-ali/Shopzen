@@ -25,7 +25,7 @@ class CheckoutComponentsTest {
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun `checkout top bar dispatches back click`() {
+    fun checkout_top_bar_dispatches_back_click() {
         var backClicks = 0
 
         composeRule.setContent {
@@ -44,7 +44,7 @@ class CheckoutComponentsTest {
     }
 
     @Test
-    fun `checkout section renders title and trailing content`() {
+    fun checkout_section_renders_title_and_trailing_content() {
         composeRule.setContent {
             ShopzenTheme {
                 CheckoutSection(
@@ -62,7 +62,7 @@ class CheckoutComponentsTest {
     }
 
     @Test
-    fun `checkout item row renders item details`() {
+    fun checkout_item_row_renders_item_details() {
         val item = sampleCheckoutItem()
 
         composeRule.setContent {
@@ -78,7 +78,7 @@ class CheckoutComponentsTest {
     }
 
     @Test
-    fun `price breakdown shows coupon and discount rows when present`() {
+    fun price_breakdown_shows_coupon_and_discount_rows_when_present() {
         composeRule.setContent {
             ShopzenTheme {
                 PriceBreakdown(
@@ -101,7 +101,7 @@ class CheckoutComponentsTest {
     }
 
     @Test
-    fun `address choice card dispatches click and shows selection`() {
+    fun address_choice_card_dispatches_click_and_shows_selection() {
         var clicks = 0
         val address = sampleAddress()
 
@@ -122,7 +122,7 @@ class CheckoutComponentsTest {
     }
 
     @Test
-    fun `payment method row dispatches click and shows selection`() {
+    fun payment_method_row_dispatches_click_and_shows_selection() {
         var clicks = 0
 
         composeRule.setContent {
@@ -146,7 +146,7 @@ class CheckoutComponentsTest {
     }
 
     @Test
-    fun `order success content renders order number and continue action`() {
+    fun order_success_content_renders_order_number_and_continue_action() {
         var continueClicks = 0
 
         composeRule.setContent {

@@ -77,10 +77,20 @@
     <string name="profile_guest_avatar">?</string>
     <string name="profile_fallback_name">Shopzen</string>
     <string name="profile_guest_banner">Sign in to manage your profile</string>
+    <string name="profile_guest_body">Create an account or sign in to edit your profile, track orders, and manage account actions.</string>
     <string name="profile_guest_cta">Sign In</string>
     <string name="profile_personal_details">Personal Details</string>
     <string name="profile_saved_addresses">Saved Locations</string>
     <string name="profile_order_history">Order History</string>
+    <string name="profile_order_history_subtitle">Review past purchases and payment details.</string>
+    <string name="profile_default_customer_name">Shopzen Customer</string>
+    <string name="profile_email_missing">Email unavailable</string>
+    <string name="profile_edit_cta">Edit Profile</string>
+    <string name="profile_details_title">Account Details</string>
+    <string name="profile_full_name_label">Full name</string>
+    <string name="profile_email_label">Email</string>
+    <string name="profile_password_label">Password</string>
+    <string name="profile_masked_password">********</string>
     <string name="profile_preferences_title">Preferences</string>
     <string name="profile_currency_label">Currency</string>
     <string name="profile_language_label">Language</string>
@@ -107,7 +117,10 @@
     <string name="nav_cart_cd">Cart</string>
     <string name="settings_title">Settings</string>
     <string name="settings_subtitle">Preferences are saved on this device.</string>
+    <string name="settings_preferences_subtitle">Choose how the storefront should display content and prices.</string>
     <string name="settings_account_title">Account</string>
+    <string name="settings_account_guest_subtitle">Login to sync preferences and manage secure account data.</string>
+    <string name="settings_account_signed_in_subtitle">Sync preferences or end the current session.</string>
     <string name="settings_login">Login</string>
     <string name="settings_logout">Logout</string>
     <string name="settings_sync">Sync with Firebase</string>
@@ -115,6 +128,96 @@
     <string name="settings_logout_confirm_title">Log out?</string>
     <string name="settings_logout_confirm_body">Are you sure you want to log out?</string>
     <string name="settings_logout_confirm_cta">Logout</string>
+    <string name="settings_tools_title">Account Tools</string>
+    <string name="settings_tools_subtitle">Open account areas that do not belong on the profile summary.</string>
+    <string name="settings_saved_addresses">Saved Addresses</string>
+    <string name="settings_saved_addresses_subtitle">Manage shipping locations and delivery details.</string>
+
+    <!-- Home Screen -->
+    <string name="home_hero_title">The Art of Elegance</string>
+    <string name="home_hero_subtitle">Curated pieces for a sharper everyday wardrobe.</string>
+    <string name="home_hero_cta">Explore Collection</string>
+    <string name="home_hero_image_cd">Featured collection banner image</string>
+    <string name="home_brands_title">Featured Brands</string>
+    <string name="home_brands_subtitle">Design houses selected for this season.</string>
+    <string name="home_categories_title">Curations</string>
+    <string name="home_categories_subtitle">Browse by mood, material, and occasion.</string>
+    <string name="home_new_arrivals_title">New Arrivals</string>
+    <string name="home_new_arrivals_subtitle">Fresh pieces ready for your next checkout.</string>
+    <string name="home_view_all">View All</string>
+    <string name="home_wishlist_remove_title">Remove Item</string>
+    <string name="home_wishlist_remove_message">Remove %1$s from your wishlist?</string>
+    <string name="home_wishlist_remove_fallback">this item</string>
+    <string name="home_wishlist_remove_confirm">Remove</string>
+    <string name="home_wishlist_add_title">Add to Wishlist</string>
+    <string name="home_wishlist_add_message">Add %1$s to your wishlist?</string>
+    <string name="home_wishlist_add_confirm">Add</string>
+
+    <!-- Search Screen -->
+    <string name="search_title">Search</string>
+    <string name="search_subtitle">Find pieces by collection, brand, or product name.</string>
+    <string name="search_hint">Search products and collections</string>
+    <string name="search_filters">Filters</string>
+    <string name="search_suggestions_title">Suggestions</string>
+    <string name="search_suggestions_subtitle">Start with popular searches.</string>
+    <string name="search_collections_title">Explore Collections</string>
+    <string name="search_collections_subtitle">Browse curated routes into the catalog.</string>
+    <string name="search_collection_featured">Featured edit</string>
+    <string name="search_results_title">Results</string>
+    <plurals name="search_results_count">
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
+    </plurals>
+    <string name="search_empty_title">No results found</string>
+    <string name="search_empty_body">Try a different search term or clear the active filters.</string>
+    <string name="search_clear_filters">Clear filters</string>
+    <string name="search_sort_default">Default</string>
+    <string name="search_sort_price_low_high">Price: Low to High</string>
+    <string name="search_sort_price_high_low">Price: High to Low</string>
+    <string name="search_sort_best_seller">Best Seller</string>
+    <string name="search_sort_by_category">By Category</string>
+
+    <!-- Wishlist Screen -->
+    <string name="wishlist_title">Wishlist</string>
+    <string name="wishlist_subtitle">Saved pieces ready when you are.</string>
+    <plurals name="wishlist_item_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+    <string name="wishlist_empty_title">Your wishlist is empty</string>
+    <string name="wishlist_empty_body">Save products you love and return when you are ready to shop.</string>
+    <string name="wishlist_shop_now">Shop Now</string>
+    <string name="wishlist_remove_title">Remove Item</string>
+    <string name="wishlist_remove_message">Remove this item from your wishlist?</string>
+    <string name="wishlist_remove_confirm">Remove</string>
+    <string name="wishlist_remove_cd">Remove from wishlist</string>
+    <string name="wishlist_add_to_cart_cd">Add to cart</string>
+    <string name="wishlist_item_image_cd">%1$s image</string>
+
+    <!-- Product Detail Screen -->
+    <string name="product_detail_title">Product Detail</string>
+    <string name="product_detail_no_image">No image available</string>
+    <string name="product_detail_image_count">%1$d / %2$d</string>
+    <string name="product_detail_wishlist_cd">Toggle wishlist</string>
+    <string name="product_detail_added_to_wishlist">Added to wishlist.</string>
+    <string name="product_detail_removed_from_wishlist">Removed from wishlist.</string>
+    <string name="product_detail_wishlist_error">Could not update wishlist.</string>
+    <string name="product_detail_no_reviews">No reviews yet</string>
+    <plurals name="product_detail_review_snapshot">
+        <item quantity="one">%1$s rating · %2$d review</item>
+        <item quantity="other">%1$s rating · %2$d reviews</item>
+    </plurals>
+    <string name="product_detail_variants_title">Choose Your Fit</string>
+    <string name="product_detail_variants_subtitle">Unavailable options are disabled based on stock.</string>
+    <string name="product_detail_size_required">Please select a size before adding to cart.</string>
+    <string name="product_detail_description_title">Description</string>
+    <string name="product_detail_description_subtitle">Materials, care, and product notes.</string>
+    <string name="product_detail_reviews_title">Reviews</string>
+    <string name="product_detail_reviews_subtitle">Customer notes and rating summary.</string>
+    <string name="product_detail_reviews_empty">Reviews are not available for this product yet.</string>
+    <string name="product_detail_total_label">Total</string>
+    <string name="product_detail_out_of_stock">Out of stock</string>
+    <string name="product_detail_add_to_cart">Add to Cart</string>
 
     <!-- ── Personal Details Screen ── -->
     <string name="personal_details_title">Personal Details</string>
@@ -178,7 +281,26 @@
     <!-- ── Add / Edit Address Screen ── -->
     <string name="address_edit_title_add">Add Location</string>
     <string name="address_edit_title_edit">Edit Location</string>
+    <string name="address_edit_mode_assisted">Map Assist</string>
+    <string name="address_edit_mode_manual">Manual Entry</string>
+    <string name="address_edit_assisted_title">Find Location</string>
+    <string name="address_edit_assisted_subtitle">Search with Mapbox-style suggestions or drop a pin, then edit details before saving.</string>
+    <string name="address_edit_search_hint">Search street, building, or area</string>
+    <string name="address_edit_mapbox_preview_title">Mapbox picker preview</string>
+    <string name="address_edit_use_map_pin">Use Pin Location</string>
+    <string name="address_edit_autofill_applied">Location details autofilled</string>
+    <string name="address_edit_autofill_editable">You can still edit every field before saving.</string>
+    <string name="address_edit_manual_override">Manual edits detected. Your typed values will be saved.</string>
+    <string name="address_edit_manual_title">Manual Fallback</string>
+    <string name="address_edit_manual_subtitle">Skip search and type the address directly.</string>
+    <string name="address_edit_manual_body">Manual entry stays available when map search is unavailable or the selected place needs correction.</string>
+    <string name="address_edit_contact_title">Contact</string>
+    <string name="address_edit_contact_subtitle">Required recipient details for delivery handoff.</string>
+    <string name="address_edit_address_title">Address Details</string>
+    <string name="address_edit_address_subtitle">Autofilled fields remain editable.</string>
     <string name="address_edit_label">Label (e.g. Home, Work)</string>
+    <string name="address_edit_first_name">First name</string>
+    <string name="address_edit_last_name">Last name</string>
     <string name="address_edit_recipient_name">Recipient name</string>
     <string name="address_edit_line1">Address line 1</string>
     <string name="address_edit_line2">Address line 2 (optional)</string>
@@ -187,6 +309,7 @@
     <string name="address_edit_postal_code">Postal code</string>
     <string name="address_edit_country">Country</string>
     <string name="address_edit_phone">Phone (optional)</string>
+    <string name="address_edit_phone_required">Phone</string>
     <string name="address_edit_save">Save Location</string>
     <string name="address_edit_error_required_fields">Please fill in all required fields</string>
 

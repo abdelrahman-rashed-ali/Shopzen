@@ -40,10 +40,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.text.NumberFormat
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Currency
 import java.util.Locale
 import shopzen.domain.profile.model.Order
@@ -53,6 +49,7 @@ import shopzen.presentation.checkout.components.CheckoutTopBar
 import shopzen.presentation.common.components.LoadingIndicator
 import shopzen.presentation.profile.intent.OrderDetailIntent
 import shopzen.presentation.profile.state.OrderDetailState
+import shopzen.presentation.profile.util.formatOrderDate
 import shopzen.presentation.profile.viewmodel.OrderDetailViewModel
 import shopzen.presentation.theme.LocalShopzenColors
 import shopzen.presentation.theme.ShopzenBody
@@ -449,13 +446,8 @@ private fun String.localizedPaymentMethod(): String =
 @Composable
 private fun Order.localizedDate(): String {
     val locale = currentLocale()
-    return remember(createdAt, locale) {
-        runCatching {
-            DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-                .withLocale(locale)
-                .format(Instant.parse(createdAt).atZone(ZoneId.systemDefault()))
-        }.getOrNull()
-    } ?: stringResource(R.string.order_history_date_unknown)
+    return remember(createdAt, locale) { formatOrderDate(createdAt, locale) }
+        ?: stringResource(R.string.order_history_date_unknown)
 }
 
 @Composable

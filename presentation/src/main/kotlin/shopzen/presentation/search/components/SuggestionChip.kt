@@ -5,16 +5,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 @Composable
 fun SuggestionChip(
@@ -23,28 +19,38 @@ fun SuggestionChip(
     modifier: Modifier = Modifier,
     isSelected: Boolean = false
 ) {
+    val shape = MaterialTheme.shapes.small
+    val containerColor = if (isSelected) {
+        MaterialTheme.colorScheme.onSurface
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+    val contentColor = if (isSelected) {
+        MaterialTheme.colorScheme.surface
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                if (isSelected) Color.Black else Color.White
-            )
+            .background(containerColor, shape)
             .border(
                 width = 1.dp,
-                color = if (isSelected) Color.Black else Color(0xFFDDDDDD),
-                shape = RoundedCornerShape(20.dp)
+                color = if (isSelected) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.outlineVariant
+                },
+                shape = shape,
             )
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Medium,
-                fontSize = 13.sp,
-                letterSpacing = 0.3.sp
-            ),
-            color = if (isSelected) Color.White else Color.Black
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = contentColor,
         )
     }
 }

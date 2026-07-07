@@ -105,6 +105,13 @@ ktor = [
     "ktor-serialization-kotlinx-json",
     "kotlinx-serialization-json",
 ]
+llm-client = [
+    "ktor-client-core",
+    "ktor-client-logging",
+    "ktor-client-content-negotiation",
+    "ktor-serialization-kotlinx-json",
+    "kotlinx-serialization-json",
+]
 apollo = [
     "apollo-runtime",
     "apollo-normalized-cache",

@@ -90,3 +90,6 @@ data object SearchScreen : NavScreen("search")
 
 @Serializable
 data class AddressEditScreen(val addressId: String? = null) : NavScreen("address-edit")
+
+@Serializable
+data object LlmTestScreenRoute : NavScreen("llm-test")

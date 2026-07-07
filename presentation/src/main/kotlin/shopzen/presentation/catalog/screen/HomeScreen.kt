@@ -1,71 +1,74 @@
 package shopzen.presentation.catalog.screen
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Path
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.ShoppingBag
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import shopzen.presentation.catalog.components.CategoryChips
-import shopzen.presentation.catalog.components.FeaturedBanner
-import shopzen.presentation.catalog.components.NewArrivalsSection
+import coil.compose.AsyncImage
+import kotlinx.coroutines.delay
+import shopzen.domain.catalog.model.Brand
+import shopzen.domain.catalog.model.Category
+import shopzen.domain.catalog.model.Product
+import shopzen.presentation.R
 import shopzen.presentation.catalog.intent.HomeIntent
 import shopzen.presentation.catalog.state.HomeState
 import shopzen.presentation.catalog.viewmodel.HomeViewModel
+import shopzen.presentation.common.components.ConfirmationDialog
 import shopzen.presentation.common.components.ErrorScreen
 import shopzen.presentation.common.components.LoadingIndicator
-import shopzen.presentation.common.components.ConfirmationDialog
 import shopzen.presentation.common.components.MainShellTab
+import shopzen.presentation.common.components.ProductCard
 import shopzen.presentation.common.components.ShopzenBottomBar
 import shopzen.presentation.common.components.ShopzenTopAppBar
 import shopzen.presentation.wishlist.intent.WishlistIntent
 import shopzen.presentation.wishlist.viewmodel.WishlistViewModel
 
-/**
- * Stateful/Stateless Home screen composable.
- * Matches the reference design screenshot exactly.
- * Injects HomeViewModel directly using hiltViewModel() inside its signature.
- */
 @Composable
 fun HomeScreen(
     onNavigateToBrand: (String) -> Unit,
@@ -79,12 +82,10 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    wishlistViewModel: WishlistViewModel = hiltViewModel()
+    wishlistViewModel: WishlistViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val wishlistState by wishlistViewModel.state.collectAsStateWithLifecycle()
-    val onIntent = viewModel::processIntent
-
     val wishlistProductIds = wishlistState.items.map { it.productId }.toSet()
 
     Scaffold(
@@ -103,311 +104,453 @@ fun HomeScreen(
                 onSettingsClick = onNavigateToSettings,
             )
         },
-        modifier = modifier.background(Color.White)
+        modifier = modifier.background(MaterialTheme.colorScheme.background),
     ) { innerPadding ->
         when {
-            state.isLoading -> {
-                LoadingIndicator(modifier = Modifier.padding(innerPadding))
-            }
+            state.isLoading -> LoadingIndicator(modifier = Modifier.padding(innerPadding))
+            state.error != null -> ErrorScreen(
+                message = state.error.orEmpty(),
+                onRetry = { viewModel.processIntent(HomeIntent.LoadHomeData) },
+                modifier = Modifier.padding(innerPadding),
+            )
 
-            state.error != null -> {
-                ErrorScreen(
-                    message = state.error.orEmpty(),
-                    onRetry = { onIntent(HomeIntent.LoadHomeData) },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
-
-            else -> {
-                HomeContent(
-                    state = state,
-                    wishlistProductIds = wishlistProductIds,
-                    onNavigateToCategory = onCategoryClick@{ categoryId ->
-                        onNavigateToCategory(categoryId)
-                    },
-                    onNavigateToProduct = onProductClick@{ productId ->
-                        onNavigateToProduct(productId)
-                    },
-                    onWishlistClick = { product ->
-                        val isFav = wishlistProductIds.contains(product.id)
-                        if (isFav) {
-                            val item = wishlistState.items.find { it.productId == product.id }
-                            if (item != null) {
-                                wishlistViewModel.processIntent(WishlistIntent.RequestRemoveItem(item.id))
-                            }
-                        } else {
-                            wishlistViewModel.processIntent(WishlistIntent.RequestAddToWishlist(product))
-                        }
-                    },
-                    onNavigateToProducts = onNavigateToProducts,
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
-        }
-    }
-
-    if (wishlistState.showRemoveItemDialog && wishlistState.pendingRemovalItemId != null) {
-        val pendingId = wishlistState.pendingRemovalItemId!!
-        val pendingItem = wishlistState.items.find { it.id == pendingId }
-        ConfirmationDialog(
-            title = "Remove Item",
-            message = "Remove ${pendingItem?.title ?: "this item"} from your wishlist?",
-            confirmText = "Remove",
-            dismissText = "Cancel",
-            onConfirm = {
-                wishlistViewModel.processIntent(
-                    WishlistIntent.ConfirmRemoveItem(pendingId)
-                )
-            },
-            onDismiss = {
-                wishlistViewModel.processIntent(
-                    WishlistIntent.DismissConfirmDialog
-                )
-            }
-        )
-    }
-
-    if (wishlistState.showAddConfirmationDialog && wishlistState.pendingAddProduct != null) {
-        val pendingProduct = wishlistState.pendingAddProduct!!
-        ConfirmationDialog(
-            title = "Add to Wishlist",
-            message = "Add ${pendingProduct.title} to your wishlist?",
-            confirmText = "Add",
-            dismissText = "Cancel",
-            onConfirm = {
-                wishlistViewModel.processIntent(
-                    WishlistIntent.ConfirmAddToWishlist(pendingProduct)
-                )
-            },
-            onDismiss = {
-                wishlistViewModel.processIntent(
-                    WishlistIntent.DismissAddConfirmDialog
-                )
-            }
-        )
-    }
-}
-
-/**
- * Top App Bar matching the LUXE branding.
- */
-@Composable
-private fun HomeTopBar() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .statusBarsPadding()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Hamburger Menu Icon
-            IconButton(onClick = { /* Open drawer */ }) {
-                Icon(
-                    imageVector = Icons.Outlined.Menu,
-                    contentDescription = "Menu",
-                    tint = Color.Black
-                )
-            }
-
-            // Center LUXE Branding
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                // Gold and Black emblem / logo mark matching screenshot exactly
-                Canvas(modifier = Modifier.size(16.dp, 16.dp)) {
-                    // Left black bar
-                    drawRect(
-                        color = Color.Black,
-                        topLeft = Offset(0f, 0f),
-                        size = Size(width = size.width * 0.25f, height = size.height)
-                    )
-                    // Middle gold slanted bar
-                    val goldPath = Path().apply {
-                        moveTo(size.width * 0.35f, 0f)
-                        lineTo(size.width * 0.55f, 0f)
-                        lineTo(size.width * 0.9f, size.height)
-                        lineTo(size.width * 0.7f, size.height)
-                        close()
+            else -> HomeContent(
+                state = state,
+                wishlistProductIds = wishlistProductIds,
+                onNavigateToBrand = onNavigateToBrand,
+                onNavigateToCategory = onNavigateToCategory,
+                onNavigateToProduct = onNavigateToProduct,
+                onWishlistClick = { product ->
+                    val wishlistItem = wishlistState.items.find { it.productId == product.id }
+                    if (wishlistItem != null) {
+                        wishlistViewModel.processIntent(WishlistIntent.RequestRemoveItem(wishlistItem.id))
+                    } else {
+                        wishlistViewModel.processIntent(WishlistIntent.RequestAddToWishlist(product))
                     }
-                    drawPath(
-                        path = goldPath,
-                        color = Color(0xFFC5A85A)
-                    )
-                    // Right black bar
-                    drawRect(
-                        color = Color.Black,
-                        topLeft = Offset(size.width * 0.75f, 0f),
-                        size = Size(width = size.width * 0.25f, height = size.height)
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "LUXE",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        letterSpacing = 4.sp
-                    ),
-                    color = Color.Black
-                )
-            }
-
-            // Notification Bell Icon
-            IconButton(onClick = { /* View notifications */ }) {
-                Icon(
-                    imageVector = Icons.Outlined.Notifications,
-                    contentDescription = "Notifications",
-                    tint = Color.Black
-                )
-            }
+                },
+                onNavigateToProducts = onNavigateToProducts,
+                modifier = Modifier.padding(innerPadding),
+            )
         }
-        // Subtle divider line at the bottom
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(0.5.dp)
-                .background(Color(0xFFEEEEEE))
+    }
+
+    val pendingRemovalId = wishlistState.pendingRemovalItemId
+    if (wishlistState.showRemoveItemDialog && pendingRemovalId != null) {
+        val pendingItem = wishlistState.items.find { it.id == pendingRemovalId }
+        ConfirmationDialog(
+            title = stringResource(R.string.home_wishlist_remove_title),
+            message = stringResource(
+                R.string.home_wishlist_remove_message,
+                pendingItem?.title ?: stringResource(R.string.home_wishlist_remove_fallback),
+            ),
+            confirmText = stringResource(R.string.home_wishlist_remove_confirm),
+            dismissText = stringResource(R.string.common_cancel),
+            onConfirm = {
+                wishlistViewModel.processIntent(WishlistIntent.ConfirmRemoveItem(pendingRemovalId))
+            },
+            onDismiss = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissConfirmDialog)
+            },
+        )
+    }
+
+    val pendingProduct = wishlistState.pendingAddProduct
+    if (wishlistState.showAddConfirmationDialog && pendingProduct != null) {
+        ConfirmationDialog(
+            title = stringResource(R.string.home_wishlist_add_title),
+            message = stringResource(R.string.home_wishlist_add_message, pendingProduct.title),
+            confirmText = stringResource(R.string.home_wishlist_add_confirm),
+            dismissText = stringResource(R.string.common_cancel),
+            onConfirm = {
+                wishlistViewModel.processIntent(WishlistIntent.ConfirmAddToWishlist(pendingProduct))
+            },
+            onDismiss = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissAddConfirmDialog)
+            },
         )
     }
 }
 
-/**
- * Custom Bottom Navigation Bar matching the design.
- * Features Home active state with dot indicator underneath.
- */
 @Composable
-private fun HomeBottomBar(onSearchClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .background(Color.White)
-            .border(width = 0.5.dp, color = Color(0xFFEEEEEE))
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Tab 1: Home (Active with dot indicator below)
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                IconButton(onClick = { /* Already on Home */ }) {
-                    Icon(
-                        imageVector = Icons.Outlined.Home,
-                        contentDescription = "Home",
-                        tint = Color.Black,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                // Dot indicator for active Home screen
-                Box(
-                    modifier = Modifier
-                        .size(4.dp)
-                        .background(Color.Black, shape = CircleShape)
-                )
-            }
-
-            // Tab 2: Search
-            IconButton(onClick = onSearchClick) {
-                Icon(
-                    imageVector = Icons.Outlined.Search,
-                    contentDescription = "Search",
-                    tint = Color.Black,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            // Tab 3: Wishlist
-            IconButton(onClick = { /* Navigate to Wishlist */ }) {
-                Icon(
-                    imageVector = Icons.Outlined.FavoriteBorder,
-                    contentDescription = "Wishlist",
-                    tint = Color.Black,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            // Tab 4: Cart (Shopping Bag)
-            IconButton(onClick = { /* Navigate to Cart */ }) {
-                Icon(
-                    imageVector = Icons.Outlined.ShoppingBag,
-                    contentDescription = "Cart",
-                    tint = Color.Black,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            // Tab 5: Profile
-            IconButton(onClick = { /* Navigate to Profile */ }) {
-                Icon(
-                    imageVector = Icons.Outlined.Person,
-                    contentDescription = "Profile",
-                    tint = Color.Black,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun HomeContent(
+internal fun HomeContent(
     state: HomeState,
     wishlistProductIds: Set<String>,
+    onNavigateToBrand: (String) -> Unit,
     onNavigateToCategory: (String) -> Unit,
     onNavigateToProduct: (String) -> Unit,
-    onWishlistClick: (shopzen.domain.catalog.model.Product) -> Unit,
+    onWishlistClick: (Product) -> Unit,
     onNavigateToProducts: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
+            .testTag(HomeTestTags.Content),
+        verticalArrangement = Arrangement.spacedBy(28.dp),
     ) {
-        // 1. Featured Banner
-        FeaturedBanner(
-            bannerImages = state.bannerImages,
-            title = "The Art of Elegance",
-            subtitle = "Discover our curated collection of timeless pieces designed for the modern connoisseur."
-        )
+        HomeAnimatedSection(index = 0) {
+            HomeHeroSection(
+                bannerImages = state.bannerImages,
+                onExploreClick = onNavigateToProducts,
+                modifier = Modifier.testTag(HomeTestTags.Hero),
+            )
+        }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        HomeAnimatedSection(index = 1) {
+            HomeBrandSection(
+                brands = state.brands,
+                onBrandClick = onNavigateToBrand,
+                modifier = Modifier.testTag(HomeTestTags.Brands),
+            )
+        }
 
-        // 2. Categories (Curations)
-        CategoryChips(
-            categories = state.categories,
-            onCategoryClick = onNavigateToCategory
-        )
+        HomeAnimatedSection(index = 2) {
+            HomeCategorySection(
+                categories = state.categories,
+                onCategoryClick = onNavigateToCategory,
+                modifier = Modifier.testTag(HomeTestTags.Categories),
+            )
+        }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        HomeAnimatedSection(index = 3) {
+            HomeNewArrivalsSection(
+                products = state.newArrivals,
+                wishlistProductIds = wishlistProductIds,
+                onProductClick = onNavigateToProduct,
+                onWishlistClick = onWishlistClick,
+                onViewAllClick = onNavigateToProducts,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .testTag(HomeTestTags.NewArrivals),
+            )
+        }
 
-        // 3. Best Sellers (New Arrivals / Product Grid)
-        NewArrivalsSection(
-            products = state.newArrivals,
-            onProductClick = onNavigateToProduct,
-            onWishlistClick = onWishlistClick,
-            onViewAllClick = onNavigateToProducts,
-            wishlistProductIds = wishlistProductIds
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
+
+@Composable
+private fun HomeAnimatedSection(
+    index: Int,
+    content: @Composable () -> Unit,
+) {
+    var visible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        delay(index * 70L)
+        visible = true
+    }
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(animationSpec = tween(durationMillis = 220)) +
+            slideInVertically(
+                animationSpec = tween(durationMillis = 260),
+                initialOffsetY = { it / 8 },
+            ),
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun HomeHeroSection(
+    bannerImages: List<String>,
+    onExploreClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(420.dp),
+    ) {
+        AsyncImage(
+            model = bannerImages.firstOrNull() ?: HOME_FALLBACK_BANNER,
+            contentDescription = stringResource(R.string.home_hero_image_cd),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.22f),
+                            Color.Black.copy(alpha = 0.82f),
+                        ),
+                        startY = 120f,
+                    ),
+                ),
+        )
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.home_hero_title),
+                style = MaterialTheme.typography.displaySmall,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = stringResource(R.string.home_hero_subtitle),
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White.copy(alpha = 0.86f),
+            )
+            Button(
+                onClick = onExploreClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color.Black,
+                ),
+                shape = RoundedCornerShape(6.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.home_hero_cta),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeBrandSection(
+    brands: List<Brand>,
+    onBrandClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (brands.isEmpty()) return
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        HomeSectionHeader(
+            title = stringResource(R.string.home_brands_title),
+            subtitle = stringResource(R.string.home_brands_subtitle),
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            items(brands, key = { it.name }) { brand ->
+                BrandPill(
+                    brand = brand,
+                    onClick = { onBrandClick(brand.name) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BrandPill(
+    brand: Brand,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier
+            .width(152.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = brand.name.take(2).uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = brand.name,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeCategorySection(
+    categories: List<Category>,
+    onCategoryClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (categories.isEmpty()) return
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        HomeSectionHeader(
+            title = stringResource(R.string.home_categories_title),
+            subtitle = stringResource(R.string.home_categories_subtitle),
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+        ) {
+            items(categories, key = { it.id }) { category ->
+                CategoryFeatureCard(
+                    category = category,
+                    onClick = { onCategoryClick(category.id) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryFeatureCard(
+    category: Category,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .width(144.dp)
+            .clickable(onClick = onClick),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        AsyncImage(
+            model = category.imageUrl,
+            contentDescription = category.title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(0.82f)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+        )
+        Text(
+            text = category.title.uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun HomeNewArrivalsSection(
+    products: List<Product>,
+    wishlistProductIds: Set<String>,
+    onProductClick: (String) -> Unit,
+    onWishlistClick: (Product) -> Unit,
+    onViewAllClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (products.isEmpty()) return
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom,
+        ) {
+            HomeSectionHeader(
+                title = stringResource(R.string.home_new_arrivals_title),
+                subtitle = stringResource(R.string.home_new_arrivals_subtitle),
+                modifier = Modifier.weight(1f),
+            )
+            OutlinedButton(
+                onClick = onViewAllClick,
+                shape = RoundedCornerShape(6.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+            ) {
+                Text(
+                    text = stringResource(R.string.home_view_all),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(22.dp)) {
+            products.chunked(2).forEach { rowProducts ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    rowProducts.forEach { product ->
+                        ProductCard(
+                            product = product,
+                            onProductClick = { onProductClick(product.id) },
+                            onWishlistClick = { onWishlistClick(product) },
+                            isFavorite = wishlistProductIds.contains(product.id),
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    if (rowProducts.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeSectionHeader(
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+internal object HomeTestTags {
+    const val Content = "home_content"
+    const val Hero = "home_hero"
+    const val Brands = "home_brands"
+    const val Categories = "home_categories"
+    const val NewArrivals = "home_new_arrivals"
+}
+
+private const val HOME_FALLBACK_BANNER =
+    "https://images.unsplash.com/photo-1619134778706-7015533a6150?q=80&w=1200"
