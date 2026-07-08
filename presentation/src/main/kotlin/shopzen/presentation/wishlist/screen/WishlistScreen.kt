@@ -90,13 +90,13 @@ fun WishlistScreen(
                 onSettingsClick = onNavigateToSettings,
             )
         },
-        modifier = modifier.background(Color.White)
+        modifier = modifier.background(MaterialTheme.colorScheme.background)
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             when {
                 state.isLoading && state.items.isEmpty() -> {
@@ -138,59 +138,6 @@ fun WishlistScreen(
     }
 }
 
-@Composable
-private fun WishlistTopBar() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .statusBarsPadding()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { /* Open drawer */ }) {
-                Icon(
-                    imageVector = Icons.Outlined.Menu,
-                    contentDescription = "Menu",
-                    tint = Color.Black
-                )
-            }
-
-            // Center LUMINA text logo matching screenshot
-            Text(
-                text = "LUMINA",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    letterSpacing = 4.sp
-                ),
-                color = Color.Black
-            )
-
-            IconButton(onClick = { /* View notifications */ }) {
-                Icon(
-                    imageVector = Icons.Outlined.Notifications,
-                    contentDescription = "Notifications",
-                    tint = Color.Black
-                )
-            }
-        }
-        // Subtle divider line
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(0.5.dp)
-                .background(Color(0xFFEEEEEE))
-        )
-    }
-}
 
 @Composable
 fun WishlistContent(
@@ -217,7 +164,7 @@ fun WishlistContent(
                     fontWeight = FontWeight.Bold,
                     fontSize = 32.sp
                 ),
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Text(
@@ -227,7 +174,7 @@ fun WishlistContent(
                     fontSize = 12.sp,
                     letterSpacing = 1.sp
                 ),
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 

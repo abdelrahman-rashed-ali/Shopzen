@@ -22,6 +22,9 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -104,6 +107,12 @@ fun ShopzenBottomBar(
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val navItemColors = androidx.compose.material3.NavigationBarItemDefaults.colors(
+        indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+        selectedIconColor = MaterialTheme.colorScheme.primary,
+        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
     NavigationBar(
         modifier = modifier
             .fillMaxWidth()
@@ -114,32 +123,35 @@ fun ShopzenBottomBar(
         NavigationBarItem(
             selected = currentTab == MainShellTab.DISCOVER,
             onClick = onDiscoverClick,
+            colors = navItemColors,
             icon = {
                 ShellIcon(
                     selected = currentTab == MainShellTab.DISCOVER,
-                    selectedIcon = Icons.Outlined.Home,
+                    selectedIcon = Icons.Filled.Home,
                     idleIcon = Icons.Outlined.Home,
                     description = stringResource(R.string.nav_discover),
                 )
             },
-            label = { Text(stringResource(R.string.nav_discover)) },
+            label = { Text(stringResource(R.string.nav_discover)) }
         )
         NavigationBarItem(
             selected = currentTab == MainShellTab.SEARCH,
             onClick = onSearchClick,
+            colors = navItemColors,
             icon = {
                 ShellIcon(
                     selected = currentTab == MainShellTab.SEARCH,
-                    selectedIcon = Icons.Outlined.Search,
+                    selectedIcon = Icons.Filled.Search,
                     idleIcon = Icons.Outlined.Search,
                     description = stringResource(R.string.nav_search),
                 )
             },
-            label = { Text(stringResource(R.string.nav_search)) },
+            label = { Text(stringResource(R.string.nav_search)) }
         )
         NavigationBarItem(
             selected = currentTab == MainShellTab.WISHLIST,
             onClick = onWishlistClick,
+            colors = navItemColors,
             icon = {
                 ShellIcon(
                     selected = currentTab == MainShellTab.WISHLIST,
@@ -148,20 +160,21 @@ fun ShopzenBottomBar(
                     description = stringResource(R.string.nav_wishlist),
                 )
             },
-            label = { Text(stringResource(R.string.nav_wishlist)) },
+            label = { Text(stringResource(R.string.nav_wishlist)) }
         )
         NavigationBarItem(
             selected = currentTab == MainShellTab.SETTINGS,
             onClick = onSettingsClick,
+            colors = navItemColors,
             icon = {
                 ShellIcon(
                     selected = currentTab == MainShellTab.SETTINGS,
-                    selectedIcon = Icons.Outlined.Settings,
+                    selectedIcon = Icons.Filled.Settings,
                     idleIcon = Icons.Outlined.Settings,
                     description = stringResource(R.string.nav_settings),
                 )
             },
-            label = { Text(stringResource(R.string.nav_settings)) },
+            label = { Text(stringResource(R.string.nav_settings)) }
         )
     }
 }
@@ -173,23 +186,9 @@ private fun ShellIcon(
     idleIcon: androidx.compose.ui.graphics.vector.ImageVector,
     description: String,
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Icon(
-            imageVector = if (selected) selectedIcon else idleIcon,
-            contentDescription = description,
-        )
-        if (selected) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 3.dp)
-                    .size(4.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape),
-            )
-        } else {
-            Spacer(modifier = Modifier.height(7.dp))
-        }
-    }
+    Icon(
+        imageVector = if (selected) selectedIcon else idleIcon,
+        contentDescription = description,
+        modifier = Modifier.size(24.dp)
+    )
 }

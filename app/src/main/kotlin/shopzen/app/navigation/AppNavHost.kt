@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import shopzen.presentation.auth.screen.LoginScreen as LoginRouteScreen
@@ -53,7 +54,7 @@ fun AppNavHost(
 
     fun navigateTopLevel(destination: NavScreen) {
         navController.navigate(destination) {
-            popUpTo<HomeScreen> {
+            popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
             launchSingleTop = true
