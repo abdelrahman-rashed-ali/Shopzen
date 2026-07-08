@@ -3,9 +3,7 @@ package shopzen.presentation.cart.screen
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -16,13 +14,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import shopzen.domain.cart.model.CartItem
 import shopzen.presentation.R
 import shopzen.presentation.cart.intent.CartIntent
 import shopzen.presentation.cart.state.CartItemUi
 import shopzen.presentation.cart.state.CartState
 import shopzen.presentation.common.util.UiText
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 
 @RunWith(AndroidJUnit4::class)
 class CartScreenContentTest {
@@ -31,7 +28,7 @@ class CartScreenContentTest {
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun `loading state shows loading indicator`() {
+    fun loading_state_shows_loading_indicator() {
         composeRule.setContent {
             ShopzenTheme {
                 CartScreenContent(
@@ -48,7 +45,7 @@ class CartScreenContentTest {
     }
 
     @Test
-    fun `error state shows retry action and dispatches retry intent`() {
+    fun error_state_shows_retry_action_and_dispatches_retry_intent() {
         val intents = mutableListOf<CartIntent>()
 
         composeRule.setContent {
@@ -71,7 +68,7 @@ class CartScreenContentTest {
     }
 
     @Test
-    fun `empty state shows start shopping action`() {
+    fun empty_state_shows_start_shopping_action() {
         var backClicks = 0
 
         composeRule.setContent {
@@ -92,7 +89,7 @@ class CartScreenContentTest {
     }
 
     @Test
-    fun `filled cart wires item and summary intents`() {
+    fun filled_cart_wires_item_and_summary_intents() {
         val intents = mutableListOf<CartIntent>()
         val item = sampleItemUi()
 
@@ -137,7 +134,7 @@ class CartScreenContentTest {
     }
 
     @Test
-    fun `remove item dialog dispatches confirm and dismiss intents`() {
+    fun remove_item_dialog_dispatches_confirm_and_dismiss_intents() {
         val intents = mutableListOf<CartIntent>()
 
         composeRule.setContent {
@@ -174,7 +171,7 @@ class CartScreenContentTest {
     }
 
     @Test
-    fun `clear cart dialog dispatches confirm and dismiss intents`() {
+    fun clear_cart_dialog_dispatches_confirm_and_dismiss_intents() {
         val intents = mutableListOf<CartIntent>()
 
         composeRule.setContent {
@@ -210,7 +207,7 @@ class CartScreenContentTest {
     }
 
     @Test
-    fun `coupon sheet renders from screen state`() {
+    fun coupon_sheet_renders_from_screen_state() {
         composeRule.setContent {
             ShopzenTheme {
                 CartScreenContent(

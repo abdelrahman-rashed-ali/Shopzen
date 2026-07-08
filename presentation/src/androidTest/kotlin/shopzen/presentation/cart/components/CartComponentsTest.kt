@@ -17,7 +17,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import shopzen.presentation.R
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +27,7 @@ class CartComponentsTest {
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun `cart top bar shows clear action when cart has items`() {
+    fun cart_top_bar_shows_clear_action_when_cart_has_items() {
         var backClicks = 0
         var clearClicks = 0
 
@@ -51,7 +51,7 @@ class CartComponentsTest {
     }
 
     @Test
-    fun `cart top bar hides clear action when cart is empty`() {
+    fun cart_top_bar_hides_clear_action_when_cart_is_empty() {
         composeRule.setContent {
             ShopzenTheme {
                 CartTopBar(
@@ -67,7 +67,7 @@ class CartComponentsTest {
     }
 
     @Test
-    fun `quantity stepper disables edges and dispatches clicks`() {
+    fun quantity_stepper_disables_edges_and_dispatches_clicks() {
         var incrementClicks = 0
         var decrementClicks = 0
 
@@ -92,7 +92,7 @@ class CartComponentsTest {
     }
 
     @Test
-    fun `quantity stepper disables decrement at minimum and increment at maximum`() {
+    fun quantity_stepper_disables_decrement_at_minimum_and_increment_at_maximum() {
         composeRule.setContent {
             ShopzenTheme {
                 QuantityStepper(
@@ -111,7 +111,7 @@ class CartComponentsTest {
     }
 
     @Test
-    fun `cart item card renders details and dispatches actions`() {
+    fun cart_item_card_renders_details_and_dispatches_actions() {
         var incrementClicks = 0
         var decrementClicks = 0
         var deleteClicks = 0
@@ -149,7 +149,7 @@ class CartComponentsTest {
     }
 
     @Test
-    fun `cart summary section shows add coupon action when coupon not applied`() {
+    fun cart_summary_section_shows_add_coupon_action_when_coupon_not_applied() {
         var addCouponClicks = 0
 
         composeRule.setContent {
@@ -173,7 +173,7 @@ class CartComponentsTest {
     }
 
     @Test
-    fun `cart summary section shows applied coupon and remove action`() {
+    fun cart_summary_section_shows_applied_coupon_and_remove_action() {
         var removeClicks = 0
 
         composeRule.setContent {
@@ -198,7 +198,7 @@ class CartComponentsTest {
     }
 
     @Test
-    fun `add coupon section disables apply when code is blank and shows error`() {
+    fun add_coupon_section_disables_apply_when_code_is_blank_and_shows_error() {
         var applyClicks = 0
 
         composeRule.setContent {
@@ -224,7 +224,7 @@ class CartComponentsTest {
     }
 
     @Test
-    fun `add coupon section shows applied coupon state and remove action`() {
+    fun add_coupon_section_shows_applied_coupon_state_and_remove_action() {
         var removeClicks = 0
 
         composeRule.setContent {
@@ -252,7 +252,7 @@ class CartComponentsTest {
     }
 
     @Test
-    fun `coupon bottom sheet renders when visible and dispatches dismiss`() {
+    fun coupon_bottom_sheet_renders_when_visible_and_dispatches_dismiss() {
         var dismissClicks = 0
 
         composeRule.setContent {
@@ -280,7 +280,7 @@ class CartComponentsTest {
     }
 
     @Test
-    fun `checkout button dispatches click`() {
+    fun checkout_button_dispatches_click() {
         var clicks = 0
 
         composeRule.setContent {

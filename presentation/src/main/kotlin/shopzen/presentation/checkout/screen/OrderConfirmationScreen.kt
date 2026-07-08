@@ -12,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import shopzen.presentation.R
 import shopzen.presentation.checkout.components.CheckoutTopBar
 import shopzen.presentation.checkout.components.OrderSuccessContent
-import shopzen.presentation.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.LocalShopzenColors
 
 @Composable
 fun OrderConfirmationScreen(

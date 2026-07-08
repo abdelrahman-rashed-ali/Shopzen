@@ -10,10 +10,12 @@ import shopzen.data.cart.mapper.toDomainCart
 import shopzen.data.cart.remote.CartRemoteDataSource
 import shopzen.data.cart.remote.CartSyncAdapter
 import shopzen.domain.cart.model.Cart
+import shopzen.domain.cart.model.CartException
 import shopzen.domain.cart.model.CartItem
 import shopzen.domain.cart.model.CouponValidationResult
 import shopzen.domain.cart.repository.CartRepository
 import shopzen.data.cart.remote.CouponRemoteDataSource
+import shopzen.data.cart.remote.CartRemoteException
 import kotlin.math.abs
 import javax.inject.Inject
 
@@ -78,6 +80,18 @@ class CartRepositoryImpl @Inject constructor(
         }
 
         upsertCartToLocal(refreshedCart, userId = item.userId)
+    }.recoverCatching { e ->
+        if (e is CartRemoteException) {
+            val isOutOfStock = e.message?.contains("not have sufficient quantities", ignoreCase = true) == true ||
+                               e.message?.contains("inventory", ignoreCase = true) == true ||
+                               e.message?.contains("out of stock", ignoreCase = true) == true
+            if (isOutOfStock) {
+                throw CartException.OutOfStock(e.message ?: "Product is out of stock")
+            } else {
+                throw CartException.MutationFailed(e.message ?: "Failed to add to cart")
+            }
+        }
+        throw e
     }
 
     override suspend fun removeFromCart(itemId: String, userId: String): Result<Unit> = runCatching {
@@ -98,6 +112,18 @@ class CartRepositoryImpl @Inject constructor(
             quantity = quantity,
         )
         upsertCartToLocal(refreshedCart, userId)
+    }.recoverCatching { e ->
+        if (e is CartRemoteException) {
+            val isOutOfStock = e.message?.contains("not have sufficient quantities", ignoreCase = true) == true ||
+                               e.message?.contains("inventory", ignoreCase = true) == true ||
+                               e.message?.contains("out of stock", ignoreCase = true) == true
+            if (isOutOfStock) {
+                throw CartException.OutOfStock(e.message ?: "Product is out of stock")
+            } else {
+                throw CartException.MutationFailed(e.message ?: "Failed to update quantity")
+            }
+        }
+        throw e
     }
 
     override suspend fun clearCart(userId: String): Result<Unit> = runCatching {

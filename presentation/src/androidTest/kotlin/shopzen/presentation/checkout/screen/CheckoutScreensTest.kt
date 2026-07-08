@@ -4,7 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.junit.Assert.assertEquals
@@ -19,7 +18,7 @@ import shopzen.presentation.checkout.intent.CheckoutIntent
 import shopzen.presentation.checkout.state.CheckoutItemUi
 import shopzen.presentation.checkout.state.CheckoutState
 import shopzen.presentation.common.util.UiText
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 
 @RunWith(AndroidJUnit4::class)
 class CheckoutScreensTest {
@@ -28,7 +27,7 @@ class CheckoutScreensTest {
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun `checkout summary loading state shows loading message`() {
+    fun checkout_summary_loading_state_shows_loading_message() {
         composeRule.setContent {
             ShopzenTheme {
                 CheckoutSummaryContent(
@@ -45,7 +44,7 @@ class CheckoutScreensTest {
     }
 
     @Test
-    fun `checkout summary content wires address and continue intents`() {
+    fun checkout_summary_content_wires_address_and_continue_intents() {
         val intents = mutableListOf<CheckoutIntent>()
         val address = sampleAddress()
         val item = sampleCheckoutItem()
@@ -85,7 +84,7 @@ class CheckoutScreensTest {
     }
 
     @Test
-    fun `checkout summary error state shows retry action`() {
+    fun checkout_summary_error_state_shows_retry_action() {
         val intents = mutableListOf<CheckoutIntent>()
 
         composeRule.setContent {
@@ -109,7 +108,7 @@ class CheckoutScreensTest {
     }
 
     @Test
-    fun `payment content wires payment selection and place order request`() {
+    fun payment_content_wires_payment_selection_and_place_order_request() {
         val intents = mutableListOf<CheckoutIntent>()
         val address = sampleAddress()
 
@@ -151,7 +150,7 @@ class CheckoutScreensTest {
     }
 
     @Test
-    fun `payment dialog wires confirm and dismiss intents`() {
+    fun payment_dialog_wires_confirm_and_dismiss_intents() {
         val intents = mutableListOf<CheckoutIntent>()
         val address = sampleAddress()
 
@@ -192,7 +191,7 @@ class CheckoutScreensTest {
     }
 
     @Test
-    fun `order confirmation screen falls back to order id when number blank`() {
+    fun order_confirmation_screen_falls_back_to_order_id_when_number_blank() {
         var continueClicks = 0
 
         composeRule.setContent {

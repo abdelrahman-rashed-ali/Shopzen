@@ -22,3 +22,5 @@ google-services.json
 .properties
 .agents
 skills-lock.json
+llm-client
+llm-client.zip

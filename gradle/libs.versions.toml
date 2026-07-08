@@ -32,6 +32,8 @@ googleid = "1.1.1"
 datastoreCore = "1.2.1"
 appcompatVersion = "1.7.1"
 paymobSdk = "1.9.2"
+mapboxMaps = "11.18.1"
+mapboxSearch = "2.6.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -91,6 +93,11 @@ androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompatVersion" }
 paymob-sdk = { group = "com.paymob.sdk", name = "Paymob-SDK", version.ref = "paymobSdk" }
 
+# Mapbox
+mapbox-maps-android = { group = "com.mapbox.maps", name = "android", version.ref = "mapboxMaps" }
+mapbox-maps-compose = { group = "com.mapbox.extension", name = "maps-compose", version.ref = "mapboxMaps" }
+mapbox-search-android = { group = "com.mapbox.search", name = "mapbox-search-android", version.ref = "mapboxSearch" }
+
 # Room
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx     = { group = "androidx.room", name = "room-ktx",     version.ref = "room" }
@@ -100,6 +107,13 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 ktor = [
     "ktor-client-core",
     "ktor-client-android",
+    "ktor-client-logging",
+    "ktor-client-content-negotiation",
+    "ktor-serialization-kotlinx-json",
+    "kotlinx-serialization-json",
+]
+llm-client = [
+    "ktor-client-core",
     "ktor-client-logging",
     "ktor-client-content-negotiation",
     "ktor-serialization-kotlinx-json",

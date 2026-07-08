@@ -9,9 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import shopzen.presentation.theme.ShopzenSectionTitle
-import shopzen.presentation.theme.ShopzenSmall
-import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.ShopzenSectionTitle
+import shopzen.presentation.common.theme.ShopzenSmall
+import shopzen.presentation.common.theme.ShopzenSpacing
 
 /**
  * Internal content layout for [FloatingIslandDialog].

@@ -189,19 +189,96 @@ class CheckoutViewModelTest {
         awaitLoaded(viewModel)
         viewModel.processIntent(CheckoutIntent.RequestPlaceOrder)
 
-        val effect = async { viewModel.effects.first() }
         viewModel.processIntent(CheckoutIntent.ConfirmPlaceOrder)
+        awaitPaymobLaunch(viewModel)
 
         assertEquals(
-            CheckoutEffect.StartOnlinePayment(
-                clientSecret = PaymobClientSecret("client-secret"),
-                publicKey = PaymobPublicKey("public-key"),
-            ),
-            effect.await(),
+            PaymobIntentionId("intent-1"),
+            viewModel.state.value.pendingPaymobLaunch?.intentionId,
+        )
+        assertEquals(
+            PaymobClientSecret("client-secret"),
+            viewModel.state.value.pendingPaymobLaunch?.clientSecret,
+        )
+        assertEquals(
+            PaymobPublicKey("public-key"),
+            viewModel.state.value.pendingPaymobLaunch?.publicKey,
         )
         assertTrue(viewModel.state.value.isOnlinePaymentInProgress)
         coVerify(exactly = 1) { createPaymobPaymentIntentionUseCase(any()) }
         coVerify(exactly = 0) { placeOrderUseCase(any()) }
+    }
+
+    @Test
+    fun `duplicate confirm place order starts Paymob once`() = runTest {
+        val user = User("user-1", "ada@example.com", "Ada", null, true)
+        val address = sampleAddress(isDefault = true)
+        val intention = PaymobPaymentIntention(
+            clientSecret = PaymobClientSecret("client-secret"),
+            publicKey = PaymobPublicKey("public-key"),
+            intentionId = PaymobIntentionId("intent-1"),
+            intentionOrderId = 123L,
+        )
+        coEvery { getCurrentUserUseCase() } returns Result.success(user)
+        every { getCartUseCase("user-1") } returns flowOf(Result.success(sampleCart()))
+        every { getSavedAddressesUseCase("user-1") } returns flowOf(Result.success(listOf(address)))
+        every { getAvailablePaymentMethodsUseCase(any()) } returns listOf(PaymentMethod.ONLINE_PAYMENT)
+        coEvery { createPaymobPaymentIntentionUseCase(any()) } returns Result.success(intention)
+
+        val viewModel = createViewModel()
+        viewModel.processIntent(CheckoutIntent.LoadCheckout)
+        awaitLoaded(viewModel)
+        viewModel.processIntent(CheckoutIntent.RequestPlaceOrder)
+
+        viewModel.processIntent(CheckoutIntent.ConfirmPlaceOrder)
+        viewModel.processIntent(CheckoutIntent.ConfirmPlaceOrder)
+        awaitPaymobLaunch(viewModel)
+
+        assertEquals(
+            PaymobIntentionId("intent-1"),
+            viewModel.state.value.pendingPaymobLaunch?.intentionId,
+        )
+        coVerify(exactly = 1) { createPaymobPaymentIntentionUseCase(any()) }
+        coVerify(exactly = 0) { placeOrderUseCase(any()) }
+        assertTrue(viewModel.state.value.isOnlinePaymentInProgress)
+        assertFalse(viewModel.state.value.showPlaceOrderDialog)
+    }
+
+    @Test
+    fun `consume pending Paymob launch clears only matching launch`() = runTest {
+        val user = User("user-1", "ada@example.com", "Ada", null, true)
+        val address = sampleAddress(isDefault = true)
+        val intention = PaymobPaymentIntention(
+            clientSecret = PaymobClientSecret("client-secret"),
+            publicKey = PaymobPublicKey("public-key"),
+            intentionId = PaymobIntentionId("intent-1"),
+            intentionOrderId = 123L,
+        )
+        coEvery { getCurrentUserUseCase() } returns Result.success(user)
+        every { getCartUseCase("user-1") } returns flowOf(Result.success(sampleCart()))
+        every { getSavedAddressesUseCase("user-1") } returns flowOf(Result.success(listOf(address)))
+        every { getAvailablePaymentMethodsUseCase(any()) } returns listOf(PaymentMethod.ONLINE_PAYMENT)
+        coEvery { createPaymobPaymentIntentionUseCase(any()) } returns Result.success(intention)
+
+        val viewModel = createViewModel()
+        viewModel.processIntent(CheckoutIntent.LoadCheckout)
+        awaitLoaded(viewModel)
+        viewModel.processIntent(CheckoutIntent.RequestPlaceOrder)
+        viewModel.processIntent(CheckoutIntent.ConfirmPlaceOrder)
+        awaitPaymobLaunch(viewModel)
+
+        viewModel.processIntent(
+            CheckoutIntent.ConsumePendingPaymobLaunch(PaymobIntentionId("other-intent"))
+        )
+        assertEquals(
+            PaymobIntentionId("intent-1"),
+            viewModel.state.value.pendingPaymobLaunch?.intentionId,
+        )
+
+        viewModel.processIntent(
+            CheckoutIntent.ConsumePendingPaymobLaunch(PaymobIntentionId("intent-1"))
+        )
+        assertEquals(null, viewModel.state.value.pendingPaymobLaunch)
     }
 
     @Test
@@ -377,7 +454,7 @@ class CheckoutViewModelTest {
         awaitLoaded(viewModel)
         viewModel.processIntent(CheckoutIntent.RequestPlaceOrder)
         viewModel.processIntent(CheckoutIntent.ConfirmPlaceOrder)
-        viewModel.effects.first()
+        awaitPaymobLaunch(viewModel)
 
         viewModel.processIntent(CheckoutIntent.OnlinePaymentFailed(null))
 
@@ -422,6 +499,14 @@ class CheckoutViewModelTest {
     private suspend fun awaitLoaded(viewModel: CheckoutViewModel) {
         withTimeout(2_000) {
             while (viewModel.state.value.isLoading || viewModel.state.value.items.isEmpty()) {
+                yield()
+            }
+        }
+    }
+
+    private suspend fun awaitPaymobLaunch(viewModel: CheckoutViewModel) {
+        withTimeout(2_000) {
+            while (viewModel.state.value.pendingPaymobLaunch == null) {
                 yield()
             }
         }

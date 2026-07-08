@@ -28,11 +28,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import shopzen.presentation.R
-import shopzen.presentation.theme.LocalShopzenColors
-import shopzen.presentation.theme.ShopzenBody
-import shopzen.presentation.theme.ShopzenHeading3
-import shopzen.presentation.theme.ShopzenSpacing
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.ShopzenBody
+import shopzen.presentation.common.theme.ShopzenHeading3
+import shopzen.presentation.common.theme.ShopzenShapes
+import shopzen.presentation.common.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.ShopzenTheme
 
 @Composable
 fun CartSummarySection(
@@ -60,7 +61,7 @@ fun CartSummarySection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = ShopzenSpacing.XL)
-                    .background(c.surfaceDialog, shape = shopzen.presentation.theme.ShopzenShapes.SM)
+                    .background(c.surfaceDialog, shape = ShopzenShapes.SM)
                     .padding(start = ShopzenSpacing.MD, end = ShopzenSpacing.XS, top = ShopzenSpacing.XS, bottom = ShopzenSpacing.XS),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically

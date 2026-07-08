@@ -1,14 +1,11 @@
 package shopzen.presentation.cart.screen.content
 
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,9 +19,8 @@ import shopzen.presentation.cart.components.CartSummarySection
 import shopzen.presentation.cart.components.CheckoutButton
 import shopzen.presentation.cart.intent.CartIntent
 import shopzen.presentation.cart.state.CartState
-import shopzen.presentation.theme.LocalShopzenColors
-import shopzen.presentation.theme.ShopzenMotion
-import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.ShopzenSpacing
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox

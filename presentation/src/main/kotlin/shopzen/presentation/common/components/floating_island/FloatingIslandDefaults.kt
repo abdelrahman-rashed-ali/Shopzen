@@ -3,7 +3,7 @@ package shopzen.presentation.common.components.floating_island
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import shopzen.presentation.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.LocalShopzenColors
 
 /**
  * Defaults and constants for [FloatingIslandDialog].

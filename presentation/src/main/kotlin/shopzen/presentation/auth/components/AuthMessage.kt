@@ -4,7 +4,7 @@ package shopzen.presentation.auth.components
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import shopzen.presentation.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.LocalShopzenColors
 
 
 @Composable

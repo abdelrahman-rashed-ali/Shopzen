@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Button
@@ -52,14 +51,14 @@ import shopzen.presentation.checkout.intent.CheckoutIntent
 import shopzen.presentation.checkout.state.CheckoutState
 import shopzen.presentation.checkout.viewmodel.CheckoutEffect
 import shopzen.presentation.checkout.viewmodel.CheckoutViewModel
-import shopzen.presentation.theme.LocalShopzenColors
-import shopzen.presentation.theme.ShopzenBody
-import shopzen.presentation.theme.ShopzenHeading3
-import shopzen.presentation.theme.ShopzenMotion
-import shopzen.presentation.theme.ShopzenShapes
-import shopzen.presentation.theme.ShopzenSize
-import shopzen.presentation.theme.ShopzenSmall
-import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.ShopzenBody
+import shopzen.presentation.common.theme.ShopzenHeading3
+import shopzen.presentation.common.theme.ShopzenMotion
+import shopzen.presentation.common.theme.ShopzenShapes
+import shopzen.presentation.common.theme.ShopzenSize
+import shopzen.presentation.common.theme.ShopzenSmall
+import shopzen.presentation.common.theme.ShopzenSpacing
 
 @Composable
 fun CheckoutSummaryScreen(
@@ -84,7 +83,6 @@ fun CheckoutSummaryScreen(
                 CheckoutEffect.NavigateToAddAddress -> onNavigateToAddAddress()
                 CheckoutEffect.NavigateToPayment -> onNavigateToPayment()
                 is CheckoutEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message.asString(context))
-                is CheckoutEffect.StartOnlinePayment -> Unit
                 is CheckoutEffect.NavigateToOrderConfirmation -> Unit
                 CheckoutEffect.NavigateHome -> Unit
             }
@@ -175,6 +173,7 @@ private fun CheckoutSummaryBody(
     state: CheckoutState,
     onIntent: (CheckoutIntent) -> Unit,
 ) {
+    val c = LocalShopzenColors.current
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
@@ -200,6 +199,7 @@ private fun CheckoutSummaryBody(
                     Text(
                         text = stringResource(R.string.checkout_items_title),
                         style = ShopzenHeading3,
+                        color = c.textPrimary,
                     )
                 },
             ) {
@@ -217,6 +217,7 @@ private fun CheckoutSummaryBody(
                     Text(
                         text = stringResource(R.string.checkout_address_title),
                         style = ShopzenHeading3,
+                        color = c.textPrimary,
                     )
                 },
                 trailingContent = {
@@ -256,6 +257,7 @@ private fun CheckoutSummaryBody(
                     Text(
                         text = stringResource(R.string.checkout_price_title),
                         style = ShopzenHeading3,
+                        color = c.textPrimary,
                     )
                 },
             ) {
