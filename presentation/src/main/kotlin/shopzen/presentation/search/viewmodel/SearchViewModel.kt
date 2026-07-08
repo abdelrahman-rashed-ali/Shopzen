@@ -1,8 +1,14 @@
 package shopzen.presentation.search.viewmodel
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -15,17 +21,21 @@ import shopzen.domain.catalog.usecase.GetCategoriesUseCase
 import shopzen.domain.catalog.usecase.GetProductsUseCase
 import shopzen.domain.search.model.SearchFilter
 import shopzen.domain.search.usecase.FilterProductsUseCase
+import shopzen.domain.search.usecase.SearchProductsByImageUseCase
 import shopzen.domain.search.usecase.SortProductsUseCase
 import shopzen.presentation.search.intent.SearchIntent
 import shopzen.presentation.search.state.SearchState
+import shopzen.presentation.search.util.ImageCompressor
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val getProductsUseCase: GetProductsUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val filterProductsUseCase: FilterProductsUseCase,
-    private val sortProductsUseCase: SortProductsUseCase
+    private val sortProductsUseCase: SortProductsUseCase,
+    private val searchProductsByImageUseCase: SearchProductsByImageUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SearchState())
@@ -65,6 +75,16 @@ class SearchViewModel @Inject constructor(
                 _state.value = _state.value.withAppliedFilters(intent.category, intent.brand, intent.sortOption)
                 applyFiltersAndSort()
             }
+            is SearchIntent.SearchByImageUri -> searchByImageUri(intent.uri)
+            is SearchIntent.SearchByImageBitmap -> searchByImageBitmap(intent.bitmap)
+            is SearchIntent.ClearImageSearch -> {
+                _state.value = _state.value.copy(
+                    selectedImageUri = null,
+                    query = "",
+                    hasSearched = false,
+                )
+                applyFiltersAndSort()
+            }
         }
     }
 
@@ -87,7 +107,7 @@ class SearchViewModel @Inject constructor(
                         error = null,
                         allProducts = products,
                         filteredProducts = products,
-                        categories = categories
+                        categories = categories,
                     )
                 }
             } catch (e: Exception) {
@@ -124,5 +144,64 @@ class SearchViewModel @Inject constructor(
         val filtered = filterProductsUseCase(currentState.allProducts, filter)
         val sorted = sortProductsUseCase(filtered, currentState.selectedSortOption)
         _state.value = currentState.copy(filteredProducts = sorted)
+    }
+
+    private fun searchByImageUri(uri: Uri) {
+        _state.value = _state.value.copy(
+            isImageUploading = true,
+            selectedImageUri = uri,
+            error = null,
+            hasSearched = true,
+        )
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch(Dispatchers.IO) {
+            val bytes = ImageCompressor.compressImageFromUri(context, uri)
+            if (bytes == null) {
+                _state.value = _state.value.copy(
+                    isImageUploading = false,
+                    error = "Failed to process image",
+                )
+                return@launch
+            }
+            performImageSearch(bytes)
+        }
+    }
+
+    private fun searchByImageBitmap(bitmap: Bitmap) {
+        _state.value = _state.value.copy(
+            isImageUploading = true,
+            selectedImageUri = null,
+            error = null,
+            hasSearched = true,
+        )
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch(Dispatchers.IO) {
+            val stream = java.io.ByteArrayOutputStream()
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 100, stream)
+            val bytes = stream.toByteArray()
+            performImageSearch(bytes)
+        }
+    }
+
+    private suspend fun performImageSearch(imageBytes: ByteArray) {
+        val result = searchProductsByImageUseCase(imageBytes)
+        if (result.isSuccess) {
+            val products = result.getOrNull().orEmpty()
+            _state.value = _state.value.copy(
+                isImageUploading = false,
+                filteredProducts = products,
+                allProducts = products,
+            )
+        } else {
+            val e = result.exceptionOrNull()
+            if (e is CancellationException) throw e
+            val message = e?.message ?: "Image search failed."
+            if (!message.contains("was cancelled", ignoreCase = true)) {
+                _state.value = _state.value.copy(
+                    isImageUploading = false,
+                    error = message,
+                )
+            }
+        }
     }
 }

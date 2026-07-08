@@ -1,5 +1,6 @@
 package shopzen.presentation.catalog.state
 
+import shopzen.domain.ads.model.Ad
 import shopzen.domain.catalog.model.Brand
 import shopzen.domain.catalog.model.Category
 import shopzen.domain.catalog.model.Product
@@ -10,5 +11,6 @@ data class HomeState(
     val bannerImages: List<String> = emptyList(),
     val brands: List<Brand> = emptyList(),
     val categories: List<Category> = emptyList(),
-    val newArrivals: List<Product> = emptyList()
+    val newArrivals: List<Product> = emptyList(),
+    val ads: List<Ad> = emptyList(),
 )

@@ -1,5 +1,8 @@
 package shopzen.presentation.search.screen
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -27,9 +30,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -40,6 +47,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -48,6 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import shopzen.domain.catalog.model.Category
 import shopzen.domain.catalog.model.Product
 import shopzen.domain.search.model.SortOption
@@ -140,6 +149,21 @@ internal fun SearchContent(
     onNavigateToCategory: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        if (bitmap != null) {
+            onIntent(SearchIntent.SearchByImageBitmap(bitmap))
+        }
+    }
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            onIntent(SearchIntent.SearchByImageUri(uri))
+        }
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -153,8 +177,27 @@ internal fun SearchContent(
                 query = state.query,
                 onQueryChange = { onIntent(SearchIntent.UpdateQuery(it)) },
                 onFilterClick = { onIntent(SearchIntent.ToggleFilterSheet) },
+                selectedImageUri = state.selectedImageUri,
+                onCameraClick = { cameraLauncher.launch(null) },
+                onGalleryClick = {
+                    galleryLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                onClearImageClick = { onIntent(SearchIntent.ClearImageSearch) },
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
+        }
+
+        if (state.isImageUploading) {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(32.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    LoadingIndicator()
+                }
+            }
         }
 
         item {
@@ -184,11 +227,16 @@ internal fun SearchContent(
     }
 }
 
+
 @Composable
 private fun SearchHeader(
     query: String,
     onQueryChange: (String) -> Unit,
     onFilterClick: () -> Unit,
+    selectedImageUri: android.net.Uri?,
+    onCameraClick: () -> Unit,
+    onGalleryClick: () -> Unit,
+    onClearImageClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -206,6 +254,33 @@ private fun SearchHeader(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+
+        if (selectedImageUri != null) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                AsyncImage(
+                    model = selectedImageUri,
+                    contentDescription = stringResource(R.string.search_selected_image_cd),
+                    modifier = Modifier.size(48.dp),
+                )
+                Text(
+                    text = stringResource(R.string.search_image_searching),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(onClick = onClearImageClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.Close,
+                        contentDescription = stringResource(R.string.search_clear_image_cd),
+                    )
+                }
+            }
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -224,6 +299,24 @@ private fun SearchHeader(
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
                     )
+                },
+                trailingIcon = {
+                    if (selectedImageUri == null) {
+                        Row {
+                            IconButton(onClick = onCameraClick) {
+                                Icon(
+                                    imageVector = Icons.Outlined.CameraAlt,
+                                    contentDescription = stringResource(R.string.search_camera_cd),
+                                )
+                            }
+                            IconButton(onClick = onGalleryClick) {
+                                Icon(
+                                    imageVector = Icons.Outlined.PhotoLibrary,
+                                    contentDescription = stringResource(R.string.search_gallery_cd),
+                                )
+                            }
+                        }
+                    }
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(8.dp),

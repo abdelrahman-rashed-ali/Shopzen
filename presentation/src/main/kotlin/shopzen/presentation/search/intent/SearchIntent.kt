@@ -1,5 +1,7 @@
 package shopzen.presentation.search.intent
 
+import android.graphics.Bitmap
+import android.net.Uri
 import shopzen.domain.search.model.SortOption
 
 sealed class SearchIntent {
@@ -16,4 +18,7 @@ sealed class SearchIntent {
         val brand: String?,
         val sortOption: SortOption
     ) : SearchIntent()
+    data class SearchByImageUri(val uri: Uri) : SearchIntent()
+    data class SearchByImageBitmap(val bitmap: Bitmap) : SearchIntent()
+    object ClearImageSearch : SearchIntent()
 }
