@@ -46,9 +46,9 @@ import shopzen.presentation.cart.state.isEmpty
 import shopzen.presentation.cart.viewmodel.CartEffect
 import shopzen.presentation.cart.viewmodel.CartViewModel
 import shopzen.presentation.common.components.ConfirmationDialog
-import shopzen.presentation.common.theme.LocalShopzenColors
-import shopzen.presentation.common.theme.ShopzenMotion
-import shopzen.presentation.common.theme.ShopzenTheme
+import shopzen.presentation.theme.LocalShopzenColors
+import shopzen.presentation.theme.ShopzenMotion
+import shopzen.presentation.theme.ShopzenTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

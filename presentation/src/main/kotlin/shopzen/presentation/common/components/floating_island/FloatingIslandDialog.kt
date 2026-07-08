@@ -42,7 +42,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import shopzen.presentation.common.components.floating_island.models.ReduceMotionBehavior
 import shopzen.presentation.common.components.floating_island.models.VibrationTrigger
-import shopzen.presentation.common.theme.ShopzenSpacing
+import shopzen.presentation.theme.ShopzenSpacing
 import kotlin.math.abs
 import kotlin.math.roundToInt
 

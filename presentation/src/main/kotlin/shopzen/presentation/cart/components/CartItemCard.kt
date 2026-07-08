@@ -38,15 +38,15 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import shopzen.presentation.R
 import shopzen.presentation.cart.state.CartItemUi
-import shopzen.presentation.common.theme.LocalShopzenColors
-import shopzen.presentation.common.theme.ShopzenBody
-import shopzen.presentation.common.theme.ShopzenElevation
-import shopzen.presentation.common.theme.ShopzenMotion
-import shopzen.presentation.common.theme.ShopzenSectionTitle
-import shopzen.presentation.common.theme.ShopzenShapes
-import shopzen.presentation.common.theme.ShopzenSmall
-import shopzen.presentation.common.theme.ShopzenSpacing
-import shopzen.presentation.common.theme.ShopzenTheme
+import shopzen.presentation.theme.LocalShopzenColors
+import shopzen.presentation.theme.ShopzenBody
+import shopzen.presentation.theme.ShopzenElevation
+import shopzen.presentation.theme.ShopzenMotion
+import shopzen.presentation.theme.ShopzenSectionTitle
+import shopzen.presentation.theme.ShopzenShapes
+import shopzen.presentation.theme.ShopzenSmall
+import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.theme.ShopzenTheme
 
 @Composable
 fun CartItemCard(

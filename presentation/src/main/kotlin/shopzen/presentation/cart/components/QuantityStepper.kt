@@ -31,11 +31,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import shopzen.presentation.R
-import shopzen.presentation.common.theme.LocalShopzenColors
-import shopzen.presentation.common.theme.ShopzenBody
-import shopzen.presentation.common.theme.ShopzenMotion
-import shopzen.presentation.common.theme.ShopzenSize
-import shopzen.presentation.common.theme.ShopzenTheme
+import shopzen.presentation.theme.LocalShopzenColors
+import shopzen.presentation.theme.ShopzenBody
+import shopzen.presentation.theme.ShopzenMotion
+import shopzen.presentation.theme.ShopzenSize
+import shopzen.presentation.theme.ShopzenTheme
 
 @Composable
 fun QuantityStepper(

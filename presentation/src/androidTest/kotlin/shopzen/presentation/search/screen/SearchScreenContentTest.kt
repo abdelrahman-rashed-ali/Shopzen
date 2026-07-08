@@ -14,7 +14,7 @@ import shopzen.domain.catalog.model.Product
 import shopzen.domain.search.model.SortOption
 import shopzen.presentation.search.intent.SearchIntent
 import shopzen.presentation.search.state.SearchState
-import shopzen.presentation.common.theme.ShopzenTheme
+import shopzen.presentation.theme.ShopzenTheme
 
 class SearchScreenContentTest {
 

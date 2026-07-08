@@ -1,4 +1,4 @@
-﻿package shopzen.presentation.common.theme
+﻿package shopzen.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

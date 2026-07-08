@@ -14,7 +14,7 @@ import org.junit.Test
 import shopzen.domain.profile.model.UserProfile
 import shopzen.presentation.profile.intent.ProfileIntent
 import shopzen.presentation.profile.state.ProfileState
-import shopzen.presentation.common.theme.ShopzenTheme
+import shopzen.presentation.theme.ShopzenTheme
 
 class ProfileScreenContentTest {
 

@@ -51,14 +51,14 @@ import shopzen.presentation.checkout.intent.CheckoutIntent
 import shopzen.presentation.checkout.state.CheckoutState
 import shopzen.presentation.checkout.viewmodel.CheckoutEffect
 import shopzen.presentation.checkout.viewmodel.CheckoutViewModel
-import shopzen.presentation.common.theme.LocalShopzenColors
-import shopzen.presentation.common.theme.ShopzenBody
-import shopzen.presentation.common.theme.ShopzenHeading3
-import shopzen.presentation.common.theme.ShopzenMotion
-import shopzen.presentation.common.theme.ShopzenShapes
-import shopzen.presentation.common.theme.ShopzenSize
-import shopzen.presentation.common.theme.ShopzenSmall
-import shopzen.presentation.common.theme.ShopzenSpacing
+import shopzen.presentation.theme.LocalShopzenColors
+import shopzen.presentation.theme.ShopzenBody
+import shopzen.presentation.theme.ShopzenHeading3
+import shopzen.presentation.theme.ShopzenMotion
+import shopzen.presentation.theme.ShopzenShapes
+import shopzen.presentation.theme.ShopzenSize
+import shopzen.presentation.theme.ShopzenSmall
+import shopzen.presentation.theme.ShopzenSpacing
 
 @Composable
 fun CheckoutSummaryScreen(

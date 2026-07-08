@@ -28,12 +28,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import shopzen.presentation.R
-import shopzen.presentation.common.theme.LocalShopzenColors
-import shopzen.presentation.common.theme.ShopzenBody
-import shopzen.presentation.common.theme.ShopzenHeading3
-import shopzen.presentation.common.theme.ShopzenShapes
-import shopzen.presentation.common.theme.ShopzenSpacing
-import shopzen.presentation.common.theme.ShopzenTheme
+import shopzen.presentation.theme.LocalShopzenColors
+import shopzen.presentation.theme.ShopzenBody
+import shopzen.presentation.theme.ShopzenHeading3
+import shopzen.presentation.theme.ShopzenShapes
+import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.theme.ShopzenTheme
 
 @Composable
 fun CartSummarySection(

@@ -14,7 +14,7 @@ import shopzen.presentation.profile.intent.AddressEditIntent
 import shopzen.presentation.profile.state.AddressEditState
 import shopzen.presentation.profile.state.AddressEntryMode
 import shopzen.presentation.profile.state.AddressPlaceSuggestion
-import shopzen.presentation.common.theme.ShopzenTheme
+import shopzen.presentation.theme.ShopzenTheme
 
 class AddEditAddressScreenContentTest {
 

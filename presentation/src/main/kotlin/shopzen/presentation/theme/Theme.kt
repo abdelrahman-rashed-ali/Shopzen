@@ -1,4 +1,4 @@
-package shopzen.presentation.common.theme
+package shopzen.presentation.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.LocalShipping
@@ -51,16 +50,16 @@ import shopzen.domain.checkout.model.PaymentMethod
 import shopzen.domain.profile.model.Address
 import shopzen.presentation.R
 import shopzen.presentation.checkout.state.CheckoutItemUi
-import shopzen.presentation.common.theme.LocalShopzenColors
-import shopzen.presentation.common.theme.ShopzenBody
-import shopzen.presentation.common.theme.ShopzenBorderWidth
-import shopzen.presentation.common.theme.ShopzenCaption
-import shopzen.presentation.common.theme.ShopzenHeading3
-import shopzen.presentation.common.theme.ShopzenMotion
-import shopzen.presentation.common.theme.ShopzenShapes
-import shopzen.presentation.common.theme.ShopzenSize
-import shopzen.presentation.common.theme.ShopzenSmall
-import shopzen.presentation.common.theme.ShopzenSpacing
+import shopzen.presentation.theme.LocalShopzenColors
+import shopzen.presentation.theme.ShopzenBody
+import shopzen.presentation.theme.ShopzenBorderWidth
+import shopzen.presentation.theme.ShopzenCaption
+import shopzen.presentation.theme.ShopzenHeading3
+import shopzen.presentation.theme.ShopzenMotion
+import shopzen.presentation.theme.ShopzenShapes
+import shopzen.presentation.theme.ShopzenSize
+import shopzen.presentation.theme.ShopzenSmall
+import shopzen.presentation.theme.ShopzenSpacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

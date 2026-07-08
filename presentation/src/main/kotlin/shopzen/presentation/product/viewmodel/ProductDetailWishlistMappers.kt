@@ -24,7 +24,7 @@ internal suspend fun ProductDetailState.toggleWishlistResult(
         addToWishlist(product.toWishlistItem(userId, selectedVariantId))
     }
 
-private fun Product.toWishlistItem(userId: String, selectedVariantId: Long?): WishlistItem {
+internal fun Product.toWishlistItem(userId: String, selectedVariantId: Long?): WishlistItem {
     val selectedVariant = selectedVariantId?.let { variantId ->
         variants.firstOrNull { it.id == variantId }
     }

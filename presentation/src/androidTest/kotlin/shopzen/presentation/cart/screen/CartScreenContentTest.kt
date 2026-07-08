@@ -19,7 +19,7 @@ import shopzen.presentation.cart.intent.CartIntent
 import shopzen.presentation.cart.state.CartItemUi
 import shopzen.presentation.cart.state.CartState
 import shopzen.presentation.common.util.UiText
-import shopzen.presentation.common.theme.ShopzenTheme
+import shopzen.presentation.theme.ShopzenTheme
 
 @RunWith(AndroidJUnit4::class)
 class CartScreenContentTest {

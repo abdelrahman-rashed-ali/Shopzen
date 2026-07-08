@@ -17,7 +17,7 @@ import shopzen.domain.profile.model.AppTheme
 import shopzen.domain.profile.model.UserPreferences
 import shopzen.presentation.profile.intent.SettingsIntent
 import shopzen.presentation.profile.state.SettingsState
-import shopzen.presentation.common.theme.ShopzenTheme
+import shopzen.presentation.theme.ShopzenTheme
 
 class SettingsScreenContentTest {
 

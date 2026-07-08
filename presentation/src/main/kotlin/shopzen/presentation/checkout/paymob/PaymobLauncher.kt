@@ -1,12 +1,10 @@
 package shopzen.presentation.checkout.paymob
 
 import android.content.Context
-import androidx.compose.ui.res.stringResource
 import com.paymob.paymob_sdk.PaymobSdk
 import com.paymob.paymob_sdk.ui.PaymobSdkListener
-import shopzen.presentation.R
-import shopzen.presentation.common.theme.Dark_Background_Primary
-import shopzen.presentation.common.theme.Dark_Text_Primary
+import shopzen.presentation.theme.Dark_Background_Primary
+import shopzen.presentation.theme.Dark_Text_Primary
 
 fun launchPaymobSdk(
     context: Context,

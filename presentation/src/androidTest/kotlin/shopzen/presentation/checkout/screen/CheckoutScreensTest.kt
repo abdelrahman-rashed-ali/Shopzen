@@ -18,7 +18,7 @@ import shopzen.presentation.checkout.intent.CheckoutIntent
 import shopzen.presentation.checkout.state.CheckoutItemUi
 import shopzen.presentation.checkout.state.CheckoutState
 import shopzen.presentation.common.util.UiText
-import shopzen.presentation.common.theme.ShopzenTheme
+import shopzen.presentation.theme.ShopzenTheme
 
 @RunWith(AndroidJUnit4::class)
 class CheckoutScreensTest {

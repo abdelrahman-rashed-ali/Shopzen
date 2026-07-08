@@ -19,8 +19,8 @@ import shopzen.presentation.cart.components.CartSummarySection
 import shopzen.presentation.cart.components.CheckoutButton
 import shopzen.presentation.cart.intent.CartIntent
 import shopzen.presentation.cart.state.CartState
-import shopzen.presentation.common.theme.LocalShopzenColors
-import shopzen.presentation.common.theme.ShopzenSpacing
+import shopzen.presentation.theme.LocalShopzenColors
+import shopzen.presentation.theme.ShopzenSpacing
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox

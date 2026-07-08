@@ -183,7 +183,9 @@ class ProductDetailViewModel @Inject constructor(
                     removeFromWishlistUseCase(wishlistItemId)
                 }
             } else {
-                addToWishlistUseCase(userId, product)
+                addToWishlistUseCase(
+                    product.toWishlistItem(userId, _state.value.selectedVariantId)
+                )
             }
 
             result
