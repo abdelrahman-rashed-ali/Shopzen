@@ -39,6 +39,7 @@ import java.util.Locale
 @Composable
 fun OrderHistoryCard(
     order: Order,
+    currency: shopzen.domain.profile.model.AppCurrency,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -105,7 +106,7 @@ fun OrderHistoryCard(
             if (order.discountAmount > 0.0) {
                 OrderInfoRow(
                     label = order.discountLabel(),
-                    value = "-${order.formattedDiscount()}",
+                    value = "-${currency.formatPrice(order.discountAmount)}",
                     valueColor = c.textSuccess,
                 )
             }
@@ -127,7 +128,7 @@ fun OrderHistoryCard(
                     color = c.textSecondary,
                 )
                 Text(
-                    text = order.formattedTotal(),
+                    text = currency.formatPrice(order.totalPrice),
                     style = ShopzenBody,
                     color = c.textPrimary,
                     fontWeight = FontWeight.SemiBold,
@@ -232,26 +233,10 @@ private fun Order.discountLabel(): String =
     } ?: stringResource(R.string.order_history_discount)
 
 @Composable
-private fun Order.formattedTotal(): String {
+private fun shopzen.domain.profile.model.AppCurrency.formatPrice(amount: Double): String {
     val locale = currentLocale()
-    return remember(totalPrice, currency, locale) {
-        val formatter = NumberFormat.getCurrencyInstance(locale)
-        runCatching { formatter.currency = Currency.getInstance(currency) }
-        formatter.format(totalPrice)
-    }
-}
-
-@Composable
-private fun Order.formattedDiscount(): String =
-    formatCurrency(discountAmount, currency)
-
-@Composable
-private fun formatCurrency(amount: Double, currency: String): String {
-    val locale = currentLocale()
-    return remember(amount, currency, locale) {
-        val formatter = NumberFormat.getCurrencyInstance(locale)
-        runCatching { formatter.currency = Currency.getInstance(currency) }
-        formatter.format(amount)
+    return remember(amount, this, locale) {
+        "${this.symbol}%.2f".format(locale, amount * this.rateFromUsd)
     }
 }
 

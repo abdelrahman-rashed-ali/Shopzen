@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import shopzen.domain.catalog.usecase.GetProductsByCategoryUseCase
 import shopzen.presentation.category.intent.CategoryProductsIntent
 import shopzen.presentation.category.state.CategoryProductsState
+import shopzen.domain.cart.usecase.GetCurrencySymbolUseCase
 import javax.inject.Inject
 
 /**
@@ -20,6 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CategoryProductsViewModel @Inject constructor(
     private val getProductsByCategoryUseCase: GetProductsByCategoryUseCase,
+    private val getCurrencySymbolUseCase: GetCurrencySymbolUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -49,19 +51,22 @@ class CategoryProductsViewModel @Inject constructor(
                 categoryTitle = categoryTitle
             )
 
+            val currency = getCurrencySymbolUseCase()
             val result = getProductsByCategoryUseCase(categoryTitle)
 
             result.fold(
                 onSuccess = { products ->
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        products = products
+                        products = products,
+                        currency = currency
                     )
                 },
                 onFailure = { error ->
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        error = error.message ?: "Failed to load products"
+                        error = error.message ?: "Failed to load products",
+                        currency = currency
                     )
                 }
             )

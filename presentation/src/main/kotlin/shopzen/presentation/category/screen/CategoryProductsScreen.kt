@@ -109,9 +109,15 @@ fun CategoryProductsScreen(
                 ) {
                     items(state.products) { product ->
                         ProductCard(
-                            product = product,
+                            id = product.id,
+                            title = product.title,
+                            category = product.productType,
+                            price = product.price,
+                            currency = state.currency,
+                            imageUrl = product.imageUrl,
+                            isFavorite = wishlistProductIds.contains(product.id),
                             onProductClick = onNavigateToProduct,
-                            onWishlistClick = {
+                            onFavoriteClick = {
                                 val isFav = wishlistProductIds.contains(product.id)
                                 if (isFav) {
                                     val item = wishlistState.items.find { it.productId == product.id }
@@ -125,8 +131,7 @@ fun CategoryProductsScreen(
                                         WishlistIntent.RequestAddToWishlist(product)
                                     )
                                 }
-                            },
-                            isFavorite = wishlistProductIds.contains(product.id)
+                            }
                         )
                     }
                 }

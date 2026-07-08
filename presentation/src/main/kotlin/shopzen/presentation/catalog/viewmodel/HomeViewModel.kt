@@ -16,6 +16,7 @@ import shopzen.domain.catalog.model.Product
 import shopzen.domain.catalog.usecase.GetBrandsUseCase
 import shopzen.domain.catalog.usecase.GetCategoriesUseCase
 import shopzen.domain.catalog.usecase.GetProductsUseCase
+import shopzen.domain.cart.usecase.GetCurrencySymbolUseCase
 import shopzen.presentation.catalog.intent.HomeIntent
 import shopzen.presentation.catalog.state.HomeState
 import javax.inject.Inject
@@ -31,6 +32,7 @@ class HomeViewModel @Inject constructor(
     private val getBrandsUseCase: GetBrandsUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val getAdsUseCase: GetAdsUseCase,
+    private val getCurrencySymbolUseCase: GetCurrencySymbolUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -70,6 +72,7 @@ class HomeViewModel @Inject constructor(
                     val brandsResult = brandsDeferred.await()
                     val categoriesResult = categoriesDeferred.await()
                     val adsResult = adsDeferred.await()
+                    val currencySymbol = getCurrencySymbolUseCase()
 
                     _state.value = _state.value.copy(
                         isLoading = false,
@@ -79,6 +82,7 @@ class HomeViewModel @Inject constructor(
                         categories = categoriesResult.getOrNull().orEmpty().ifEmpty { fallbackHomeCategories() },
                         newArrivals = productsResult.getOrNull().orEmpty().ifEmpty { fallbackHomeProducts() },
                         ads = adsResult.getOrNull().orEmpty(),
+                        currency = currencySymbol,
                     )
                 }
             } catch (e: Exception) {

@@ -14,15 +14,16 @@ import shopzen.domain.wishlist.usecase.RemoveFromWishlistUseCase
 import shopzen.presentation.wishlist.intent.WishlistIntent
 import shopzen.presentation.wishlist.state.WishlistState
 import javax.inject.Inject
-
 import shopzen.domain.wishlist.usecase.AddToWishlistUseCase
+import shopzen.domain.cart.usecase.GetCurrencySymbolUseCase
 
 @HiltViewModel
 class WishlistViewModel @Inject constructor(
     private val getWishlistUseCase: GetWishlistUseCase,
     private val removeFromWishlistUseCase: RemoveFromWishlistUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
-    private val addToWishlistUseCase: AddToWishlistUseCase
+    private val addToWishlistUseCase: AddToWishlistUseCase,
+    private val getCurrencySymbolUseCase: GetCurrencySymbolUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WishlistState())
@@ -92,6 +93,7 @@ class WishlistViewModel @Inject constructor(
     private fun loadWishlist() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
+            val currency = getCurrencySymbolUseCase()
             val userResult = getCurrentUserUseCase()
             val userId = userResult.getOrNull()?.uid ?: "guest_user"
 
@@ -99,13 +101,16 @@ class WishlistViewModel @Inject constructor(
                 .catch { e ->
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        error = e.localizedMessage ?: "Failed to load wishlist"
+                        error = e.message ?: "Failed to load wishlist",
+                        currency = currency
                     )
                 }
                 .collect { items ->
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        items = items
+                        items = items,
+                        error = null,
+                        currency = currency
                     )
                 }
         }

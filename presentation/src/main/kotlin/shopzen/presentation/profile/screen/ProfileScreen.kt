@@ -513,7 +513,7 @@ private fun OrderHistoryCard(
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .testTag(ProfileTestTags.OrderHistoryButton),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onSurface),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(22.dp),
     ) {
         Row(
@@ -524,8 +524,8 @@ private fun OrderHistoryCard(
             Surface(
                 modifier = Modifier.size(48.dp),
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.14f),
-                contentColor = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f),
+                contentColor = MaterialTheme.colorScheme.onSurface,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(Icons.AutoMirrored.Outlined.ReceiptLong, contentDescription = null)
@@ -538,13 +538,13 @@ private fun OrderHistoryCard(
                 Text(
                     text = stringResource(R.string.profile_order_history),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.surface,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = stringResource(R.string.profile_order_history_subtitle),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f),
                 )
             }
         }

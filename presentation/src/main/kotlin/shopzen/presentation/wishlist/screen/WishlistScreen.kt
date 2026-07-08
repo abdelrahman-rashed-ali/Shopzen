@@ -54,7 +54,7 @@ import shopzen.presentation.common.components.MainShellTab
 import shopzen.presentation.common.components.ShopzenBottomBar
 import shopzen.presentation.common.components.ShopzenTopAppBar
 import shopzen.presentation.wishlist.WishlistTestTags
-import shopzen.presentation.wishlist.components.WishlistItemCard
+import shopzen.presentation.common.components.ProductCard
 import shopzen.presentation.wishlist.intent.WishlistIntent
 import shopzen.presentation.wishlist.state.WishlistState
 import shopzen.presentation.wishlist.viewmodel.WishlistViewModel
@@ -195,14 +195,17 @@ fun WishlistContent(
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(state.items, key = { it.id }) { item ->
-                    WishlistItemCard(
-                        item = item,
-                        onItemClick = onNavigateToProduct,
-                        onRemoveClick = { itemId ->
-                            onIntent(WishlistIntent.RequestRemoveItem(itemId))
-                        },
-                        onAddToCartClick = { productId ->
-                            onIntent(WishlistIntent.AddToCart(productId))
+                    ProductCard(
+                        id = item.productId,
+                        title = item.title,
+                        category = item.vendor, // WishlistItem doesn't have productType, vendor is the closest
+                        price = item.price,
+                        currency = state.currency,
+                        imageUrl = item.imageUrl,
+                        isFavorite = true, // It's in the wishlist
+                        onProductClick = onNavigateToProduct,
+                        onFavoriteClick = {
+                            onIntent(WishlistIntent.RequestRemoveItem(item.id))
                         }
                     )
                 }
@@ -235,11 +238,16 @@ private fun WishlistAnimatedRow(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             rowItems.forEach { item ->
-                WishlistItemCard(
-                    item = item,
-                    onItemClick = onItemClick,
-                    onRemoveClick = onRemoveClick,
-                    onAddToCartClick = onAddToCartClick,
+                ProductCard(
+                    id = item.productId,
+                    title = item.title,
+                    category = item.vendor,
+                    price = item.price,
+                    currency = shopzen.domain.profile.model.AppCurrency.USD, // Animated row not actually used, placeholder
+                    imageUrl = item.imageUrl,
+                    isFavorite = true,
+                    onProductClick = onItemClick,
+                    onFavoriteClick = { onRemoveClick(item.id) },
                     modifier = Modifier
                         .weight(1f)
                         .testTag(WishlistTestTags.item(item.id)),

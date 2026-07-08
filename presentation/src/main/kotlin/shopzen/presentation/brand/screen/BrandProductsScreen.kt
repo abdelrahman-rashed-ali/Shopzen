@@ -93,6 +93,7 @@ fun BrandProductsScreen(
             else -> {
                 BrandProductsContent(
                     products = state.products,
+                    currency = state.currency,
                     wishlistProductIds = wishlistProductIds,
                     onProductClick = onNavigateToProduct,
                     onWishlistClick = { product ->
@@ -159,6 +160,7 @@ fun BrandProductsScreen(
 @Composable
 private fun BrandProductsContent(
     products: List<Product>,
+    currency: shopzen.domain.profile.model.AppCurrency,
     wishlistProductIds: Set<String>,
     onProductClick: (String) -> Unit,
     onWishlistClick: (Product) -> Unit,
@@ -189,10 +191,15 @@ private fun BrandProductsContent(
     ) {
         items(products) { product ->
             ProductCard(
-                product = product,
+                id = product.id,
+                title = product.title,
+                category = product.productType,
+                price = product.price,
+                currency = currency,
+                imageUrl = product.imageUrl,
+                isFavorite = wishlistProductIds.contains(product.id),
                 onProductClick = onProductClick,
-                onWishlistClick = { onWishlistClick(product) },
-                isFavorite = wishlistProductIds.contains(product.id)
+                onFavoriteClick = { onWishlistClick(product) }
             )
         }
     }

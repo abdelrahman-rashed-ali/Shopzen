@@ -1,20 +1,17 @@
 package shopzen.domain.cart.usecase
 
-import shopzen.domain.auth.repository.AuthRepository
+import shopzen.domain.profile.repository.PreferencesRepository
+import shopzen.domain.profile.model.AppCurrency
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 /**
- * Returns the current user-selected currency symbol.
- * Retrieves from Shopify Admin API customer profile. Falls back to "USD".
+ * Returns the current user-selected currency from local preferences.
  */
 class GetCurrencySymbolUseCase @Inject constructor(
-    private val authRepository: AuthRepository,
-    private val profileRepository: shopzen.domain.profile.repository.ProfileRepository,
+    private val preferencesRepository: PreferencesRepository,
 ) {
-    suspend operator fun invoke(): String {
-        val user = authRepository.getCurrentUser().getOrNull()
-        if (user == null || user.email == null) return "USD"
-        
-        return profileRepository.getUserCurrency(user.email)
+    suspend operator fun invoke(): AppCurrency {
+        return preferencesRepository.getPreferences().first().currency
     }
 }

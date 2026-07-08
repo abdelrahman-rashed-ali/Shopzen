@@ -477,9 +477,15 @@ fun SearchContent(
                     ) {
                         rowProducts.forEach { product ->
                             ProductCard(
-                                product = product,
+                                id = product.id,
+                                title = product.title,
+                                category = product.productType,
+                                price = product.price,
+                                currency = state.currency,
+                                imageUrl = product.imageUrl,
+                                isFavorite = false,
                                 onProductClick = onNavigateToProduct,
-                                onWishlistClick = { },
+                                onFavoriteClick = { },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -559,6 +565,7 @@ private fun CollectionCardsLayout(
 @Composable
 private fun ProductResultsGrid(
     products: List<Product>,
+    currency: shopzen.domain.profile.model.AppCurrency = shopzen.domain.profile.model.AppCurrency.USD,
     onNavigateToProduct: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -573,9 +580,15 @@ private fun ProductResultsGrid(
             ) {
                 rowProducts.forEach { product ->
                     ProductCard(
-                        product = product,
+                        id = product.id,
+                        title = product.title,
+                        category = product.productType,
+                        price = product.price,
+                        currency = currency,
+                        imageUrl = product.imageUrl,
+                        isFavorite = false,
                         onProductClick = { onNavigateToProduct(product.id) },
-                        onWishlistClick = {},
+                        onFavoriteClick = {},
                         modifier = Modifier
                             .weight(1f)
                             .testTag(SearchTestTags.product(product.id)),
