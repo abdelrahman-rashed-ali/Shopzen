@@ -25,6 +25,8 @@ interface AuthRepository {
 
     fun signInAsGuest(): Flow<Result<AuthSession>>
 
+    suspend fun reloadCurrentUser(): Result<Unit>
+
     suspend fun getCurrentUser(): Result<User?>
 
     suspend fun sendVerificationEmail(): Result<Unit>

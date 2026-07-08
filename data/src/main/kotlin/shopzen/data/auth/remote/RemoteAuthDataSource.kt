@@ -23,6 +23,8 @@ interface RemoteAuthDataSource {
 
     suspend fun signInAnonymously(): FirebaseUser
 
+    suspend fun reloadCurrentUser()
+
     fun getCurrentUser(): FirebaseUser?
 
     suspend fun sendVerificationEmail()

@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Register -->
-    <string name="app_logo">LUMINA</string>
+    <string name="app_logo">Shopzen</string>
 
     <string name="create_account">Create Account</string>
     <string name="create_account_desc">
