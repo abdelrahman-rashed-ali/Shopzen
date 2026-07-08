@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import shopzen.domain.auth.usecase.RegisterWithEmailUseCase
 import shopzen.domain.auth.usecase.SendVerificationEmailUseCase
+import shopzen.domain.auth.usecase.CheckEmailVerifiedUseCase
 import shopzen.presentation.auth.intent.RegisterIntent
 import shopzen.presentation.auth.state.RegisterState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val registerWithEmailUseCase: RegisterWithEmailUseCase,
-    private val sendVerificationEmailUseCase: SendVerificationEmailUseCase
+    private val sendVerificationEmailUseCase: SendVerificationEmailUseCase,
+    private val checkEmailVerifiedUseCase: CheckEmailVerifiedUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RegisterState())
@@ -86,6 +88,20 @@ class RegisterViewModel @Inject constructor(
     fun resendVerificationEmail() {
         viewModelScope.launch {
             sendVerificationEmailUseCase()
+        }
+    }
+
+    fun checkEmailVerified() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            val isVerified = checkEmailVerifiedUseCase()
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    isEmailVerified = isVerified,
+                    error = if (!isVerified) "Email not verified yet" else null
+                )
+            }
         }
     }
 }

@@ -81,6 +81,10 @@ class RemoteAuthDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun reloadCurrentUser() {
+        firebaseAuth.currentUser?.reload()?.await()
+    }
+
     override fun getCurrentUser(): FirebaseUser? = firebaseAuth.currentUser
 
     override suspend fun sendVerificationEmail() {

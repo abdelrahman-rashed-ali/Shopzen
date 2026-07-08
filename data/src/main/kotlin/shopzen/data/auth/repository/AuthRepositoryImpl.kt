@@ -60,6 +60,10 @@ class AuthRepositoryImpl @Inject constructor(
         emit(Result.failure(throwable))
     }
 
+    override suspend fun reloadCurrentUser(): Result<Unit> = runCatching {
+        remoteAuthDataSource.reloadCurrentUser()
+    }
+
     override suspend fun getCurrentUser(): Result<User?> = runCatching {
         remoteAuthDataSource.getCurrentUser()?.toDomainModel()
     }
