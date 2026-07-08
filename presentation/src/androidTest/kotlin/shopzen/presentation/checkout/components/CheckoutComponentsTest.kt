@@ -16,7 +16,7 @@ import shopzen.domain.checkout.model.PaymentMethod
 import shopzen.domain.profile.model.Address
 import shopzen.presentation.R
 import shopzen.presentation.checkout.state.CheckoutItemUi
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 
 @RunWith(AndroidJUnit4::class)
 class CheckoutComponentsTest {

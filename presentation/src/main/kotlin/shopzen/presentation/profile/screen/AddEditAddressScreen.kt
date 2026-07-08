@@ -56,6 +56,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,13 +67,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.extension.compose.MapboxMap
+import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.generated.CircleAnnotation
 import shopzen.presentation.R
 import shopzen.presentation.common.components.LoadingIndicator
 import shopzen.presentation.profile.intent.AddressEditIntent
 import shopzen.presentation.profile.state.AddressEditState
 import shopzen.presentation.profile.state.AddressEntryMode
 import shopzen.presentation.profile.state.AddressPlaceSuggestion
+import shopzen.presentation.profile.viewmodel.AddressEditEvent
 import shopzen.presentation.profile.viewmodel.AddressEditViewModel
+
 
 @Composable
 fun AddEditAddressScreen(
@@ -83,11 +91,17 @@ fun AddEditAddressScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    // Collect one-shot NavigateBack events — Channel(BUFFERED) so no event is lost.
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                AddressEditEvent.NavigateBack -> onNavigateBack()
+            }
+        }
+    }
+
     LaunchedEffect(addressId) {
         viewModel.processIntent(AddressEditIntent.LoadAddress(addressId))
-    }
-    LaunchedEffect(state.isSaved) {
-        if (state.isSaved) onNavigateBack()
     }
 
     AddressEditContent(
@@ -96,6 +110,18 @@ fun AddEditAddressScreen(
         onNavigateBack = onNavigateBack,
         modifier = modifier,
     )
+    
+    AnimatedVisibility(
+        visible = state.isMapScreenOpen,
+        enter = fadeIn() + slideInVertically { it },
+        exit = fadeOut() + slideOutVertically { it }
+    ) {
+        FullScreenMapScreen(
+            state = state,
+            onIntent = viewModel::processIntent,
+            onClose = { viewModel.processIntent(AddressEditIntent.CloseMapScreen) }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -281,37 +307,9 @@ private fun AssistedLocationSection(
         subtitle = stringResource(R.string.address_edit_assisted_subtitle),
         modifier = modifier.testTag(AddressEditTestTags.AssistedSection),
     ) {
-        OutlinedTextField(
-            value = state.placeQuery,
-            onValueChange = { onIntent(AddressEditIntent.PlaceQueryChanged(it)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(AddressEditTestTags.SearchField),
-            label = { Text(stringResource(R.string.address_edit_search_hint)) },
-            leadingIcon = {
-                Icon(Icons.Outlined.Search, contentDescription = null)
-            },
-            singleLine = true,
-        )
-
-        AnimatedVisibility(
-            visible = state.placeSuggestions.isNotEmpty(),
-            enter = fadeIn(tween(140)) + slideInVertically { it / 4 },
-            exit = fadeOut(tween(100)) + slideOutVertically { it / 4 },
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                state.placeSuggestions.forEach { suggestion ->
-                    PlaceSuggestionRow(
-                        suggestion = suggestion,
-                        onClick = { onIntent(AddressEditIntent.PlaceSuggestionSelected(suggestion)) },
-                    )
-                }
-            }
-        }
-
         MapPickerPreview(
             state = state,
-            onUsePin = { onIntent(AddressEditIntent.UseMapPin) },
+            onOpenMap = { onIntent(AddressEditIntent.OpenMapScreen) },
         )
 
         AnimatedVisibility(
@@ -375,53 +373,74 @@ private fun PlaceSuggestionRow(
 @Composable
 private fun MapPickerPreview(
     state: AddressEditState,
-    onUsePin: () -> Unit,
+    onOpenMap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Default centre: Cairo or whatever coords are already in state.
+    val initialLat = state.selectedLatitude ?: 30.0444
+    val initialLng = state.selectedLongitude ?: 31.2357
+
+    val viewportState = rememberMapViewportState {
+        setCameraOptions {
+            center(Point.fromLngLat(initialLng, initialLat))
+            zoom(13.0)
+        }
+    }
+
+    // Snap camera when state coords change (e.g. suggestion selected).
+    LaunchedEffect(state.selectedLatitude, state.selectedLongitude) {
+        val lat = state.selectedLatitude ?: return@LaunchedEffect
+        val lng = state.selectedLongitude ?: return@LaunchedEffect
+        viewportState.easeTo(
+            CameraOptions.Builder()
+                .center(Point.fromLngLat(lng, lat))
+                .zoom(14.0)
+                .build(),
+        )
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .testTag(AddressEditTestTags.MapPreview),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onSurface),
         shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(190.dp)
-                .background(MaterialTheme.colorScheme.onSurface),
+                .height(240.dp),
         ) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Surface(
-                    modifier = Modifier.size(62.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.16f),
-                    contentColor = MaterialTheme.colorScheme.surface,
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Outlined.Map, contentDescription = null)
+            MapboxMap(
+                modifier = Modifier.fillMaxSize(),
+                mapViewportState = viewportState,
+                onMapLongClickListener = { false },
+                content = {
+                    val lat = state.selectedLatitude
+                    val lng = state.selectedLongitude
+                    if (lat != null && lng != null) {
+                        CircleAnnotation(
+                            point = Point.fromLngLat(lng, lat),
+                        ) {
+                            circleRadius = 10.0
+                            circleColor = Color(0xFFEF4444)
+                            circleStrokeWidth = 2.0
+                            circleStrokeColor = Color.White
+                        }
                     }
-                }
-                Text(
-                    text = stringResource(R.string.address_edit_mapbox_preview_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.surface,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = state.coordinateLabel(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
-                )
-            }
+                },
+            )
+
+            // Transparent overlay to intercept touches and open the map screen
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(onClick = onOpenMap)
+            )
+
+            // Action button overlaid on the map preview.
             Button(
-                onClick = onUsePin,
+                onClick = onOpenMap,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(16.dp)
@@ -432,12 +451,147 @@ private fun MapPickerPreview(
                     contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
             ) {
-                Icon(Icons.Outlined.LocationOn, contentDescription = null)
+                Icon(Icons.Outlined.Map, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.address_edit_use_map_pin))
+                Text(stringResource(R.string.address_edit_search_hint)) // e.g. "Search for location"
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FullScreenMapScreen(
+    state: AddressEditState,
+    onIntent: (AddressEditIntent) -> Unit,
+    onClose: () -> Unit,
+) {
+    val initialLat = state.selectedLatitude ?: 30.0444
+    val initialLng = state.selectedLongitude ?: 31.2357
+
+    val viewportState = rememberMapViewportState {
+        setCameraOptions {
+            center(Point.fromLngLat(initialLng, initialLat))
+            zoom(13.0)
+        }
+    }
+
+    LaunchedEffect(state.selectedLatitude, state.selectedLongitude) {
+        val lat = state.selectedLatitude ?: return@LaunchedEffect
+        val lng = state.selectedLongitude ?: return@LaunchedEffect
+        viewportState.easeTo(
+            CameraOptions.Builder()
+                .center(Point.fromLngLat(lng, lat))
+                .zoom(14.0)
+                .build(),
+        )
+    }
+
+    androidx.activity.compose.BackHandler(onBack = onClose)
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.address_edit_assisted_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onClose) {
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
+            )
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            MapboxMap(
+                modifier = Modifier.fillMaxSize(),
+                mapViewportState = viewportState,
+                onMapClickListener = { point ->
+                    onIntent(AddressEditIntent.MapPinMoved(point.latitude(), point.longitude()))
+                    true
+                },
+                content = {
+                    val lat = state.selectedLatitude
+                    val lng = state.selectedLongitude
+                    if (lat != null && lng != null) {
+                        CircleAnnotation(point = Point.fromLngLat(lng, lat)) {
+                            circleRadius = 10.0
+                            circleColor = Color(0xFFEF4444)
+                            circleStrokeWidth = 2.0
+                            circleStrokeColor = Color.White
+                        }
+                    }
+                }
+            )
+
+            // Search Bar overlay
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .align(Alignment.TopCenter)
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = state.placeQuery,
+                    onValueChange = { onIntent(AddressEditIntent.PlaceQueryChanged(it)) },
+                    modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp)),
+                    placeholder = { Text(stringResource(R.string.address_edit_search_hint)) },
+                    leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp)
+                )
+
+                AnimatedVisibility(
+                    visible = state.placeSuggestions.isNotEmpty(),
+                    enter = fadeIn(tween(140)) + slideInVertically { it / 4 },
+                    exit = fadeOut(tween(100)) + slideOutVertically { it / 4 },
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        state.placeSuggestions.forEach { suggestion ->
+                            PlaceSuggestionRow(
+                                suggestion = suggestion,
+                                onClick = { onIntent(AddressEditIntent.PlaceSuggestionSelected(suggestion)) },
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Confirm Pin Button
+            Button(
+                onClick = {
+                    onIntent(AddressEditIntent.UseMapPin)
+                    onClose()
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
+            ) {
+                Text(
+                    text = stringResource(R.string.address_edit_use_map_pin).uppercase(),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+    } 
 }
 
 @Composable
@@ -699,15 +853,7 @@ private fun AddressSaveBar(
     }
 }
 
-private fun AddressEditState.coordinateLabel(): String {
-    val latitude = selectedLatitude
-    val longitude = selectedLongitude
-    return if (latitude != null && longitude != null) {
-        "%.4f, %.4f".format(latitude, longitude)
-    } else {
-        "30.0444, 31.2357"
-    }
-}
+
 
 internal object AddressEditTestTags {
     const val Content = "address_edit_content"

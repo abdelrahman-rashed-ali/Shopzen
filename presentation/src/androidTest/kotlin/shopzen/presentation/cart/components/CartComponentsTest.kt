@@ -17,7 +17,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import shopzen.presentation.R
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalMaterial3Api::class)

@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.stateIn
 import shopzen.domain.profile.model.AppTheme
 import shopzen.domain.profile.model.UserPreferences
 import shopzen.domain.profile.usecase.GetUserPreferencesUseCase
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 
 /**
  * The ONLY place in the app allowed to read UserPreferences for the

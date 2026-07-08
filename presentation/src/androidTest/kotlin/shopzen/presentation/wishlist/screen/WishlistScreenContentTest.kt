@@ -10,7 +10,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import shopzen.domain.wishlist.model.WishlistItem
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 import shopzen.presentation.wishlist.WishlistTestTags
 import shopzen.presentation.wishlist.intent.WishlistIntent
 import shopzen.presentation.wishlist.state.WishlistState

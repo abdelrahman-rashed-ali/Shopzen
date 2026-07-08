@@ -2,12 +2,20 @@ package shopzen.presentation.profile.state
 
 import shopzen.domain.profile.model.Address
 
+/**
+ * Update the query string and clear any open suggestion list.
+ * Actual Search SDK call is debounced in AddressEditViewModel.
+ */
 internal fun AddressEditState.withPlaceQuery(value: String): AddressEditState =
     copy(
         placeQuery = value,
-        placeSuggestions = if (value.isBlank()) emptyList() else demoPlaceSuggestions(value),
+        placeSuggestions = if (value.isBlank()) emptyList() else placeSuggestions,
         fieldError = null,
     )
+
+internal fun AddressEditState.withSuggestions(
+    suggestions: List<AddressPlaceSuggestion>,
+): AddressEditState = copy(placeSuggestions = suggestions)
 
 internal fun AddressEditState.withPlaceSuggestion(suggestion: AddressPlaceSuggestion): AddressEditState =
     copy(
@@ -23,6 +31,16 @@ internal fun AddressEditState.withPlaceSuggestion(suggestion: AddressPlaceSugges
         country = suggestion.country,
         isAutofilled = true,
         hasManualOverride = false,
+        fieldError = null,
+    )
+
+/** Apply a lat/lng from a map long-press (pin drop). */
+internal fun AddressEditState.withMapPin(latitude: Double, longitude: Double): AddressEditState =
+    copy(
+        selectedLatitude = latitude,
+        selectedLongitude = longitude,
+        placeSuggestions = emptyList(),
+        placeQuery = placeQuery,
         fieldError = null,
     )
 
@@ -92,36 +110,6 @@ internal fun Address.toEditState(current: AddressEditState): AddressEditState {
         country = country,
         phone = phone.orEmpty(),
         isDefault = isDefault,
-    )
-}
-
-private fun demoPlaceSuggestions(query: String): List<AddressPlaceSuggestion> {
-    val normalized = query.trim().ifBlank { "Shopzen" }
-    return listOf(
-        AddressPlaceSuggestion(
-            id = "mapbox-cairo-$normalized",
-            title = "$normalized Downtown",
-            subtitle = "Talaat Harb St, Cairo",
-            addressLine1 = "Talaat Harb St",
-            city = "Cairo",
-            stateOrProvince = "Cairo Governorate",
-            postalCode = "11511",
-            country = "Egypt",
-            latitude = 30.0444,
-            longitude = 31.2357,
-        ),
-        AddressPlaceSuggestion(
-            id = "mapbox-giza-$normalized",
-            title = "$normalized West",
-            subtitle = "Giza District, Giza",
-            addressLine1 = "Giza District",
-            city = "Giza",
-            stateOrProvince = "Giza Governorate",
-            postalCode = "12511",
-            country = "Egypt",
-            latitude = 30.0131,
-            longitude = 31.2089,
-        ),
     )
 }
 

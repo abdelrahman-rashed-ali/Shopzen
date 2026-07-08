@@ -20,9 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import shopzen.presentation.R
-import shopzen.presentation.theme.ShopzenBorderWidth
-import shopzen.presentation.theme.ShopzenShapes
-import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.ShopzenBorderWidth
+import shopzen.presentation.common.theme.ShopzenShapes
+import shopzen.presentation.common.theme.ShopzenSpacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

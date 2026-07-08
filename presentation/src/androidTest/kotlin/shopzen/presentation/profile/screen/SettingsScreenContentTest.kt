@@ -4,7 +4,6 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -18,7 +17,7 @@ import shopzen.domain.profile.model.AppTheme
 import shopzen.domain.profile.model.UserPreferences
 import shopzen.presentation.profile.intent.SettingsIntent
 import shopzen.presentation.profile.state.SettingsState
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 
 class SettingsScreenContentTest {
 

@@ -38,13 +38,12 @@ import shopzen.presentation.profile.components.OrderHistoryCard
 import shopzen.presentation.profile.intent.OrderHistoryIntent
 import shopzen.presentation.profile.state.OrderHistoryState
 import shopzen.presentation.profile.viewmodel.OrderHistoryViewModel
-import shopzen.presentation.theme.LocalShopzenColors
-import shopzen.presentation.theme.ShopzenBody
-import shopzen.presentation.theme.ShopzenHeading3
-import shopzen.presentation.theme.ShopzenMotion
-import shopzen.presentation.theme.ShopzenShapes
-import shopzen.presentation.theme.ShopzenSize
-import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.ShopzenHeading3
+import shopzen.presentation.common.theme.ShopzenMotion
+import shopzen.presentation.common.theme.ShopzenShapes
+import shopzen.presentation.common.theme.ShopzenSize
+import shopzen.presentation.common.theme.ShopzenSpacing
 
 @Composable
 fun OrderHistoryScreen(

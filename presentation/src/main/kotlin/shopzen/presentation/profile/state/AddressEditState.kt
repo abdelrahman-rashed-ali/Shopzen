@@ -26,7 +26,8 @@ data class AddressEditState(
     val phone: String = "",
     val isDefault: Boolean = false,
     val fieldError: String? = null,
-    val isSaved: Boolean = false
+    val isSaved: Boolean = false,
+    val isMapScreenOpen: Boolean = false
 )
 
 enum class AddressEntryMode {

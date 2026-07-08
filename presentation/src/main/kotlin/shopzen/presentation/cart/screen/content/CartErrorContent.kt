@@ -16,11 +16,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import shopzen.presentation.R
-import shopzen.presentation.theme.LocalShopzenColors
-import shopzen.presentation.theme.ShopzenBody
-import shopzen.presentation.theme.ShopzenHeading3
-import shopzen.presentation.theme.ShopzenShapes
-import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.ShopzenBody
+import shopzen.presentation.common.theme.ShopzenHeading3
+import shopzen.presentation.common.theme.ShopzenShapes
+import shopzen.presentation.common.theme.ShopzenSpacing
 
 @Composable
 fun CartErrorContent(

@@ -51,15 +51,15 @@ import shopzen.presentation.profile.intent.OrderDetailIntent
 import shopzen.presentation.profile.state.OrderDetailState
 import shopzen.presentation.profile.util.formatOrderDate
 import shopzen.presentation.profile.viewmodel.OrderDetailViewModel
-import shopzen.presentation.theme.LocalShopzenColors
-import shopzen.presentation.theme.ShopzenBody
-import shopzen.presentation.theme.ShopzenCaption
-import shopzen.presentation.theme.ShopzenHeading3
-import shopzen.presentation.theme.ShopzenMotion
-import shopzen.presentation.theme.ShopzenShapes
-import shopzen.presentation.theme.ShopzenSize
-import shopzen.presentation.theme.ShopzenSmall
-import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.ShopzenBody
+import shopzen.presentation.common.theme.ShopzenCaption
+import shopzen.presentation.common.theme.ShopzenHeading3
+import shopzen.presentation.common.theme.ShopzenMotion
+import shopzen.presentation.common.theme.ShopzenShapes
+import shopzen.presentation.common.theme.ShopzenSize
+import shopzen.presentation.common.theme.ShopzenSmall
+import shopzen.presentation.common.theme.ShopzenSpacing
 
 @Composable
 fun OrderDetailScreen(

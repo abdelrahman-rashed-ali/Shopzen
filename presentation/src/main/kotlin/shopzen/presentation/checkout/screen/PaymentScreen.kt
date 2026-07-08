@@ -57,14 +57,14 @@ import shopzen.presentation.checkout.state.CheckoutState
 import shopzen.presentation.checkout.viewmodel.CheckoutEffect
 import shopzen.presentation.checkout.viewmodel.CheckoutViewModel
 import shopzen.presentation.common.components.ConfirmationDialog
-import shopzen.presentation.theme.LocalShopzenColors
-import shopzen.presentation.theme.ShopzenBody
-import shopzen.presentation.theme.ShopzenHeading3
-import shopzen.presentation.theme.ShopzenMotion
-import shopzen.presentation.theme.ShopzenShapes
-import shopzen.presentation.theme.ShopzenSize
-import shopzen.presentation.theme.ShopzenSmall
-import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.ShopzenBody
+import shopzen.presentation.common.theme.ShopzenHeading3
+import shopzen.presentation.common.theme.ShopzenMotion
+import shopzen.presentation.common.theme.ShopzenShapes
+import shopzen.presentation.common.theme.ShopzenSize
+import shopzen.presentation.common.theme.ShopzenSmall
+import shopzen.presentation.common.theme.ShopzenSpacing
 
 @Composable
 fun PaymentScreen(
@@ -219,6 +219,7 @@ private fun PaymentBody(
     state: CheckoutState,
     onIntent: (CheckoutIntent) -> Unit,
 ) {
+    val c = LocalShopzenColors.current
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(ShopzenSpacing.LG),
@@ -242,6 +243,7 @@ private fun PaymentBody(
                     Text(
                         text = stringResource(R.string.checkout_payment_method_title),
                         style = ShopzenHeading3,
+                        color = c.textPrimary,
                     )
                 },
             ) {
@@ -265,6 +267,7 @@ private fun PaymentBody(
                     Text(
                         text = stringResource(R.string.checkout_price_title),
                         style = ShopzenHeading3,
+                        color = c.textPrimary,
                     )
                 },
             ) {

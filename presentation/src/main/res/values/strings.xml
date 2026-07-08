@@ -411,5 +411,6 @@
     <string name="checkout_back_cd">Go back</string>
     <string name="checkout_item_image_cd">%1$s image</string>
     <string name="checkout_payment_selection_cd">Payment selection</string>
+    <string name="app_name" translatable="false">Shopzen</string>
 
 </resources>

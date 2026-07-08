@@ -3,9 +3,7 @@ package shopzen.presentation.cart.screen
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -16,13 +14,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import shopzen.domain.cart.model.CartItem
 import shopzen.presentation.R
 import shopzen.presentation.cart.intent.CartIntent
 import shopzen.presentation.cart.state.CartItemUi
 import shopzen.presentation.cart.state.CartState
 import shopzen.presentation.common.util.UiText
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 
 @RunWith(AndroidJUnit4::class)
 class CartScreenContentTest {

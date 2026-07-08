@@ -1,4 +1,4 @@
-package shopzen.presentation.theme
+package shopzen.presentation.common.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp

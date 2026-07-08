@@ -51,14 +51,14 @@ import shopzen.presentation.checkout.intent.CheckoutIntent
 import shopzen.presentation.checkout.state.CheckoutState
 import shopzen.presentation.checkout.viewmodel.CheckoutEffect
 import shopzen.presentation.checkout.viewmodel.CheckoutViewModel
-import shopzen.presentation.theme.LocalShopzenColors
-import shopzen.presentation.theme.ShopzenBody
-import shopzen.presentation.theme.ShopzenHeading3
-import shopzen.presentation.theme.ShopzenMotion
-import shopzen.presentation.theme.ShopzenShapes
-import shopzen.presentation.theme.ShopzenSize
-import shopzen.presentation.theme.ShopzenSmall
-import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.ShopzenBody
+import shopzen.presentation.common.theme.ShopzenHeading3
+import shopzen.presentation.common.theme.ShopzenMotion
+import shopzen.presentation.common.theme.ShopzenShapes
+import shopzen.presentation.common.theme.ShopzenSize
+import shopzen.presentation.common.theme.ShopzenSmall
+import shopzen.presentation.common.theme.ShopzenSpacing
 
 @Composable
 fun CheckoutSummaryScreen(
@@ -173,6 +173,7 @@ private fun CheckoutSummaryBody(
     state: CheckoutState,
     onIntent: (CheckoutIntent) -> Unit,
 ) {
+    val c = LocalShopzenColors.current
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
@@ -198,6 +199,7 @@ private fun CheckoutSummaryBody(
                     Text(
                         text = stringResource(R.string.checkout_items_title),
                         style = ShopzenHeading3,
+                        color = c.textPrimary,
                     )
                 },
             ) {
@@ -215,6 +217,7 @@ private fun CheckoutSummaryBody(
                     Text(
                         text = stringResource(R.string.checkout_address_title),
                         style = ShopzenHeading3,
+                        color = c.textPrimary,
                     )
                 },
                 trailingContent = {
@@ -254,6 +257,7 @@ private fun CheckoutSummaryBody(
                     Text(
                         text = stringResource(R.string.checkout_price_title),
                         style = ShopzenHeading3,
+                        color = c.textPrimary,
                     )
                 },
             ) {

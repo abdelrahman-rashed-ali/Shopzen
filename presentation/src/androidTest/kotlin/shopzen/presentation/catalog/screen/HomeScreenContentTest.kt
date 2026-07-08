@@ -13,7 +13,7 @@ import shopzen.domain.catalog.model.Brand
 import shopzen.domain.catalog.model.Category
 import shopzen.domain.catalog.model.Product
 import shopzen.presentation.catalog.state.HomeState
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 
 class HomeScreenContentTest {
 

@@ -4,7 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.junit.Assert.assertEquals
@@ -19,7 +18,7 @@ import shopzen.presentation.checkout.intent.CheckoutIntent
 import shopzen.presentation.checkout.state.CheckoutItemUi
 import shopzen.presentation.checkout.state.CheckoutState
 import shopzen.presentation.common.util.UiText
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 
 @RunWith(AndroidJUnit4::class)
 class CheckoutScreensTest {

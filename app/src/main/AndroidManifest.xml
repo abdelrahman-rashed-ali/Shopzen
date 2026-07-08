@@ -18,7 +18,7 @@
         <activity
             android:name="shopzen.app.MainActivity"
             android:exported="true"
-            android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection|density"
+            android:configChanges="mcc|mnc|touchscreen|keyboard|keyboardHidden|navigation|screenLayout|fontScale|uiMode|orientation|screenSize|smallestScreenSize|layoutDirection|density"
             android:theme="@style/Theme.Shopzen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

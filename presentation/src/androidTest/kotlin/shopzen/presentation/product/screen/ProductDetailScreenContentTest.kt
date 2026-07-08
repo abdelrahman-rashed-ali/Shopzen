@@ -20,7 +20,7 @@ import shopzen.presentation.cart.intent.CartIntent
 import shopzen.presentation.product.intent.ProductDetailIntent
 import shopzen.presentation.product.state.ProductDetailState
 import shopzen.presentation.product.state.ProductReviewUi
-import shopzen.presentation.theme.ShopzenTheme
+import shopzen.presentation.common.theme.ShopzenTheme
 
 class ProductDetailScreenContentTest {
 
