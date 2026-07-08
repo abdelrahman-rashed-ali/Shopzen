@@ -26,6 +26,8 @@ import shopzen.domain.wishlist.repository.WishlistRepository
 import shopzen.domain.profile.repository.PreferencesRepository
 import shopzen.domain.profile.repository.OrderRepository
 import shopzen.domain.profile.repository.ProfileRepository
+import shopzen.data.search.repository.ImageSearchRepositoryImpl
+import shopzen.domain.search.repository.ImageSearchRepository
 import javax.inject.Singleton
 
 @Module
@@ -91,4 +93,16 @@ abstract class RepositoryModule {
     abstract fun bindCheckoutRepository(
         impl: CheckoutRepositoryImpl
     ): CheckoutRepository
+  
+    @Binds
+    @Singleton
+    abstract fun bindAdRepository(
+        impl: shopzen.data.ads.repository.AdRepositoryImpl
+    ): shopzen.domain.ads.repository.AdRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindImageSearchRepository(
+        impl: ImageSearchRepositoryImpl
+    ): ImageSearchRepository
 }

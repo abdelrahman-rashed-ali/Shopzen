@@ -56,6 +56,7 @@ import shopzen.domain.catalog.model.Brand
 import shopzen.domain.catalog.model.Category
 import shopzen.domain.catalog.model.Product
 import shopzen.presentation.R
+import shopzen.presentation.catalog.components.AdBannerSection
 import shopzen.presentation.catalog.intent.HomeIntent
 import shopzen.presentation.catalog.state.HomeState
 import shopzen.presentation.catalog.viewmodel.HomeViewModel
@@ -80,6 +81,7 @@ fun HomeScreen(
     onNavigateToWishlist: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     wishlistViewModel: WishlistViewModel = hiltViewModel(),
@@ -107,7 +109,10 @@ fun HomeScreen(
         modifier = modifier.background(MaterialTheme.colorScheme.background),
     ) { innerPadding ->
         when {
-            state.isLoading -> LoadingIndicator(modifier = Modifier.padding(innerPadding))
+            state.isLoading -> LoadingIndicator(
+                modifier = Modifier.padding(innerPadding),
+            )
+
             state.error != null -> ErrorScreen(
                 message = state.error.orEmpty(),
                 onRetry = { viewModel.processIntent(HomeIntent.LoadHomeData) },
@@ -132,6 +137,22 @@ fun HomeScreen(
                 modifier = Modifier.padding(innerPadding),
             )
         }
+    }
+
+    if (wishlistState.showLoginRequiredDialog) {
+        ConfirmationDialog(
+            title = "Login Required",
+            message = "You need to log in to add items to your wishlist.",
+            confirmText = "Log In",
+            dismissText = "Cancel",
+            onConfirm = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissLoginRequiredDialog)
+                onNavigateToLogin()
+            },
+            onDismiss = {
+                wishlistViewModel.processIntent(WishlistIntent.DismissLoginRequiredDialog)
+            },
+        )
     }
 
     val pendingRemovalId = wishlistState.pendingRemovalItemId
@@ -209,6 +230,13 @@ internal fun HomeContent(
         }
 
         HomeAnimatedSection(index = 2) {
+            AdBannerSection(
+                ads = state.ads,
+                modifier = Modifier.testTag(HomeTestTags.Ads),
+            )
+        }
+
+        HomeAnimatedSection(index = 3) {
             HomeCategorySection(
                 categories = state.categories,
                 onCategoryClick = onNavigateToCategory,
@@ -216,7 +244,7 @@ internal fun HomeContent(
             )
         }
 
-        HomeAnimatedSection(index = 3) {
+        HomeAnimatedSection(index = 4) {
             HomeNewArrivalsSection(
                 products = state.newArrivals,
                 wishlistProductIds = wishlistProductIds,
@@ -548,6 +576,7 @@ internal object HomeTestTags {
     const val Content = "home_content"
     const val Hero = "home_hero"
     const val Brands = "home_brands"
+    const val Ads = "home_ads"
     const val Categories = "home_categories"
     const val NewArrivals = "home_new_arrivals"
 }

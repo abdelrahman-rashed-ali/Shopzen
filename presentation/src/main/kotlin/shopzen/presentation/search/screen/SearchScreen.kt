@@ -1,5 +1,8 @@
 package shopzen.presentation.search.screen
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -18,18 +21,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -40,6 +45,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -48,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import shopzen.domain.catalog.model.Category
 import shopzen.domain.catalog.model.Product
 import shopzen.domain.search.model.SortOption
@@ -115,6 +123,7 @@ fun SearchScreen(
     ) { innerPadding ->
         when {
             state.isLoading -> LoadingIndicator(modifier = Modifier.padding(innerPadding))
+
             state.error != null -> ErrorScreen(
                 message = state.error.orEmpty(),
                 onRetry = { onIntent(SearchIntent.LoadInitialData) },
@@ -140,6 +149,22 @@ internal fun SearchContent(
     onNavigateToCategory: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview(),
+    ) { bitmap ->
+        if (bitmap != null) {
+            onIntent(SearchIntent.SearchByImageBitmap(bitmap))
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) {
+            onIntent(SearchIntent.SearchByImageUri(uri))
+        }
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -150,11 +175,31 @@ internal fun SearchContent(
     ) {
         item {
             SearchHeader(
-                query = state.query,
+                state = state,
                 onQueryChange = { onIntent(SearchIntent.UpdateQuery(it)) },
                 onFilterClick = { onIntent(SearchIntent.ToggleFilterSheet) },
+                onCameraClick = { cameraLauncher.launch(null) },
+                onGalleryClick = {
+                    galleryLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                    )
+                },
+                onClearImageSearch = { onIntent(SearchIntent.ClearImageSearch) },
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
+        }
+
+        if (state.isImageUploading) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    LoadingIndicator()
+                }
+            }
         }
 
         item {
@@ -186,9 +231,12 @@ internal fun SearchContent(
 
 @Composable
 private fun SearchHeader(
-    query: String,
+    state: SearchState,
     onQueryChange: (String) -> Unit,
     onFilterClick: () -> Unit,
+    onCameraClick: () -> Unit,
+    onGalleryClick: () -> Unit,
+    onClearImageSearch: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -201,18 +249,27 @@ private fun SearchHeader(
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
         )
+
         Text(
             text = stringResource(R.string.search_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+
+        if (state.selectedImageUri != null) {
+            SelectedImageSearchRow(
+                imageModel = state.selectedImageUri,
+                onClearImageSearch = onClearImageSearch,
+            )
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedTextField(
-                value = query,
+                value = state.query,
                 onValueChange = onQueryChange,
                 modifier = Modifier
                     .weight(1f)
@@ -225,6 +282,26 @@ private fun SearchHeader(
                         modifier = Modifier.size(20.dp),
                     )
                 },
+                trailingIcon = {
+                    if (state.selectedImageUri == null) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = onCameraClick) {
+                                Icon(
+                                    imageVector = Icons.Outlined.CameraAlt,
+                                    contentDescription = "Camera",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            IconButton(onClick = onGalleryClick) {
+                                Icon(
+                                    imageVector = Icons.Outlined.PhotoLibrary,
+                                    contentDescription = "Gallery",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                },
                 singleLine = true,
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -234,6 +311,7 @@ private fun SearchHeader(
                     unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                 ),
             )
+
             Surface(
                 modifier = Modifier
                     .size(56.dp)
@@ -249,6 +327,62 @@ private fun SearchHeader(
                         contentDescription = stringResource(R.string.search_filters),
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SelectedImageSearchRow(
+    imageModel: Any,
+    onClearImageSearch: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+    ) {
+        Row(
+            modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            AsyncImage(
+                model = imageModel,
+                contentDescription = "Selected image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.background),
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = "Searching by image",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = "Clear the image to return to text search.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            IconButton(onClick = onClearImageSearch) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = "Clear image search",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
@@ -509,7 +643,7 @@ private fun ProductResultsGrid(
                 rowProducts.forEach { product ->
                     ProductCard(
                         product = product,
-                        onProductClick = onNavigateToProduct,
+                        onProductClick = { onNavigateToProduct(product.id) },
                         onWishlistClick = {},
                         modifier = Modifier
                             .weight(1f)
