@@ -56,10 +56,7 @@ fun AdBannerSection(
         ) {
             Text(
                 text = "Exclusive Offers",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    fontFamily = FontFamily.Serif
-                ),
+                style = MaterialTheme.typography.titleLarge,
                 color = theme.textPrimary
             )
             Spacer(modifier = Modifier.weight(1f))
