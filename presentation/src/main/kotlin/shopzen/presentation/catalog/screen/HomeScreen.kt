@@ -80,7 +80,6 @@ fun HomeScreen(
     onNavigateToWishlist: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     wishlistViewModel: WishlistViewModel = hiltViewModel(),
@@ -167,22 +166,6 @@ fun HomeScreen(
             },
             onDismiss = {
                 wishlistViewModel.processIntent(WishlistIntent.DismissAddConfirmDialog)
-            },
-        )
-    }
-
-    if (wishlistState.showLoginRequiredDialog) {
-        ConfirmationDialog(
-            title = stringResource(R.string.home_wishlist_login_required_title),
-            message = stringResource(R.string.home_wishlist_login_required_message),
-            confirmText = stringResource(R.string.home_wishlist_login_required_confirm),
-            dismissText = stringResource(R.string.common_cancel),
-            onConfirm = {
-                wishlistViewModel.processIntent(WishlistIntent.DismissLoginRequiredDialog)
-                onNavigateToLogin()
-            },
-            onDismiss = {
-                wishlistViewModel.processIntent(WishlistIntent.DismissLoginRequiredDialog)
             },
         )
     }

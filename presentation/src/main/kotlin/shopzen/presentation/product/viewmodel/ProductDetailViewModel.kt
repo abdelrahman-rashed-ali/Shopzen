@@ -10,14 +10,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shopzen.domain.auth.usecase.GetCurrentUserUseCase
 import shopzen.domain.product.usecase.GetProductByIdUseCase
-import shopzen.domain.profile.model.AppCurrency
-import shopzen.domain.profile.usecase.GetUserPreferencesUseCase
 import shopzen.domain.wishlist.usecase.AddToWishlistUseCase
 import shopzen.domain.wishlist.usecase.GetWishlistUseCase
 import shopzen.domain.wishlist.usecase.RemoveFromWishlistUseCase
@@ -33,7 +30,6 @@ import javax.inject.Inject
  *
  * - Reads `productId` from [SavedStateHandle] (injected from nav arguments)
  * - Processes [ProductDetailIntent]s via [processIntent]
- * - Observes user preferences and reactively converts prices when currency changes
  * - Exposes a single [StateFlow] of [ProductDetailState]
  */
 @HiltViewModel
@@ -43,7 +39,6 @@ class ProductDetailViewModel @Inject constructor(
     private val addToWishlistUseCase: AddToWishlistUseCase,
     private val removeFromWishlistUseCase: RemoveFromWishlistUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
-    private val getUserPreferencesUseCase: GetUserPreferencesUseCase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -58,7 +53,6 @@ class ProductDetailViewModel @Inject constructor(
     val effects = _effects.receiveAsFlow()
 
     init {
-        observeCurrency()
         processIntent(ProductDetailIntent.LoadProduct(productId))
     }
 
@@ -72,45 +66,13 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
-    // ── Currency observation ──────────────────────────────────────────────
-
-    private fun observeCurrency() {
-        viewModelScope.launch {
-            getUserPreferencesUseCase().collectLatest { prefs ->
-                _state.update { current ->
-                    current.copy(
-                        currency = prefs.currency,
-                        convertedPrice = convertPrice(current.rawPrice(), prefs.currency),
-                        convertedCompareAtPrice = convertPrice(current.rawCompareAtPrice(), prefs.currency),
-                    )
-                }
-            }
-        }
-    }
-
-    // ── Product loading ───────────────────────────────────────────────────
-
     private fun loadProduct(id: Long) {
         viewModelScope.launch {
             _state.update { it.loadingProduct() }
 
             getProductByIdUseCase(id)
                 .onSuccess { product ->
-                    _state.update { current ->
-                        val initialVariantId =
-                            if (product.variants.size == 1) product.variants.first().id else null
-                        val rawPrice = product.variants
-                            .find { it.id == initialVariantId }
-                            ?.price ?: product.price
-                        val rawCompare = product.variants
-                            .find { it.id == initialVariantId }
-                            ?.compareAtPrice ?: product.compareAtPrice
-                        current.withLoadedProduct(product).copy(
-                            selectedVariantId = initialVariantId,
-                            convertedPrice = convertPrice(rawPrice, current.currency),
-                            convertedCompareAtPrice = convertPrice(rawCompare, current.currency),
-                        )
-                    }
+                    _state.update { it.withLoadedProduct(product) }
                     observeWishlist(product.id)
                 }
                 .onFailure { throwable ->
@@ -140,23 +102,13 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
-    // ── Variant selection ──────────────────────────────────────────────────
-
     private fun selectVariant(variantId: Long) {
-        _state.update { current ->
-            val variant = current.product?.variants?.find { it.id == variantId }
-            current.withSelectedVariant(variantId).copy(
-                convertedPrice = convertPrice(variant?.price, current.currency),
-                convertedCompareAtPrice = convertPrice(variant?.compareAtPrice, current.currency),
-            )
-        }
+        _state.update { it.withSelectedVariant(variantId) }
     }
 
     private fun showVariantSelectionError() {
         _state.update { it.withVariantRequiredError() }
     }
-
-    // ── Wishlist toggling ──────────────────────────────────────────────────
 
     private fun toggleWishlist() {
         viewModelScope.launch {
@@ -204,23 +156,5 @@ class ProductDetailViewModel @Inject constructor(
                     )
                 }
         }
-    }
-
-    // ── Price conversion helpers ───────────────────────────────────────────
-
-    private fun convertPrice(rawUsd: String?, currency: AppCurrency): Double? {
-        val usd = rawUsd?.toDoubleOrNull() ?: return null
-        return usd * currency.rateFromUsd
-    }
-
-    /** Returns the raw (USD) price for the currently selected variant or product default. */
-    private fun ProductDetailState.rawPrice(): String? {
-        val variant = product?.variants?.find { it.id == selectedVariantId }
-        return variant?.price ?: product?.price
-    }
-
-    private fun ProductDetailState.rawCompareAtPrice(): String? {
-        val variant = product?.variants?.find { it.id == selectedVariantId }
-        return variant?.compareAtPrice ?: product?.compareAtPrice
     }
 }

@@ -51,7 +51,7 @@ data object WishlistScreen : NavScreen(
 data class ProductDetail(val productId: Long) : NavScreen("product-detail")
 
 @Serializable
-data object CartScreen : NavScreen("cart")
+object CartScreen : NavScreen("cart")
 
 @Serializable
 data object CheckoutSummaryScreen : NavScreen("checkout-summary")
@@ -82,7 +82,6 @@ data class OrderDetailScreen(
 @Serializable
 data object PersonalDetailsScreen : NavScreen("personal-details")
 
-
 @Serializable
 data object AddressesScreen : NavScreen("addresses")
 
@@ -93,10 +92,4 @@ data object SearchScreen : NavScreen("search")
 data class AddressEditScreen(val addressId: String? = null) : NavScreen("address-edit")
 
 @Serializable
-data object BrandListScreen : NavScreen("brand-list")
-
-@Serializable
-data class BrandProducts(val brandName: String) : NavScreen("brand-products")
-
-@Serializable
-data class CategoryProductsScreen(val categoryTitle: String) : NavScreen("category-products")
+data object LlmTestScreenRoute : NavScreen("llm-test")
