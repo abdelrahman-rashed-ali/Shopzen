@@ -107,7 +107,7 @@ class ProductDetailViewModel @Inject constructor(
     }
 
     private fun showVariantSelectionError() {
-        _state.update { it.withSizeRequiredError() }
+        _state.update { it.withVariantRequiredError() }
     }
 
     private fun toggleWishlist() {

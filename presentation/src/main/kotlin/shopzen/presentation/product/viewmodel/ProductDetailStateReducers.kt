@@ -26,10 +26,10 @@ internal fun ProductDetailState.withWishlistItem(item: WishlistItem?): ProductDe
     )
 
 internal fun ProductDetailState.withSelectedVariant(variantId: Long): ProductDetailState =
-    copy(selectedVariantId = variantId, showSizeRequiredError = false)
+    copy(selectedVariantId = variantId, showVariantRequiredError = false)
 
-internal fun ProductDetailState.withSizeRequiredError(): ProductDetailState =
-    copy(showSizeRequiredError = true)
+internal fun ProductDetailState.withVariantRequiredError(): ProductDetailState =
+    copy(showVariantRequiredError = true)
 
 internal fun ProductDetailState.withWishlistUpdating(isUpdating: Boolean): ProductDetailState =
     copy(isWishlistUpdating = isUpdating)

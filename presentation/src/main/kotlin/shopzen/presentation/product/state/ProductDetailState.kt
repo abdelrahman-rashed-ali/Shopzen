@@ -11,7 +11,7 @@ data class ProductDetailState(
     val error: String? = null,
     val product: Product? = null,
     val selectedVariantId: Long? = null,
-    val showSizeRequiredError: Boolean = false,
+    val showVariantRequiredError: Boolean = false,
     val isWishlisted: Boolean = false,
     val wishlistItemId: String? = null,
     val isWishlistUpdating: Boolean = false,

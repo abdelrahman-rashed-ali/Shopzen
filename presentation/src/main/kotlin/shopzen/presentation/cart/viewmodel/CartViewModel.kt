@@ -32,6 +32,7 @@ import shopzen.presentation.R
 import shopzen.presentation.cart.intent.CartIntent
 import shopzen.presentation.cart.state.CartItemUi
 import shopzen.presentation.cart.state.CartState
+import shopzen.presentation.common.mapper.toUiText
 import shopzen.presentation.common.util.UiText
 import javax.inject.Inject
 
@@ -168,8 +169,7 @@ class CartViewModel @Inject constructor(
                             it.copy(
                                 isLoading = false,
                                 isRefreshing = false,
-                                error = throwable.message?.let { msg -> UiText.DynamicString(msg) as UiText }
-                                    ?: UiText.StringResource(R.string.cart_error_load_failed)
+                                error = throwable.toUiText(fallbackMessageId = R.string.cart_error_load_failed)
                             )
                         }
                     }
@@ -215,8 +215,7 @@ class CartViewModel @Inject constructor(
                 loadCurrencyAndCart()
                 _effects.emit(
                     CartEffect.ShowSnackbar(
-                        throwable.message?.let(UiText::DynamicString)
-                            ?: UiText.StringResource(R.string.cart_error_load_failed)
+                        throwable.toUiText(fallbackMessageId = R.string.cart_error_load_failed)
                     )
                 )
             }
@@ -249,8 +248,7 @@ class CartViewModel @Inject constructor(
                 loadCurrencyAndCart()
                 _effects.emit(
                     CartEffect.ShowSnackbar(
-                        throwable.message?.let(UiText::DynamicString)
-                            ?: UiText.StringResource(R.string.cart_error_load_failed)
+                        throwable.toUiText(fallbackMessageId = R.string.cart_error_load_failed)
                     )
                 )
             }
@@ -279,8 +277,7 @@ class CartViewModel @Inject constructor(
                 loadCurrencyAndCart()
                 _effects.emit(
                     CartEffect.ShowSnackbar(
-                        throwable.message?.let(UiText::DynamicString)
-                            ?: UiText.StringResource(R.string.cart_error_load_failed)
+                        throwable.toUiText(fallbackMessageId = R.string.cart_error_load_failed)
                     )
                 )
             }
@@ -367,8 +364,7 @@ class CartViewModel @Inject constructor(
                     _state.update { it.copy(isLoading = false) }
                     _effects.emit(
                         CartEffect.ShowSnackbar(
-                            throwable.message?.let(UiText::DynamicString)
-                                ?: UiText.StringResource(R.string.cart_error_add_failed)
+                            throwable.toUiText(fallbackMessageId = R.string.cart_error_add_failed)
                         )
                     )
                 }
@@ -416,8 +412,7 @@ class CartViewModel @Inject constructor(
 
                     _effects.emit(
                         CartEffect.ShowSnackbar(
-                            throwable.message?.let(UiText::DynamicString)
-                                ?: UiText.StringResource(R.string.cart_error_add_failed)
+                            throwable.toUiText(fallbackMessageId = R.string.cart_error_add_failed)
                         )
                     )
                 }

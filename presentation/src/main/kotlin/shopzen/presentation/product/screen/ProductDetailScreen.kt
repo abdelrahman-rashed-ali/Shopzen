@@ -458,15 +458,15 @@ private fun ProductOptionsSection(
                 }
             }
             AnimatedVisibility(
-                visible = state.showSizeRequiredError,
+                visible = state.showVariantRequiredError,
                 enter = fadeIn(tween(140)) + slideInVertically { it / 3 },
                 exit = fadeOut(tween(100)) + slideOutVertically { it / 3 },
             ) {
                 Text(
-                    text = stringResource(R.string.product_detail_size_required),
+                    text = stringResource(R.string.product_detail_variant_required),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.testTag(ProductDetailTestTags.SizeError),
+                    modifier = Modifier.testTag(ProductDetailTestTags.VariantError),
                 )
             }
         }
@@ -781,7 +781,7 @@ internal object ProductDetailTestTags {
     const val Summary = "product_detail_summary"
     const val WishlistButton = "product_detail_wishlist_button"
     const val Options = "product_detail_options"
-    const val SizeError = "product_detail_size_error"
+    const val VariantError = "product_detail_variant_error"
     const val Description = "product_detail_description"
     const val Reviews = "product_detail_reviews"
     const val StickyCta = "product_detail_sticky_cta"

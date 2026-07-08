@@ -224,6 +224,7 @@
     <string name="cart_error_not_authenticated">يرجى تسجيل الدخول لعرض عربة التسوق</string>
     <string name="cart_item_added">تم إضافة العنصر إلى عربة التسوق.</string>
     <string name="cart_error_add_failed">فشل إضافة العنصر إلى عربة التسوق.</string>
+    <string name="cart_error_mutation_failed">فشلت العملية على العربة.</string>
 
     <!-- Checkout -->
     <string name="checkout_title">إتمام الشراء</string>
@@ -376,7 +377,7 @@
     </plurals>
     <string name="product_detail_variants_title">اختر المقاس</string>
     <string name="product_detail_variants_subtitle">الخيارات غير المتاحة معطلة حسب المخزون.</string>
-    <string name="product_detail_size_required">يرجى اختيار المقاس قبل الإضافة إلى العربة.</string>
+    <string name="product_detail_variant_required">يرجى اختيار خيار قبل الإضافة إلى العربة.</string>
     <string name="product_detail_description_title">الوصف</string>
     <string name="product_detail_description_subtitle">الخامات والعناية وملاحظات المنتج.</string>
     <string name="product_detail_reviews_title">المراجعات</string>

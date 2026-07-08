@@ -209,7 +209,7 @@
     </plurals>
     <string name="product_detail_variants_title">Choose Your Fit</string>
     <string name="product_detail_variants_subtitle">Unavailable options are disabled based on stock.</string>
-    <string name="product_detail_size_required">Please select a size before adding to cart.</string>
+    <string name="product_detail_variant_required">Please select a variant before adding to cart.</string>
     <string name="product_detail_description_title">Description</string>
     <string name="product_detail_description_subtitle">Materials, care, and product notes.</string>
     <string name="product_detail_reviews_title">Reviews</string>
@@ -359,6 +359,7 @@
     <string name="cart_error_not_authenticated">Please log in to view your cart</string>
     <string name="cart_item_added">Item added to cart.</string>
     <string name="cart_error_add_failed">Failed to add item to cart.</string>
+    <string name="cart_error_mutation_failed">Cart operation failed.</string>
 
     <!-- Checkout -->
     <string name="checkout_title">Checkout</string>
