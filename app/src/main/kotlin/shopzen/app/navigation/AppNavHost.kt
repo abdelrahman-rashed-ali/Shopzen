@@ -204,7 +204,7 @@ fun AppNavHost(
                     navigateTopLevel(SearchScreen)
                 },
                 onNavigateToProfile = {
-                    navigateAuthRequired(ProfileScreen)
+                    navigateAuthRequiredSingle(ProfileScreen)
                 },
                 onNavigateToWishlist = {
                     navigateAuthRequired(WishlistScreen)
@@ -240,7 +240,7 @@ fun AppNavHost(
                     navigateAuthRequired(CartScreen)
                 },
                 onNavigateToProfile = {
-                    navigateAuthRequired(ProfileScreen)
+                    navigateAuthRequiredSingle(ProfileScreen)
                 },
                 onNavigateToSettings = {
                     navigateTopLevel(SettingsScreen)
@@ -263,7 +263,7 @@ fun AppNavHost(
                     navigateAuthRequired(CartScreen)
                 },
                 onNavigateToProfile = {
-                    navigateAuthRequired(ProfileScreen)
+                    navigateAuthRequiredSingle(ProfileScreen)
                 },
                 onNavigateToSettings = {
                     navigateTopLevel(SettingsScreen)
@@ -276,7 +276,7 @@ fun AppNavHost(
                 onNavigateToDiscover = { navigateTopLevel(HomeScreen) },
                 onNavigateToSearch = { navigateTopLevel(SearchScreen) },
                 onNavigateToWishlist = { navigateAuthRequired(WishlistScreen) },
-                onNavigateToProfile = { navigateAuthRequired(ProfileScreen) },
+                onNavigateToProfile = { navigateAuthRequiredSingle(ProfileScreen) },
                 onNavigateToCart = { navigateAuthRequired(CartScreen) },
                 onNavigateToLogin = { navigateToLogin() },
                 onNavigateToAddresses = { navigateAuthRequiredSingle(AddressesScreen) },
@@ -352,6 +352,7 @@ fun AppNavHost(
 
         composable<ProfileScreen> {
             ProfileRouteScreen(
+                onNavigateBack = { navigateBackOrHome() },
                 onNavigateToLogin = {
                     navigateToLogin()
                 },
