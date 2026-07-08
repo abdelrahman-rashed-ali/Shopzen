@@ -10,5 +10,6 @@ data class WishlistState(
     val pendingRemovalItemId: String? = null,
     val showAddConfirmationDialog: Boolean = false,
     val pendingAddProduct: shopzen.domain.catalog.model.Product? = null,
-    val showLoginRequiredDialog: Boolean = false
+    val showLoginRequiredDialog: Boolean = false,
+    val currency: shopzen.domain.profile.model.AppCurrency = shopzen.domain.profile.model.AppCurrency.USD
 )

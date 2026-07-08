@@ -54,7 +54,7 @@ import shopzen.presentation.common.components.MainShellTab
 import shopzen.presentation.common.components.ShopzenBottomBar
 import shopzen.presentation.common.components.ShopzenTopAppBar
 import shopzen.presentation.wishlist.WishlistTestTags
-import shopzen.presentation.wishlist.components.WishlistItemCard
+import shopzen.presentation.common.components.ProductCard
 import shopzen.presentation.wishlist.intent.WishlistIntent
 import shopzen.presentation.wishlist.state.WishlistState
 import shopzen.presentation.wishlist.viewmodel.WishlistViewModel
@@ -90,13 +90,13 @@ fun WishlistScreen(
                 onSettingsClick = onNavigateToSettings,
             )
         },
-        modifier = modifier.background(Color.White)
+        modifier = modifier.background(MaterialTheme.colorScheme.background)
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             when {
                 state.isLoading && state.items.isEmpty() -> {
@@ -138,59 +138,6 @@ fun WishlistScreen(
     }
 }
 
-@Composable
-private fun WishlistTopBar() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .statusBarsPadding()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { /* Open drawer */ }) {
-                Icon(
-                    imageVector = Icons.Outlined.Menu,
-                    contentDescription = "Menu",
-                    tint = Color.Black
-                )
-            }
-
-            // Center LUMINA text logo matching screenshot
-            Text(
-                text = "LUMINA",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    letterSpacing = 4.sp
-                ),
-                color = Color.Black
-            )
-
-            IconButton(onClick = { /* View notifications */ }) {
-                Icon(
-                    imageVector = Icons.Outlined.Notifications,
-                    contentDescription = "Notifications",
-                    tint = Color.Black
-                )
-            }
-        }
-        // Subtle divider line
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(0.5.dp)
-                .background(Color(0xFFEEEEEE))
-        )
-    }
-}
 
 @Composable
 fun WishlistContent(
@@ -217,7 +164,7 @@ fun WishlistContent(
                     fontWeight = FontWeight.Bold,
                     fontSize = 32.sp
                 ),
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Text(
@@ -227,7 +174,7 @@ fun WishlistContent(
                     fontSize = 12.sp,
                     letterSpacing = 1.sp
                 ),
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -248,14 +195,17 @@ fun WishlistContent(
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(state.items, key = { it.id }) { item ->
-                    WishlistItemCard(
-                        item = item,
-                        onItemClick = onNavigateToProduct,
-                        onRemoveClick = { itemId ->
-                            onIntent(WishlistIntent.RequestRemoveItem(itemId))
-                        },
-                        onAddToCartClick = { productId ->
-                            onIntent(WishlistIntent.AddToCart(productId))
+                    ProductCard(
+                        id = item.productId,
+                        title = item.title,
+                        category = item.vendor, // WishlistItem doesn't have productType, vendor is the closest
+                        price = item.price,
+                        currency = state.currency,
+                        imageUrl = item.imageUrl,
+                        isFavorite = true, // It's in the wishlist
+                        onProductClick = onNavigateToProduct,
+                        onFavoriteClick = {
+                            onIntent(WishlistIntent.RequestRemoveItem(item.id))
                         }
                     )
                 }
@@ -288,11 +238,16 @@ private fun WishlistAnimatedRow(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             rowItems.forEach { item ->
-                WishlistItemCard(
-                    item = item,
-                    onItemClick = onItemClick,
-                    onRemoveClick = onRemoveClick,
-                    onAddToCartClick = onAddToCartClick,
+                ProductCard(
+                    id = item.productId,
+                    title = item.title,
+                    category = item.vendor,
+                    price = item.price,
+                    currency = shopzen.domain.profile.model.AppCurrency.USD, // Animated row not actually used, placeholder
+                    imageUrl = item.imageUrl,
+                    isFavorite = true,
+                    onProductClick = onItemClick,
+                    onFavoriteClick = { onRemoveClick(item.id) },
                     modifier = Modifier
                         .weight(1f)
                         .testTag(WishlistTestTags.item(item.id)),

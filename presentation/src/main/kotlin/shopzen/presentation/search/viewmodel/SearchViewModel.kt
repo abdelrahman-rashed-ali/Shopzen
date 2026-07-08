@@ -26,6 +26,7 @@ import shopzen.domain.search.model.SearchFilter
 import shopzen.domain.search.usecase.FilterProductsUseCase
 import shopzen.domain.search.usecase.SearchProductsByImageUseCase
 import shopzen.domain.search.usecase.SortProductsUseCase
+import shopzen.domain.cart.usecase.GetCurrencySymbolUseCase
 import shopzen.presentation.search.intent.SearchIntent
 import shopzen.presentation.search.state.SearchState
 import shopzen.presentation.search.util.ImageCompressor
@@ -39,6 +40,7 @@ class SearchViewModel @Inject constructor(
     private val filterProductsUseCase: FilterProductsUseCase,
     private val sortProductsUseCase: SortProductsUseCase,
     private val searchProductsByImageUseCase: SearchProductsByImageUseCase,
+    private val getCurrencySymbolUseCase: GetCurrencySymbolUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SearchState())
@@ -104,7 +106,6 @@ class SearchViewModel @Inject constructor(
     private fun loadInitialData() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
-
             try {
                 supervisorScope {
                     val productsDeferred = async { getProductsUseCase() }
@@ -112,7 +113,6 @@ class SearchViewModel @Inject constructor(
 
                     val productsResult = productsDeferred.await()
                     val categoriesResult = categoriesDeferred.await()
-
                     val products = productsResult
                         .getOrNull()
                         .orEmpty()
@@ -125,12 +125,15 @@ class SearchViewModel @Inject constructor(
 
                     catalogProducts = products
 
+                    val currency = getCurrencySymbolUseCase()
+
                     _state.value = _state.value.copy(
                         isLoading = false,
                         error = null,
                         allProducts = products,
                         filteredProducts = products,
                         categories = categories,
+                        currency = currency,
                     )
                 }
             } catch (e: Exception) {

@@ -1,6 +1,7 @@
 package shopzen.presentation.cart.state
 
 import shopzen.presentation.common.util.UiText
+import shopzen.domain.profile.model.AppCurrency
 
 data class CartItemUi(
     val id: String,
@@ -16,7 +17,7 @@ data class CartItemUi(
 
 data class CartState(
     val items: List<CartItemUi> = emptyList(),
-    val currencySymbol: String = "$",
+    val currency: AppCurrency = AppCurrency.USD,
     val formattedSubtotal: String = "$0.00",
     val formattedDiscount: String? = null,
     val formattedTotal: String = "$0.00",

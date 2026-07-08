@@ -7,4 +7,5 @@ data class OrderDetailState(
     val isLoading: Boolean = false,
     val error: UiText? = null,
     val order: Order? = null,
+    val currency: shopzen.domain.profile.model.AppCurrency = shopzen.domain.profile.model.AppCurrency.USD,
 )

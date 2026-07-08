@@ -136,6 +136,7 @@ fun OrderHistoryContent(
                         }
                         OrderHistoryCard(
                             order = order,
+                            currency = current.currency,
                             onClick = onOrderClickRemembered,
                             modifier = Modifier.fillMaxWidth(),
                         )

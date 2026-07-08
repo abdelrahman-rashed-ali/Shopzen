@@ -625,7 +625,6 @@ private fun ProductStickyActionBar(
     val product = state.product ?: return
     val canAttemptAdd = state.canAttemptAddToCart()
     val outOfStock = !canAttemptAdd && product.hasConcreteVariantSelection(state.selectedVariantId)
-    val displayPrice = selectedVariant?.price ?: product.price
 
     Surface(
         modifier = modifier
@@ -650,7 +649,7 @@ private fun ProductStickyActionBar(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = "$$displayPrice",
+                    text = "${state.currency.symbol}${String.format(java.util.Locale.getDefault(), "%.2f", state.convertedPrice ?: 0.0)}",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,

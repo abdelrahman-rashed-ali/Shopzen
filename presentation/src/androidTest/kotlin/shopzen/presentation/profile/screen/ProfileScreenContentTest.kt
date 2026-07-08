@@ -31,6 +31,7 @@ class ProfileScreenContentTest {
                         profile = sampleProfile(),
                     ),
                     onIntent = {},
+                    onNavigateBack = {},
                     onNavigateToLogin = {},
                 )
             }
@@ -61,6 +62,7 @@ class ProfileScreenContentTest {
                         profile = sampleProfile(),
                     ),
                     onIntent = { intents += it },
+                    onNavigateBack = {},
                     onNavigateToLogin = {},
                 )
             }
@@ -91,6 +93,7 @@ class ProfileScreenContentTest {
                 ProfileContent(
                     state = ProfileState(isGuest = true),
                     onIntent = {},
+                    onNavigateBack = {},
                     onNavigateToLogin = { loginClicks++ },
                 )
             }
@@ -119,6 +122,7 @@ class ProfileScreenContentTest {
                         showLogoutDialog = true,
                     ),
                     onIntent = { intents += it },
+                    onNavigateBack = {},
                     onNavigateToLogin = {},
                 )
             }

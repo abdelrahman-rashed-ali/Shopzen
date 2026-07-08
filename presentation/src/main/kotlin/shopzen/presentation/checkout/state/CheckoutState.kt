@@ -39,6 +39,7 @@ data class CheckoutState(
     val isOnlinePaymentInProgress: Boolean = false,
     val pendingPaymobLaunch: PendingPaymobLaunch? = null,
     val showPlaceOrderDialog: Boolean = false,
+    val currency: shopzen.domain.profile.model.AppCurrency = shopzen.domain.profile.model.AppCurrency.USD,
 ) {
     val selectedAddress: Address?
         get() = addresses.firstOrNull { it.id == selectedAddressId }

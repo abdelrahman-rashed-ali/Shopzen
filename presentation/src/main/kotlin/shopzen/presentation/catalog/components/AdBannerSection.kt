@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import shopzen.domain.ads.model.Ad
+import shopzen.presentation.theme.LocalShopzenColors
 
 /**
  * A premium sliding horizontal Ad pager for the Home Screen.
@@ -37,6 +38,7 @@ fun AdBannerSection(
     ads: List<Ad>,
     modifier: Modifier = Modifier
 ) {
+    val theme = LocalShopzenColors.current
     if (ads.isEmpty()) return
 
     val pagerState = rememberPagerState(pageCount = { ads.size })
@@ -54,11 +56,8 @@ fun AdBannerSection(
         ) {
             Text(
                 text = "Exclusive Offers",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    fontFamily = FontFamily.Serif
-                ),
-                color = Color.Black
+                style = MaterialTheme.typography.titleLarge,
+                color = theme.textPrimary
             )
             Spacer(modifier = Modifier.weight(1f))
             Box(

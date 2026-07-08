@@ -126,15 +126,15 @@ class CartViewModel @Inject constructor(
     private fun loadCurrencyAndCart(forceRefresh: Boolean = false) {
         val uid = userId ?: return
         viewModelScope.launch {
-            val symbol = getCurrencySymbolUseCase()
-            _state.update { it.copy(currencySymbol = symbol) }
-            observeCart(uid, symbol, forceRefresh)
+            val currency = getCurrencySymbolUseCase()
+            _state.update { it.copy(currency = currency) }
+            observeCart(uid, currency, forceRefresh)
         }
     }
 
     private var observeJob: kotlinx.coroutines.Job? = null
 
-    private fun observeCart(uid: String, symbol: String, forceRefresh: Boolean = false) {
+    private fun observeCart(uid: String, currency: shopzen.domain.profile.model.AppCurrency, forceRefresh: Boolean = false) {
         observeJob?.cancel()
         if (forceRefresh) {
             _state.update { it.copy(isRefreshing = true, error = null) }
@@ -147,16 +147,16 @@ class CartViewModel @Inject constructor(
                     onSuccess = { cart ->
                         currentCart = cart
                         _state.update { current ->
-                            val uiItems = cart.items.map { it.toUi(symbol) }
+                            val uiItems = cart.items.map { it.toUi(currency) }
                             current.copy(
                                 isLoading = false,
                                 isRefreshing = false,
                                 error = null,
                                 items = uiItems,
-                                formattedSubtotal = symbol.formatPrice(cart.subtotalPrice),
-                                formattedTotal = symbol.formatPrice(cart.totalPrice),
+                                formattedSubtotal = currency.formatPrice(cart.subtotalPrice),
+                                formattedTotal = currency.formatPrice(cart.totalPrice),
                                 formattedDiscount = if (cart.discountAmount > 0) {
-                                    "-${symbol.formatPrice(cart.discountAmount)}"
+                                    "-${currency.formatPrice(cart.discountAmount)}"
                                 } else null,
                                 couponApplied = cart.appliedCoupon != null,
                                 appliedCouponLabel = cart.appliedCoupon?.code?.let { "$it" }, // Shopify UI just shows code
@@ -198,14 +198,14 @@ class CartViewModel @Inject constructor(
         val updatedCart = cart.copy(items = updatedItems, subtotalPrice = getCartTotalUseCase(updatedItems))
         currentCart = updatedCart
         
-        val symbol = _state.value.currencySymbol
+        val currency = _state.value.currency
         _state.update { current ->
             current.copy(
-                items = updatedCart.items.map { it.toUi(symbol) },
-                formattedSubtotal = symbol.formatPrice(updatedCart.subtotalPrice),
-                formattedTotal = symbol.formatPrice(updatedCart.totalPrice),
+                items = updatedCart.items.map { it.toUi(currency) },
+                formattedSubtotal = currency.formatPrice(updatedCart.subtotalPrice),
+                formattedTotal = currency.formatPrice(updatedCart.totalPrice),
                 formattedDiscount = if (updatedCart.discountAmount > 0) {
-                    "-${symbol.formatPrice(updatedCart.discountAmount)}"
+                    "-${currency.formatPrice(updatedCart.discountAmount)}"
                 } else null,
             )
         }
@@ -231,14 +231,14 @@ class CartViewModel @Inject constructor(
         val updatedCart = cart.copy(items = updatedItems, subtotalPrice = getCartTotalUseCase(updatedItems))
         currentCart = updatedCart
         
-        val symbol = _state.value.currencySymbol
+        val currency = _state.value.currency
         _state.update { current ->
             current.copy(
-                items = updatedCart.items.map { it.toUi(symbol) },
-                formattedSubtotal = symbol.formatPrice(updatedCart.subtotalPrice),
-                formattedTotal = symbol.formatPrice(updatedCart.totalPrice),
+                items = updatedCart.items.map { it.toUi(currency) },
+                formattedSubtotal = currency.formatPrice(updatedCart.subtotalPrice),
+                formattedTotal = currency.formatPrice(updatedCart.totalPrice),
                 formattedDiscount = if (updatedCart.discountAmount > 0) {
-                    "-${symbol.formatPrice(updatedCart.discountAmount)}"
+                    "-${currency.formatPrice(updatedCart.discountAmount)}"
                 } else null,
             )
         }
@@ -258,12 +258,12 @@ class CartViewModel @Inject constructor(
     private fun confirmClearCart() {
         _state.update { it.copy(showClearCartDialog = false) }
         currentCart = null
-        val symbol = _state.value.currencySymbol
+        val currency = _state.value.currency
         _state.update { current ->
             current.copy(
                 items = emptyList(),
-                formattedSubtotal = symbol.formatPrice(0.0),
-                formattedTotal = symbol.formatPrice(0.0),
+                formattedSubtotal = currency.formatPrice(0.0),
+                formattedTotal = currency.formatPrice(0.0),
                 formattedDiscount = null,
                 couponApplied = false,
                 appliedCouponLabel = null,
@@ -420,20 +420,20 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    private fun CartItem.toUi(symbol: String) = CartItemUi(
+    private fun CartItem.toUi(currency: shopzen.domain.profile.model.AppCurrency) = CartItemUi(
         id = id,
         productId = productId,
         variantId = variantId,
         title = title,
         variantTitle = variantTitle,
-        formattedPrice = symbol.formatPrice(price),
+        formattedPrice = currency.formatPrice(price),
         quantity = quantity,
         maxQuantity = maxQuantity,
         imageUrl = imageUrl,
     )
 
-    private fun String.formatPrice(amount: Double): String =
-        "${this}%.2f".format(amount)
+    private fun shopzen.domain.profile.model.AppCurrency.formatPrice(amount: Double): String =
+        "${this.symbol}%.2f".format(amount * this.rateFromUsd)
 
     private fun CouponValidationResult.Invalid.toUiText(): UiText =
         when (reason) {

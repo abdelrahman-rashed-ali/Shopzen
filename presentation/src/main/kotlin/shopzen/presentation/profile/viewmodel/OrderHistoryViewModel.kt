@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shopzen.domain.customer.usecase.GetCurrentShopifyCustomerIdUseCase
 import shopzen.domain.profile.usecase.GetOrderHistoryUseCase
+import shopzen.domain.cart.usecase.GetCurrencySymbolUseCase
 import shopzen.presentation.R
 import shopzen.presentation.common.util.UiText
 import shopzen.presentation.profile.intent.OrderHistoryIntent
@@ -20,6 +21,7 @@ import shopzen.presentation.profile.state.OrderHistoryState
 class OrderHistoryViewModel @Inject constructor(
     private val getCurrentShopifyCustomerIdUseCase: GetCurrentShopifyCustomerIdUseCase,
     private val getOrderHistoryUseCase: GetOrderHistoryUseCase,
+    private val getCurrencySymbolUseCase: GetCurrencySymbolUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OrderHistoryState())
@@ -48,6 +50,8 @@ class OrderHistoryViewModel @Inject constructor(
                 return@launch
             }
 
+            val currency = getCurrencySymbolUseCase()
+
             getOrderHistoryUseCase(customerId).fold(
                 onSuccess = { orders ->
                     _state.update {
@@ -55,6 +59,7 @@ class OrderHistoryViewModel @Inject constructor(
                             isLoading = false,
                             error = null,
                             orders = orders,
+                            currency = currency,
                         )
                     }
                 },

@@ -149,8 +149,6 @@ internal fun SettingsContent(
             PreferenceSection(state = state, onIntent = onIntent)
             AccountActionsSection(
                 isGuest = state.isGuest,
-                onLogin = onNavigateToLogin,
-                onLogout = { onIntent(SettingsIntent.RequestLogout) },
                 onSync = { onIntent(SettingsIntent.RequestFirebaseSync) },
             )
             SettingsToolsSection(
@@ -266,8 +264,6 @@ private fun PreferenceSection(
 @Composable
 private fun AccountActionsSection(
     isGuest: Boolean,
-    onLogin: () -> Unit,
-    onLogout: () -> Unit,
     onSync: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -296,52 +292,6 @@ private fun AccountActionsSection(
             )
         }
 
-        AnimatedContent(
-            targetState = isGuest,
-            contentKey = { guest -> if (guest) "guest" else "signed-in" },
-            transitionSpec = {
-                (fadeIn(tween(140)) + slideInVertically { it / 6 })
-                    .togetherWith(fadeOut(tween(100)) + slideOutVertically { -it / 8 })
-            },
-            label = "settings-account-action",
-        ) { guest ->
-            if (guest) {
-                Button(
-                    onClick = onLogin,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .testTag(SettingsTestTags.LoginButton),
-                    shape = RoundedCornerShape(16.dp),
-                ) {
-                    Icon(Icons.AutoMirrored.Outlined.Login, contentDescription = null)
-                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                    Text(
-                        text = stringResource(R.string.settings_login),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            } else {
-                OutlinedButton(
-                    onClick = onLogout,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .testTag(SettingsTestTags.LogoutButton),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                    ),
-                ) {
-                    Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null)
-                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                    Text(
-                        text = stringResource(R.string.settings_logout),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            }
-        }
     }
 }
 

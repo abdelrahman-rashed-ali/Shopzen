@@ -248,6 +248,7 @@ internal fun HomeContent(
             HomeNewArrivalsSection(
                 products = state.newArrivals,
                 wishlistProductIds = wishlistProductIds,
+                currency = state.currency,
                 onProductClick = onNavigateToProduct,
                 onWishlistClick = onWishlistClick,
                 onViewAllClick = onNavigateToProducts,
@@ -488,6 +489,7 @@ private fun CategoryFeatureCard(
 private fun HomeNewArrivalsSection(
     products: List<Product>,
     wishlistProductIds: Set<String>,
+    currency: shopzen.domain.profile.model.AppCurrency,
     onProductClick: (String) -> Unit,
     onWishlistClick: (Product) -> Unit,
     onViewAllClick: () -> Unit,
@@ -530,10 +532,15 @@ private fun HomeNewArrivalsSection(
                 ) {
                     rowProducts.forEach { product ->
                         ProductCard(
-                            product = product,
-                            onProductClick = { onProductClick(product.id) },
-                            onWishlistClick = { onWishlistClick(product) },
+                            id = product.id,
+                            title = product.title,
+                            category = product.productType,
+                            price = product.price,
+                            currency = currency,
+                            imageUrl = product.imageUrl,
                             isFavorite = wishlistProductIds.contains(product.id),
+                            onProductClick = { onProductClick(product.id) },
+                            onFavoriteClick = { onWishlistClick(product) },
                             modifier = Modifier.weight(1f),
                         )
                     }

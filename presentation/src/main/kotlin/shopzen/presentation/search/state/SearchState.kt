@@ -18,5 +18,6 @@ data class SearchState(
     val showFilterSheet: Boolean = false,
     val hasSearched: Boolean = false,
     val isImageUploading: Boolean = false,
-    val selectedImageUri: android.net.Uri? = null
+    val selectedImageUri: android.net.Uri? = null,
+    val currency: shopzen.domain.profile.model.AppCurrency = shopzen.domain.profile.model.AppCurrency.USD
 )

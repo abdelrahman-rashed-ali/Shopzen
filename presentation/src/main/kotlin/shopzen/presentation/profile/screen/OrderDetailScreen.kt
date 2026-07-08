@@ -134,7 +134,7 @@ fun OrderDetailContent(
                     actionLabel = stringResource(R.string.order_detail_retry),
                     onAction = { onIntent(OrderDetailIntent.Retry) },
                 )
-                else -> OrderDetailLoadedContent(order = current.order)
+                else -> OrderDetailLoadedContent(order = current.order, currency = current.currency)
             }
         }
     }
@@ -143,6 +143,7 @@ fun OrderDetailContent(
 @Composable
 private fun OrderDetailLoadedContent(
     order: Order,
+    currency: shopzen.domain.profile.model.AppCurrency,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -158,6 +159,7 @@ private fun OrderDetailLoadedContent(
         item {
             OrderDetailSummaryCard(
                 order = order,
+                currency = currency,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -172,7 +174,7 @@ private fun OrderDetailLoadedContent(
         items(order.lineItems, key = { it.id }) { item ->
             OrderLineItemRow(
                 item = item,
-                currency = order.currency,
+                currency = currency,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -182,6 +184,7 @@ private fun OrderDetailLoadedContent(
 @Composable
 private fun OrderDetailSummaryCard(
     order: Order,
+    currency: shopzen.domain.profile.model.AppCurrency,
     modifier: Modifier = Modifier,
 ) {
     val c = LocalShopzenColors.current
@@ -239,19 +242,19 @@ private fun OrderDetailSummaryCard(
             )
             OrderDetailPriceRow(
                 label = stringResource(R.string.order_detail_subtotal),
-                value = order.formattedSubtotal(),
+                value = currency.formatPrice(order.subtotalPrice),
             )
             if (order.discountAmount > 0.0) {
                 OrderDetailPriceRow(
                     label = order.discountLabel(),
-                    value = "-${order.formattedDiscount()}",
+                    value = "-${currency.formatPrice(order.discountAmount)}",
                     labelColor = c.textSuccess,
                     valueColor = c.textSuccess,
                 )
             }
             OrderDetailPriceRow(
                 label = stringResource(R.string.order_detail_total),
-                value = order.formattedTotal(),
+                value = currency.formatPrice(order.totalPrice),
                 valueStyleIsTotal = true,
             )
         }
@@ -261,7 +264,7 @@ private fun OrderDetailSummaryCard(
 @Composable
 private fun OrderLineItemRow(
     item: OrderLineItem,
-    currency: String,
+    currency: shopzen.domain.profile.model.AppCurrency,
     modifier: Modifier = Modifier,
 ) {
     val c = LocalShopzenColors.current
@@ -306,13 +309,13 @@ private fun OrderLineItemRow(
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = formatCurrency(item.price * item.quantity, currency),
+                    text = currency.formatPrice(item.price * item.quantity),
                     style = ShopzenBody,
                     color = c.textPrimary,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = formatCurrency(item.price, currency),
+                    text = currency.formatPrice(item.price),
                     style = ShopzenSmall,
                     color = c.textSecondary,
                 )
@@ -457,24 +460,10 @@ private fun Order.discountLabel(): String =
     } ?: stringResource(R.string.order_history_discount)
 
 @Composable
-private fun Order.formattedSubtotal(): String =
-    formatCurrency(subtotalPrice, currency)
-
-@Composable
-private fun Order.formattedDiscount(): String =
-    formatCurrency(discountAmount, currency)
-
-@Composable
-private fun Order.formattedTotal(): String =
-    formatCurrency(totalPrice, currency)
-
-@Composable
-private fun formatCurrency(amount: Double, currency: String): String {
+private fun shopzen.domain.profile.model.AppCurrency.formatPrice(amount: Double): String {
     val locale = currentLocale()
-    return remember(amount, currency, locale) {
-        val formatter = NumberFormat.getCurrencyInstance(locale)
-        runCatching { formatter.currency = Currency.getInstance(currency) }
-        formatter.format(amount)
+    return remember(amount, this, locale) {
+        "${this.symbol}%.2f".format(locale, amount * this.rateFromUsd)
     }
 }
 

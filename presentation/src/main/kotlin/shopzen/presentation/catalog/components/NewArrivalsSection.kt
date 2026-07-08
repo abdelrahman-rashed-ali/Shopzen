@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import shopzen.domain.profile.model.AppCurrency
 import shopzen.domain.catalog.model.Product
 import shopzen.presentation.common.components.ProductCard
 
@@ -31,6 +32,7 @@ fun NewArrivalsSection(
     onProductClick: (String) -> Unit,
     onWishlistClick: (Product) -> Unit,
     onViewAllClick: () -> Unit,
+    currency: AppCurrency,
     modifier: Modifier = Modifier,
     wishlistProductIds: Set<String> = emptySet()
 ) {
@@ -82,11 +84,16 @@ fun NewArrivalsSection(
                 ) {
                     rowProducts.forEach { product ->
                         ProductCard(
-                            product = product,
+                            id = product.id,
+                            title = product.title,
+                            category = product.productType,
+                            price = product.price,
+                            currency = currency,
+                            imageUrl = product.imageUrl,
+                            isFavorite = wishlistProductIds.contains(product.id),
                             onProductClick = { onProductClick(product.id) },
-                            onWishlistClick = { _ -> onWishlistClick(product) },
-                            modifier = Modifier.weight(1f),
-                            isFavorite = wishlistProductIds.contains(product.id)
+                            onFavoriteClick = { onWishlistClick(product) },
+                            modifier = Modifier.weight(1f)
                         )
                     }
                     // If odd number of items, insert spacer to align layout

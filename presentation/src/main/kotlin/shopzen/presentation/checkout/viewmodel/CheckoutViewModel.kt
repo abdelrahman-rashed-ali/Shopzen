@@ -26,6 +26,7 @@ import shopzen.domain.checkout.model.PaymentMethod
 import shopzen.domain.checkout.usecase.CreatePaymobPaymentIntentionUseCase
 import shopzen.domain.checkout.usecase.GetAvailablePaymentMethodsUseCase
 import shopzen.domain.checkout.usecase.PlaceOrderUseCase
+import shopzen.domain.cart.usecase.GetCurrencySymbolUseCase
 import shopzen.domain.customer.usecase.GetCurrentShopifyCustomerIdUseCase
 import shopzen.domain.profile.model.Address
 import shopzen.domain.profile.usecase.GetSavedAddressesUseCase
@@ -65,6 +66,7 @@ class CheckoutViewModel @Inject constructor(
     private val placeOrderUseCase: PlaceOrderUseCase,
     private val createPaymobPaymentIntentionUseCase: CreatePaymobPaymentIntentionUseCase,
     private val clearCartUseCase: ClearCartUseCase,
+    private val getCurrencySymbolUseCase: GetCurrencySymbolUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CheckoutState())
@@ -139,6 +141,8 @@ class CheckoutViewModel @Inject constructor(
             }
             currentShopifyCustomerId = customerId
 
+            val currency = getCurrencySymbolUseCase()
+
             val cartResult = getCartUseCase(user.uid).first()
             val cart = cartResult.getOrElse {
                 Log.e(TAG, "loadCheckout: cart load failed", it)
@@ -189,16 +193,17 @@ class CheckoutViewModel @Inject constructor(
                     error = null,
                     isOnlinePaymentInProgress = false,
                     pendingPaymobLaunch = null,
-                    items = cart.items.map { it.toUi(cart.currency) },
+                    items = cart.items.map { it.toUi(currency) },
                     addresses = addresses,
                     selectedAddressId = selectedAddressId,
                     availablePaymentMethods = availableMethods,
                     selectedPaymentMethod = selectedPaymentMethod,
-                    formattedSubtotal = cart.currency.formatPrice(cart.subtotalPrice),
+                    formattedSubtotal = currency.formatPrice(cart.subtotalPrice),
                     formattedDiscount = cart.discountAmount.takeIf { it > 0.0 }
-                        ?.let { "-${cart.currency.formatPrice(it)}" },
-                    formattedTotal = cart.currency.formatPrice(cart.totalPrice),
-                    appliedCouponLabel = cart.appliedCoupon?.code,
+                        ?.let { "-${currency.formatPrice(it)}" },
+                    formattedTotal = currency.formatPrice(cart.totalPrice),
+                    appliedCouponLabel = cart.appliedCoupon?.code?.let { "$it" },
+                    currency = currency,
                 )
             }
         }
@@ -628,7 +633,7 @@ class CheckoutViewModel @Inject constructor(
         } ?: addresses.firstOrNull { it.isDefault }?.id
         ?: addresses.firstOrNull()?.id
 
-    private fun CartItem.toUi(currency: String): CheckoutItemUi =
+    private fun CartItem.toUi(currency: shopzen.domain.profile.model.AppCurrency): CheckoutItemUi =
         CheckoutItemUi(
             id = id,
             title = title,
@@ -639,15 +644,8 @@ class CheckoutViewModel @Inject constructor(
             imageUrl = imageUrl,
         )
 
-    private fun String.formatPrice(amount: Double): String =
-        "${currencySymbol()}%.2f".format(amount)
-
-    private fun String.currencySymbol(): String =
-        when (uppercase()) {
-            "USD" -> "$"
-            "EGP" -> "EGP "
-            else -> "$"
-        }
+    private fun shopzen.domain.profile.model.AppCurrency.formatPrice(amount: Double): String =
+        "${symbol}%.2f".format(amount * rateFromUsd)
 
     private companion object {
         const val TAG = "CheckoutViewModel"

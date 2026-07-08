@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import shopzen.presentation.auth.screen.LoginScreen as LoginRouteScreen
@@ -53,7 +54,7 @@ fun AppNavHost(
 
     fun navigateTopLevel(destination: NavScreen) {
         navController.navigate(destination) {
-            popUpTo<HomeScreen> {
+            popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
             launchSingleTop = true
@@ -81,7 +82,8 @@ fun AppNavHost(
     }
 
     fun navigateToProduct(productId: String) {
-        navController.navigate(ProductDetail(productId.toLongOrNull() ?: 0L)) {
+        val parsedId = productId.substringAfterLast('/').toLongOrNull() ?: 0L
+        navController.navigate(ProductDetail(parsedId)) {
             launchSingleTop = true
         }
     }
@@ -204,7 +206,7 @@ fun AppNavHost(
                     navigateTopLevel(SearchScreen)
                 },
                 onNavigateToProfile = {
-                    navigateAuthRequired(ProfileScreen)
+                    navigateAuthRequiredSingle(ProfileScreen)
                 },
                 onNavigateToWishlist = {
                     navigateAuthRequired(WishlistScreen)
@@ -240,7 +242,7 @@ fun AppNavHost(
                     navigateAuthRequired(CartScreen)
                 },
                 onNavigateToProfile = {
-                    navigateAuthRequired(ProfileScreen)
+                    navigateAuthRequiredSingle(ProfileScreen)
                 },
                 onNavigateToSettings = {
                     navigateTopLevel(SettingsScreen)
@@ -263,7 +265,7 @@ fun AppNavHost(
                     navigateAuthRequired(CartScreen)
                 },
                 onNavigateToProfile = {
-                    navigateAuthRequired(ProfileScreen)
+                    navigateAuthRequiredSingle(ProfileScreen)
                 },
                 onNavigateToSettings = {
                     navigateTopLevel(SettingsScreen)
@@ -276,7 +278,7 @@ fun AppNavHost(
                 onNavigateToDiscover = { navigateTopLevel(HomeScreen) },
                 onNavigateToSearch = { navigateTopLevel(SearchScreen) },
                 onNavigateToWishlist = { navigateAuthRequired(WishlistScreen) },
-                onNavigateToProfile = { navigateAuthRequired(ProfileScreen) },
+                onNavigateToProfile = { navigateAuthRequiredSingle(ProfileScreen) },
                 onNavigateToCart = { navigateAuthRequired(CartScreen) },
                 onNavigateToLogin = { navigateToLogin() },
                 onNavigateToAddresses = { navigateAuthRequiredSingle(AddressesScreen) },
@@ -352,6 +354,7 @@ fun AppNavHost(
 
         composable<ProfileScreen> {
             ProfileRouteScreen(
+                onNavigateBack = { navigateBackOrHome() },
                 onNavigateToLogin = {
                     navigateToLogin()
                 },
@@ -426,7 +429,7 @@ fun AppNavHost(
                     navController.navigateUp()
                 },
                 onNavigateToProduct = { productId ->
-                    navController.navigate(ProductDetail(productId.toLongOrNull() ?: 0L))
+                    navigateToProduct(productId)
                 }
             )
         }
@@ -438,11 +441,7 @@ fun AppNavHost(
                 categoryTitle = args.categoryTitle,
                 onNavigateBack = { navController.navigateUp() },
                 onNavigateToProduct = { productId ->
-                    navController.navigate(
-                        ProductDetail(
-                            productId.toLongOrNull() ?: 0L
-                        )
-                    )
+                    navigateToProduct(productId)
                 }
             )
         }
