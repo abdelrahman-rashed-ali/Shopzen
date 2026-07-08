@@ -24,18 +24,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import shopzen.domain.profile.model.Order
 import shopzen.presentation.R
-import shopzen.presentation.theme.LocalShopzenColors
-import shopzen.presentation.theme.ShopzenBody
-import shopzen.presentation.theme.ShopzenCaption
-import shopzen.presentation.theme.ShopzenHeading3
-import shopzen.presentation.theme.ShopzenShapes
-import shopzen.presentation.theme.ShopzenSmall
-import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.ShopzenBody
+import shopzen.presentation.common.theme.ShopzenCaption
+import shopzen.presentation.common.theme.ShopzenHeading3
+import shopzen.presentation.common.theme.ShopzenShapes
+import shopzen.presentation.common.theme.ShopzenSmall
+import shopzen.presentation.common.theme.ShopzenSpacing
+import shopzen.presentation.profile.util.formatOrderDate
 import java.text.NumberFormat
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Currency
 import java.util.Locale
 
@@ -224,13 +221,8 @@ private fun String.localizedPaymentMethod(): String =
 @Composable
 private fun Order.localizedDate(): String {
     val locale = currentLocale()
-    return remember(createdAt, locale) {
-        runCatching {
-            DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-                .withLocale(locale)
-                .format(Instant.parse(createdAt).atZone(ZoneId.systemDefault()))
-        }.getOrNull()
-    } ?: stringResource(R.string.order_history_date_unknown)
+    return remember(createdAt, locale) { formatOrderDate(createdAt, locale) }
+        ?: stringResource(R.string.order_history_date_unknown)
 }
 
 @Composable

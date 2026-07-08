@@ -23,10 +23,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import shopzen.presentation.R
-import shopzen.presentation.theme.LocalShopzenColors
-import shopzen.presentation.theme.ShopzenSectionTitle
-import shopzen.presentation.theme.ShopzenSize
-import shopzen.presentation.theme.ShopzenSpacing
+import shopzen.presentation.common.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.ShopzenSectionTitle
+import shopzen.presentation.common.theme.ShopzenSize
+import shopzen.presentation.common.theme.ShopzenSpacing
 
 @Composable
 fun CartTopBar(

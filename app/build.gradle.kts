@@ -46,7 +46,8 @@ android {
             "PAYMOB_ONLINE_CARD_INTEGRATION_ID",
             "${properties.intProperty("PAYMOB_ONLINE_CARD_INTEGRATION_ID")}"
         )
-
+        buildConfigField("String", "LLM_API_KEY", "\"${properties.stringProperty("LLM_API_KEY")}\"")
+        buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"${properties.stringProperty("MAPBOX_ACCESS_TOKEN")}\"")
     }
 
     buildTypes {
@@ -121,5 +122,6 @@ dependencies {
     implementation(libs.bundles.ktor)
     implementation(libs.bundles.room)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.mapbox.maps.android)
     //ziad
 }

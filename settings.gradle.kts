@@ -25,6 +25,18 @@ dependencyResolutionManagement {
         maven {
             url = uri("https://jitpack.io")
         }
+        maven {
+            url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+            authentication { create<BasicAuthentication>("basic") }
+            credentials {
+                username = "mapbox"
+                val props = java.util.Properties().also { p ->
+                    val f = java.io.File(settingsDir, "local.properties")
+                    if (f.exists()) f.inputStream().use(p::load)
+                }
+                password = props.getProperty("MAPBOX_DOWNLOAD_TOKEN", "")
+            }
+        }
     }
 }
 

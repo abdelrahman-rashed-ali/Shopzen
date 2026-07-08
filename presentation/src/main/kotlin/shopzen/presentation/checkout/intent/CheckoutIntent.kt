@@ -1,6 +1,7 @@
 package shopzen.presentation.checkout.intent
 
 import shopzen.domain.checkout.model.PaymentMethod
+import shopzen.domain.checkout.model.PaymobIntentionId
 
 sealed class CheckoutIntent {
     data object LoadCheckout : CheckoutIntent()
@@ -10,6 +11,7 @@ sealed class CheckoutIntent {
     data class SelectPaymentMethod(val method: PaymentMethod) : CheckoutIntent()
     data object RequestPlaceOrder : CheckoutIntent()
     data object ConfirmPlaceOrder : CheckoutIntent()
+    data class ConsumePendingPaymobLaunch(val intentionId: PaymobIntentionId) : CheckoutIntent()
     data class OnlinePaymentSucceeded(val payResponse: Map<String, String?>) : CheckoutIntent()
     data class OnlinePaymentFailed(val message: String?) : CheckoutIntent()
     data object OnlinePaymentPending : CheckoutIntent()

@@ -15,12 +15,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import shopzen.presentation.R
-import shopzen.presentation.theme.LocalShopzenColors
-import shopzen.presentation.theme.ShopzenBody
-import shopzen.presentation.theme.ShopzenElevation
-import shopzen.presentation.theme.ShopzenMotion
-import shopzen.presentation.theme.ShopzenShapes
-import shopzen.presentation.theme.ShopzenSize
+import shopzen.presentation.common.theme.LocalShopzenColors
+import shopzen.presentation.common.theme.ShopzenBody
+import shopzen.presentation.common.theme.ShopzenElevation
+import shopzen.presentation.common.theme.ShopzenMotion
+import shopzen.presentation.common.theme.ShopzenShapes
+import shopzen.presentation.common.theme.ShopzenSize
 
 @Composable
 fun CheckoutButton(

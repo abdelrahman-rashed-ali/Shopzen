@@ -79,4 +79,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.text.google.fonts)
     implementation(libs.paymob.sdk)
     //ziad
+    implementation(libs.mapbox.maps.android)
+    implementation(libs.mapbox.maps.compose)
+    implementation(libs.mapbox.search.android)
 }

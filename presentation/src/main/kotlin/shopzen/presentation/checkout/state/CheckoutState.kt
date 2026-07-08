@@ -1,6 +1,9 @@
 package shopzen.presentation.checkout.state
 
 import shopzen.domain.checkout.model.PaymentMethod
+import shopzen.domain.checkout.model.PaymobClientSecret
+import shopzen.domain.checkout.model.PaymobIntentionId
+import shopzen.domain.checkout.model.PaymobPublicKey
 import shopzen.domain.profile.model.Address
 import shopzen.presentation.common.util.UiText
 
@@ -12,6 +15,12 @@ data class CheckoutItemUi(
     val quantity: Int,
     val formattedLineTotal: String,
     val imageUrl: String,
+)
+
+data class PendingPaymobLaunch(
+    val intentionId: PaymobIntentionId,
+    val clientSecret: PaymobClientSecret,
+    val publicKey: PaymobPublicKey,
 )
 
 data class CheckoutState(
@@ -28,6 +37,7 @@ data class CheckoutState(
     val appliedCouponLabel: String? = null,
     val isPlacingOrder: Boolean = false,
     val isOnlinePaymentInProgress: Boolean = false,
+    val pendingPaymobLaunch: PendingPaymobLaunch? = null,
     val showPlaceOrderDialog: Boolean = false,
 ) {
     val selectedAddress: Address?

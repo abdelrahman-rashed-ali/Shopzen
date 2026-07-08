@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import shopzen.presentation.common.components.floating_island.models.HapticIntensity
@@ -89,6 +90,7 @@ private fun vibrateWithEffect(vibrator: Vibrator, config: VibrationConfig) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 private fun createCustomEffect(config: VibrationConfig): VibrationEffect? {
     val pattern = config.customPattern ?: return null
     val amplitudes = config.customAmplitudes

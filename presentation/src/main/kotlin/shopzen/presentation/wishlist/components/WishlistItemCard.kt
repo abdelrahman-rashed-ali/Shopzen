@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,20 +20,22 @@ import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import shopzen.domain.wishlist.model.WishlistItem
+import shopzen.presentation.R
+import shopzen.presentation.wishlist.WishlistTestTags
 
 @Composable
 fun WishlistItemCard(
@@ -40,110 +43,97 @@ fun WishlistItemCard(
     onItemClick: (String) -> Unit,
     onRemoveClick: (String) -> Unit,
     onAddToCartClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onItemClick(item.productId) },
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        // Product Image Container
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(3f / 4f)
-                .shadow(
-                    elevation = 2.dp,
-                    shape = RoundedCornerShape(8.dp),
-                    ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)
-                )
+                .aspectRatio(0.78f)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFFF7F7F7)) // Subtle off-white background matching screenshot
+                .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
             AsyncImage(
                 model = item.imageUrl,
-                contentDescription = item.title,
+                contentDescription = stringResource(R.string.wishlist_item_image_cd, item.title),
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop // Crop to fill the container nicely
+                contentScale = ContentScale.Crop,
             )
 
-            // Remove Circular Button (x)
-            Box(
+            Surface(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(6.dp)
-                    .size(24.dp)
-                    .background(
-                        color = Color.White.copy(alpha = 0.85f),
-                        shape = CircleShape
-                    )
-                    .clickable { onRemoveClick(item.id) },
-                contentAlignment = Alignment.Center
+                    .padding(8.dp)
+                    .size(32.dp)
+                    .clickable { onRemoveClick(item.id) }
+                    .testTag(WishlistTestTags.remove(item.id)),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+                contentColor = MaterialTheme.colorScheme.onSurface,
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Remove from wishlist",
-                    tint = Color.Gray,
-                    modifier = Modifier.size(12.dp)
-                )
+                Box(
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.wishlist_remove_cd),
+                        modifier = Modifier.size(15.dp),
+                    )
+                }
             }
         }
 
-        // Product Info (Title, Subtitle, Price & Shopping Bag)
         Column(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier.padding(horizontal = 2.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            // Product Title
+            Text(
+                text = item.vendor.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             Text(
                 text = item.title,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                ),
-                color = MaterialTheme.colorScheme.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
-
-            // Subtitle / Description / Vendor
-            Text(
-                text = item.vendor,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 14.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            // Price & Shopping Bag Row
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Price
                 Text(
                     text = if (item.price.isNotEmpty()) "$${item.price}" else "",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
-                    ),
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
-
-                // Add to Cart Bag Icon
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                 IconButton(
                     onClick = { onAddToCartClick(item.productId) },
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier
+                        .size(36.dp)
+                        .testTag(WishlistTestTags.addToCart(item.id)),
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ShoppingBag,
-                        contentDescription = "Add to cart",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp)
+                        contentDescription = stringResource(R.string.wishlist_add_to_cart_cd),
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }
