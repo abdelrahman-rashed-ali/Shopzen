@@ -124,7 +124,7 @@ fun SearchScreen(
                 onSettingsClick = onNavigateToSettings,
             )
         },
-        modifier = modifier.background(Color.White)
+        modifier = modifier.background(MaterialTheme.colorScheme.background)
     ) { innerPadding ->
         when {
             state.isLoading -> {
@@ -150,57 +150,7 @@ fun SearchScreen(
     }
 }
 
-@Composable
-private fun SearchTopBar() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .statusBarsPadding()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { }) {
-                Icon(
-                    imageVector = Icons.Outlined.Menu,
-                    contentDescription = "Menu",
-                    tint = Color.Black
-                )
-            }
 
-            Text(
-                text = "LUMINA",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    letterSpacing = 4.sp
-                ),
-                color = Color.Black
-            )
-
-            IconButton(onClick = { }) {
-                Icon(
-                    imageVector = Icons.Outlined.Notifications,
-                    contentDescription = "Notifications",
-                    tint = Color.Black
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(0.5.dp)
-                .background(Color(0xFFEEEEEE))
-        )
-    }
-}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -214,7 +164,7 @@ fun SearchContent(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(bottom = 24.dp)
     ) {
         // 1. Search Bar
@@ -268,14 +218,14 @@ fun SearchContent(
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontSize = 14.sp
                         ),
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Outlined.Search,
                         contentDescription = "Search",
-                        tint = Color.Gray,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -291,7 +241,7 @@ fun SearchContent(
                                 Icon(
                                     imageVector = Icons.Outlined.CameraAlt,
                                     contentDescription = "Camera",
-                                    tint = Color.Gray
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             IconButton(onClick = {
@@ -304,7 +254,7 @@ fun SearchContent(
                                 Icon(
                                     imageVector = Icons.Outlined.PhotoLibrary,
                                     contentDescription = "Gallery",
-                                    tint = Color.Gray
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -313,11 +263,11 @@ fun SearchContent(
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFDDDDDD),
-                    unfocusedBorderColor = Color(0xFFEEEEEE),
-                    focusedContainerColor = Color(0xFFFAFAFA),
-                    unfocusedContainerColor = Color(0xFFFAFAFA),
-                    cursorColor = Color.Black
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 )
             )
         }
@@ -346,7 +296,7 @@ fun SearchContent(
                             fontSize = 11.sp,
                             letterSpacing = 1.5.sp
                         ),
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
@@ -382,7 +332,7 @@ fun SearchContent(
                             fontWeight = FontWeight.Bold,
                             fontSize = 24.sp
                         ),
-                        color = Color.Black
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -393,7 +343,7 @@ fun SearchContent(
                         Icon(
                             imageVector = Icons.Outlined.Tune,
                             contentDescription = "Filters",
-                            tint = Color.Black,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -403,7 +353,7 @@ fun SearchContent(
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 14.sp
                             ),
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -435,7 +385,7 @@ fun SearchContent(
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp
                         ),
-                        color = Color.Black
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -444,7 +394,7 @@ fun SearchContent(
                         Icon(
                             imageVector = Icons.Outlined.Tune,
                             contentDescription = "Filters",
-                            tint = Color.Black,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -454,7 +404,7 @@ fun SearchContent(
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 14.sp
                             ),
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -503,12 +453,12 @@ fun SearchContent(
                                     fontFamily = FontFamily.Serif,
                                     fontWeight = FontWeight.SemiBold
                                 ),
-                                color = Color.Black
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "Try adjusting your search or filters",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }

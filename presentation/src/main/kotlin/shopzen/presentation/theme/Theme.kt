@@ -10,6 +10,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import android.app.Activity
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  SHOPZEN THEME — Design System v1.0  |  Source: DESIGN.md §1,§3,§17,§18,§20
@@ -429,6 +433,15 @@ fun ShopzenTheme(
 ) {
     val colorScheme   = if (darkTheme) ShopzenDarkColorScheme  else ShopzenLightColorScheme
     val shopzenColors = if (darkTheme) ShopzenDarkColors       else ShopzenLightColors
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
+        }
+    }
 
     CompositionLocalProvider(LocalShopzenColors provides shopzenColors) {
         MaterialTheme(
