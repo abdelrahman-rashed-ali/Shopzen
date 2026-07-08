@@ -81,7 +81,8 @@ fun AppNavHost(
     }
 
     fun navigateToProduct(productId: String) {
-        navController.navigate(ProductDetail(productId.toLongOrNull() ?: 0L)) {
+        val parsedId = productId.substringAfterLast('/').toLongOrNull() ?: 0L
+        navController.navigate(ProductDetail(parsedId)) {
             launchSingleTop = true
         }
     }
@@ -427,7 +428,7 @@ fun AppNavHost(
                     navController.navigateUp()
                 },
                 onNavigateToProduct = { productId ->
-                    navController.navigate(ProductDetail(productId.toLongOrNull() ?: 0L))
+                    navigateToProduct(productId)
                 }
             )
         }
@@ -439,11 +440,7 @@ fun AppNavHost(
                 categoryTitle = args.categoryTitle,
                 onNavigateBack = { navController.navigateUp() },
                 onNavigateToProduct = { productId ->
-                    navController.navigate(
-                        ProductDetail(
-                            productId.toLongOrNull() ?: 0L
-                        )
-                    )
+                    navigateToProduct(productId)
                 }
             )
         }
