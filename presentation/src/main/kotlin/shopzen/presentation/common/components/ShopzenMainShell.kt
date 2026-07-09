@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
@@ -50,6 +51,7 @@ enum class MainShellTab {
 fun ShopzenTopAppBar(
     onProfileClick: () -> Unit,
     onCartClick: () -> Unit,
+    onAssistantClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -81,12 +83,24 @@ fun ShopzenTopAppBar(
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            IconButton(onClick = onCartClick) {
-                Icon(
-                    imageVector = Icons.Outlined.ShoppingBag,
-                    contentDescription = stringResource(R.string.nav_cart_cd),
-                    tint = MaterialTheme.colorScheme.onSurface,
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (onAssistantClick != null) {
+                    IconButton(onClick = onAssistantClick) {
+                        Icon(
+                            imageVector = Icons.Outlined.AutoAwesome,
+                            contentDescription = stringResource(R.string.nav_ai_assistant_cd),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+
+                IconButton(onClick = onCartClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.ShoppingBag,
+                        contentDescription = stringResource(R.string.nav_cart_cd),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
             }
         }
         Box(

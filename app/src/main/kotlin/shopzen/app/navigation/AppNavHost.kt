@@ -219,7 +219,19 @@ fun AppNavHost(
                 },
                 onNavigateToLogin = {
                     navController.navigate(LoginScreen)
+                },
+                onNavigateToAssistant = {
+                    navigateSingleTop(AiChatScreen)
+                },
+                onNavigateToAiComparison = {
+                    navigateSingleTop(AiComparisonRoute)
                 }
+            )
+        }
+        composable<AiChatScreen> {
+            shopzen.presentation.ai.screen.AiChatScreen(
+                onNavigateBack = { navigateBackOrHome() },
+                onNavigateToProduct = { productId -> navigateToProduct(productId) },
             )
         }
 
@@ -236,6 +248,9 @@ fun AppNavHost(
                 },
                 onNavigateToCategory = { categoryTitle ->
                     navController.navigate(CategoryProductsScreen(categoryTitle))
+                },
+                onNavigateToAiComparison = {
+                    navigateSingleTop(AiComparisonRoute)
                 },
                 onNavigateToSearch = { navigateTopLevel(SearchScreen) },
                 onNavigateToCart = {
@@ -442,7 +457,19 @@ fun AppNavHost(
                 onNavigateBack = { navController.navigateUp() },
                 onNavigateToProduct = { productId ->
                     navigateToProduct(productId)
+                },
+                onNavigateToAiComparison = {
+                    navigateSingleTop(AiComparisonRoute)
                 }
+            )
+        }
+        composable<AiComparisonRoute> {
+            val viewModel: shopzen.presentation.comparison.viewmodel.ComparisonViewModel = hiltViewModel(
+                androidx.compose.ui.platform.LocalContext.current as androidx.activity.ComponentActivity
+            )
+            shopzen.presentation.comparison.screen.AiComparisonScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.navigateUp() }
             )
         }
     }

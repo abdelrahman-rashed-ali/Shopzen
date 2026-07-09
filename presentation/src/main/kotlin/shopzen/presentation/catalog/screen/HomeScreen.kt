@@ -60,6 +60,10 @@ import shopzen.presentation.catalog.components.AdBannerSection
 import shopzen.presentation.catalog.intent.HomeIntent
 import shopzen.presentation.catalog.state.HomeState
 import shopzen.presentation.catalog.viewmodel.HomeViewModel
+import shopzen.presentation.comparison.viewmodel.ComparisonViewModel
+import shopzen.presentation.comparison.screen.ComparisonTray
+import shopzen.presentation.comparison.state.ComparisonIntent
+import androidx.compose.foundation.layout.Box
 import shopzen.presentation.common.components.ConfirmationDialog
 import shopzen.presentation.common.components.ErrorScreen
 import shopzen.presentation.common.components.LoadingIndicator
@@ -82,12 +86,16 @@ fun HomeScreen(
     onNavigateToCart: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToAssistant: () -> Unit,
+    onNavigateToAiComparison: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     wishlistViewModel: WishlistViewModel = hiltViewModel(),
+    comparisonViewModel: ComparisonViewModel = hiltViewModel(androidx.compose.ui.platform.LocalContext.current as androidx.activity.ComponentActivity),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val wishlistState by wishlistViewModel.state.collectAsStateWithLifecycle()
+    val comparisonState by comparisonViewModel.state.collectAsStateWithLifecycle()
     val wishlistProductIds = wishlistState.items.map { it.productId }.toSet()
 
     Scaffold(
@@ -95,6 +103,7 @@ fun HomeScreen(
             ShopzenTopAppBar(
                 onProfileClick = onNavigateToProfile,
                 onCartClick = onNavigateToCart,
+                onAssistantClick = onNavigateToAssistant
             )
         },
         bottomBar = {
@@ -119,23 +128,46 @@ fun HomeScreen(
                 modifier = Modifier.padding(innerPadding),
             )
 
-            else -> HomeContent(
-                state = state,
-                wishlistProductIds = wishlistProductIds,
-                onNavigateToBrand = onNavigateToBrand,
-                onNavigateToCategory = onNavigateToCategory,
-                onNavigateToProduct = onNavigateToProduct,
-                onWishlistClick = { product ->
-                    val wishlistItem = wishlistState.items.find { it.productId == product.id }
-                    if (wishlistItem != null) {
-                        wishlistViewModel.processIntent(WishlistIntent.RequestRemoveItem(wishlistItem.id))
-                    } else {
-                        wishlistViewModel.processIntent(WishlistIntent.RequestAddToWishlist(product))
-                    }
-                },
-                onNavigateToProducts = onNavigateToProducts,
-                modifier = Modifier.padding(innerPadding),
-            )
+            else -> {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    HomeContent(
+                        state = state,
+                        wishlistProductIds = wishlistProductIds,
+                        onNavigateToBrand = onNavigateToBrand,
+                        onNavigateToCategory = onNavigateToCategory,
+                        onNavigateToProduct = onNavigateToProduct,
+                        onWishlistClick = { product ->
+                            val wishlistItem = wishlistState.items.find { it.productId == product.id }
+                            if (wishlistItem != null) {
+                                wishlistViewModel.processIntent(WishlistIntent.RequestRemoveItem(wishlistItem.id))
+                            } else {
+                                wishlistViewModel.processIntent(WishlistIntent.RequestAddToWishlist(product))
+                            }
+                        },
+                        onCompareClick = { product ->
+                            comparisonViewModel.processIntent(
+                                ComparisonIntent.AddProduct(
+                                    shopzen.presentation.comparison.state.ComparableProductUiModel(
+                                        productId = product.id,
+                                        title = product.title,
+                                        imageUrl = product.imageUrl,
+                                        price = product.price.toDoubleOrNull() ?: 0.0,
+                                        currency = state.currency.symbol
+                                    )
+                                )
+                            )
+                        },
+                        onNavigateToProducts = onNavigateToProducts,
+                        modifier = Modifier.padding(innerPadding).fillMaxSize(),
+                    )
+                    ComparisonTray(
+                        state = comparisonState,
+                        onIntent = comparisonViewModel::processIntent,
+                        onNavigateToComparison = onNavigateToAiComparison,
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = innerPadding.calculateBottomPadding())
+                    )
+                }
+            }
         }
     }
 
@@ -200,6 +232,7 @@ internal fun HomeContent(
     onNavigateToCategory: (String) -> Unit,
     onNavigateToProduct: (String) -> Unit,
     onWishlistClick: (Product) -> Unit,
+    onCompareClick: (Product) -> Unit,
     onNavigateToProducts: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -251,6 +284,7 @@ internal fun HomeContent(
                 currency = state.currency,
                 onProductClick = onNavigateToProduct,
                 onWishlistClick = onWishlistClick,
+                onCompareClick = onCompareClick,
                 onViewAllClick = onNavigateToProducts,
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -492,6 +526,7 @@ private fun HomeNewArrivalsSection(
     currency: shopzen.domain.profile.model.AppCurrency,
     onProductClick: (String) -> Unit,
     onWishlistClick: (Product) -> Unit,
+    onCompareClick: (Product) -> Unit,
     onViewAllClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -541,6 +576,7 @@ private fun HomeNewArrivalsSection(
                             isFavorite = wishlistProductIds.contains(product.id),
                             onProductClick = { onProductClick(product.id) },
                             onFavoriteClick = { onWishlistClick(product) },
+                            onCompareClick = { onCompareClick(product) },
                             modifier = Modifier.weight(1f),
                         )
                     }

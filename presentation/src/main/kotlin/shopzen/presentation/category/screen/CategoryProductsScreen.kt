@@ -35,6 +35,11 @@ import shopzen.presentation.common.components.LoadingIndicator
 import shopzen.presentation.common.components.ProductCard
 import shopzen.presentation.wishlist.intent.WishlistIntent
 import shopzen.presentation.wishlist.viewmodel.WishlistViewModel
+import shopzen.presentation.comparison.viewmodel.ComparisonViewModel
+import shopzen.presentation.comparison.screen.ComparisonTray
+import shopzen.presentation.comparison.state.ComparisonIntent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 
 /**
  * Displays products filtered by a specific category (Shopify product_type).
@@ -47,12 +52,15 @@ fun CategoryProductsScreen(
     categoryTitle: String,
     onNavigateBack: () -> Unit,
     onNavigateToProduct: (String) -> Unit,
+    onNavigateToAiComparison: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CategoryProductsViewModel = hiltViewModel(),
-    wishlistViewModel: WishlistViewModel = hiltViewModel()
+    wishlistViewModel: WishlistViewModel = hiltViewModel(),
+    comparisonViewModel: ComparisonViewModel = hiltViewModel(androidx.compose.ui.platform.LocalContext.current as androidx.activity.ComponentActivity),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val wishlistState by wishlistViewModel.state.collectAsStateWithLifecycle()
+    val comparisonState by comparisonViewModel.state.collectAsStateWithLifecycle()
 
     val wishlistProductIds = wishlistState.items.map { it.productId }.toSet()
 
@@ -98,42 +106,63 @@ fun CategoryProductsScreen(
             }
 
             else -> {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                ) {
-                    items(state.products) { product ->
-                        ProductCard(
-                            id = product.id,
-                            title = product.title,
-                            category = product.productType,
-                            price = product.price,
-                            currency = state.currency,
-                            imageUrl = product.imageUrl,
-                            isFavorite = wishlistProductIds.contains(product.id),
-                            onProductClick = onNavigateToProduct,
-                            onFavoriteClick = {
-                                val isFav = wishlistProductIds.contains(product.id)
-                                if (isFav) {
-                                    val item = wishlistState.items.find { it.productId == product.id }
-                                    if (item != null) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(20.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                    ) {
+                        items(state.products) { product ->
+                            ProductCard(
+                                id = product.id,
+                                title = product.title,
+                                category = product.productType,
+                                price = product.price,
+                                currency = state.currency,
+                                imageUrl = product.imageUrl,
+                                isFavorite = wishlistProductIds.contains(product.id),
+                                onProductClick = onNavigateToProduct,
+                                onFavoriteClick = {
+                                    val isFav = wishlistProductIds.contains(product.id)
+                                    if (isFav) {
+                                        val item = wishlistState.items.find { it.productId == product.id }
+                                        if (item != null) {
+                                            wishlistViewModel.processIntent(
+                                                WishlistIntent.RequestRemoveItem(item.id)
+                                            )
+                                        }
+                                    } else {
                                         wishlistViewModel.processIntent(
-                                            WishlistIntent.RequestRemoveItem(item.id)
+                                            WishlistIntent.RequestAddToWishlist(product)
                                         )
                                     }
-                                } else {
-                                    wishlistViewModel.processIntent(
-                                        WishlistIntent.RequestAddToWishlist(product)
+                                },
+                                onCompareClick = {
+                                    comparisonViewModel.processIntent(
+                                        ComparisonIntent.AddProduct(
+                                            shopzen.presentation.comparison.state.ComparableProductUiModel(
+                                                productId = product.id,
+                                                title = product.title,
+                                                imageUrl = product.imageUrl,
+                                                price = product.price.toDoubleOrNull() ?: 0.0,
+                                                currency = state.currency.symbol
+                                            )
+                                        )
                                     )
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
+                    ComparisonTray(
+                        state = comparisonState,
+                        onIntent = comparisonViewModel::processIntent,
+                        onNavigateToComparison = onNavigateToAiComparison,
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = innerPadding.calculateBottomPadding())
+                    )
                 }
             }
         }
