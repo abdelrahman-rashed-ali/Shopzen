@@ -9,5 +9,5 @@ interface CatalogRepository {
     suspend fun getBrands(): Result<List<Brand>>
     suspend fun getCategories(): Result<List<Category>>
     suspend fun getProductsByBrand(brandName: String): Result<List<Product>>
-    suspend fun getProductsByCategory(categoryTitle: String): Result<List<Product>>
+    suspend fun getProductsByCategory(categoryId: String): Result<List<Product>>
 }

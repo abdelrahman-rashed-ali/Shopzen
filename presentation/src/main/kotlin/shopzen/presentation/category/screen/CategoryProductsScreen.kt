@@ -44,6 +44,7 @@ import shopzen.presentation.wishlist.viewmodel.WishlistViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryProductsScreen(
+    categoryId: String,
     categoryTitle: String,
     onNavigateBack: () -> Unit,
     onNavigateToProduct: (String) -> Unit,
@@ -61,7 +62,7 @@ fun CategoryProductsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = categoryTitle,
+                        text = state.categoryTitle.ifEmpty { categoryTitle },
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.SemiBold,
                             fontFamily = FontFamily.Serif
@@ -93,6 +94,15 @@ fun CategoryProductsScreen(
                 ErrorScreen(
                     message = state.error.orEmpty(),
                     onRetry = { viewModel.processIntent(CategoryProductsIntent.Retry) },
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
+
+            state.products.isEmpty() -> {
+                shopzen.presentation.common.components.EmptyStateView(
+                    message = "No products found in this category",
+                    actionLabel = "Go Back",
+                    onAction = onNavigateBack,
                     modifier = Modifier.padding(innerPadding)
                 )
             }

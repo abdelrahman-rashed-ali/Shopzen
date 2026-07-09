@@ -80,7 +80,7 @@ fun SearchScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToWishlist: () -> Unit,
     onNavigateToProduct: (String) -> Unit,
-    onNavigateToCategory: (String) -> Unit,
+    onNavigateToCategory: (String, String) -> Unit,
     onNavigateToSearch: () -> Unit,
     onNavigateToCart: () -> Unit,
     onNavigateToProfile: () -> Unit,
@@ -158,7 +158,7 @@ fun SearchContent(
     state: SearchState,
     onIntent: (SearchIntent) -> Unit,
     onNavigateToProduct: (String) -> Unit,
-    onNavigateToCategory: (String) -> Unit,
+    onNavigateToCategory: (String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -502,7 +502,7 @@ fun SearchContent(
 @Composable
 private fun CollectionCardsLayout(
     categories: List<shopzen.domain.catalog.model.Category>,
-    onCategoryClick: (String) -> Unit
+    onCategoryClick: (String, String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -514,7 +514,7 @@ private fun CollectionCardsLayout(
         if (categories.isNotEmpty()) {
             CollectionCard(
                 category = categories[0],
-                onClick = onCategoryClick,
+                onClick = { id -> onCategoryClick(id, categories[0].title) },
                 subtitle = if (categories[0].title.contains("Timepiece", ignoreCase = true))
                     "Swiss precision" else null,
                 aspectRatio = 4f / 3f
@@ -529,13 +529,13 @@ private fun CollectionCardsLayout(
             ) {
                 CollectionCard(
                     category = categories[1],
-                    onClick = onCategoryClick,
+                    onClick = { id -> onCategoryClick(id, categories[1].title) },
                     modifier = Modifier.weight(1f),
                     aspectRatio = 3f / 4f
                 )
                 CollectionCard(
                     category = categories[2],
-                    onClick = onCategoryClick,
+                    onClick = { id -> onCategoryClick(id, categories[2].title) },
                     modifier = Modifier.weight(1f),
                     aspectRatio = 3f / 4f
                 )
@@ -546,7 +546,7 @@ private fun CollectionCardsLayout(
         if (categories.size >= 4) {
             CollectionCard(
                 category = categories[3],
-                onClick = onCategoryClick,
+                onClick = { id -> onCategoryClick(id, categories[3].title) },
                 aspectRatio = 16f / 9f
             )
         }
@@ -555,7 +555,7 @@ private fun CollectionCardsLayout(
         categories.drop(4).forEach { category ->
             CollectionCard(
                 category = category,
-                onClick = onCategoryClick,
+                onClick = { id -> onCategoryClick(id, category.title) },
                 aspectRatio = 16f / 9f
             )
         }
@@ -605,7 +605,7 @@ private fun ProductResultsGrid(
 @Composable
 private fun CollectionCardsLayout(
     categories: List<Category>,
-    onCategoryClick: (String) -> Unit,
+    onCategoryClick: (String, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -615,7 +615,7 @@ private fun CollectionCardsLayout(
         categories.take(1).forEach { category ->
             CollectionCard(
                 category = category,
-                onClick = onCategoryClick,
+                onClick = { id -> onCategoryClick(id, category.title) },
                 modifier = Modifier.testTag(SearchTestTags.collection(category.id)),
                 subtitle = stringResource(R.string.search_collection_featured),
                 aspectRatio = 4f / 3f,
@@ -629,7 +629,7 @@ private fun CollectionCardsLayout(
                 categories.drop(1).take(2).forEach { category ->
                     CollectionCard(
                         category = category,
-                        onClick = onCategoryClick,
+                        onClick = { id -> onCategoryClick(id, category.title) },
                         modifier = Modifier
                             .weight(1f)
                             .testTag(SearchTestTags.collection(category.id)),
@@ -641,7 +641,7 @@ private fun CollectionCardsLayout(
         categories.drop(3).forEach { category ->
             CollectionCard(
                 category = category,
-                onClick = onCategoryClick,
+                onClick = { id -> onCategoryClick(id, category.title) },
                 modifier = Modifier.testTag(SearchTestTags.collection(category.id)),
                 aspectRatio = 16f / 9f,
             )

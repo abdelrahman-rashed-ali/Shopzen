@@ -193,14 +193,14 @@ fun AppNavHost(
                 onNavigateToBrand = { brandName ->
                     navController.navigate(BrandProducts(brandName = brandName))
                 },
-                onNavigateToCategory = { categoryTitle ->
-                    navController.navigate(CategoryProductsScreen(categoryTitle))
+                onNavigateToCategory = { categoryId, categoryTitle ->
+                    navController.navigate(CategoryProductsScreen(categoryId, categoryTitle))
                 },
                 onNavigateToProduct = { productId ->
                     navigateToProduct(productId)
                 },
                 onNavigateToProducts = {
-                    // TODO: Handle view all products
+                    navigateTopLevel(SearchScreen)
                 },
                 onNavigateToSearch = {
                     navigateTopLevel(SearchScreen)
@@ -234,8 +234,8 @@ fun AppNavHost(
                 onNavigateToProduct = { productId ->
                     navigateToProduct(productId)
                 },
-                onNavigateToCategory = { categoryTitle ->
-                    navController.navigate(CategoryProductsScreen(categoryTitle))
+                onNavigateToCategory = { categoryId, categoryTitle ->
+                    navController.navigate(CategoryProductsScreen(categoryId, categoryTitle))
                 },
                 onNavigateToSearch = { navigateTopLevel(SearchScreen) },
                 onNavigateToCart = {
@@ -438,6 +438,7 @@ fun AppNavHost(
             val args = backStackEntry.toRoute<CategoryProductsScreen>()
 
             CategoryProductsRouteScreen(
+                categoryId = args.categoryId,
                 categoryTitle = args.categoryTitle,
                 onNavigateBack = { navController.navigateUp() },
                 onNavigateToProduct = { productId ->

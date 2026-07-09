@@ -36,6 +36,7 @@ import shopzen.presentation.theme.LocalShopzenColors
 @Composable
 fun AdBannerSection(
     ads: List<Ad>,
+    onAdClick: (Ad) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val theme = LocalShopzenColors.current
@@ -149,7 +150,7 @@ fun AdBannerSection(
                 val cta = ad.ctaText
                 if (!cta.isNullOrEmpty()) {
                     Button(
-                        onClick = { /* Handle ad click target redirection */ },
+                        onClick = { onAdClick(ad) },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(16.dp),

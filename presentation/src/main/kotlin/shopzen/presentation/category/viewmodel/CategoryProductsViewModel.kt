@@ -28,31 +28,33 @@ class CategoryProductsViewModel @Inject constructor(
     private val _state = MutableStateFlow(CategoryProductsState())
     val state: StateFlow<CategoryProductsState> = _state.asStateFlow()
 
+    private val categoryId: String = savedStateHandle.get<String>("categoryId").orEmpty()
     private val categoryTitle: String = savedStateHandle.get<String>("categoryTitle").orEmpty()
 
     init {
-        if (categoryTitle.isNotEmpty()) {
-            processIntent(CategoryProductsIntent.LoadProducts(categoryTitle))
+        if (categoryId.isNotEmpty()) {
+            processIntent(CategoryProductsIntent.LoadProducts(categoryId))
         }
     }
 
     fun processIntent(intent: CategoryProductsIntent) {
         when (intent) {
-            is CategoryProductsIntent.LoadProducts -> loadProducts(intent.categoryTitle)
-            is CategoryProductsIntent.Retry -> loadProducts(_state.value.categoryTitle)
+            is CategoryProductsIntent.LoadProducts -> loadProducts(intent.categoryId)
+            is CategoryProductsIntent.Retry -> loadProducts(_state.value.categoryId)
         }
     }
 
-    private fun loadProducts(categoryTitle: String) {
+    private fun loadProducts(categoryId: String) {
         viewModelScope.launch {
             _state.value = _state.value.copy(
                 isLoading = true,
                 error = null,
+                categoryId = categoryId,
                 categoryTitle = categoryTitle
             )
 
             val currency = getCurrencySymbolUseCase()
-            val result = getProductsByCategoryUseCase(categoryTitle)
+            val result = getProductsByCategoryUseCase(categoryId)
 
             result.fold(
                 onSuccess = { products ->

@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import kotlinx.coroutines.delay
 import shopzen.domain.catalog.model.Brand
 import shopzen.domain.catalog.model.Category
@@ -65,6 +67,7 @@ import shopzen.presentation.common.components.ErrorScreen
 import shopzen.presentation.common.components.LoadingIndicator
 import shopzen.presentation.common.components.MainShellTab
 import shopzen.presentation.common.components.ProductCard
+import shopzen.presentation.common.components.ShimmerBox
 import shopzen.presentation.common.components.ShopzenBottomBar
 import shopzen.presentation.common.components.ShopzenTopAppBar
 import shopzen.presentation.wishlist.intent.WishlistIntent
@@ -73,7 +76,7 @@ import shopzen.presentation.wishlist.viewmodel.WishlistViewModel
 @Composable
 fun HomeScreen(
     onNavigateToBrand: (String) -> Unit,
-    onNavigateToCategory: (String) -> Unit,
+    onNavigateToCategory: (String, String) -> Unit,
     onNavigateToProduct: (String) -> Unit,
     onNavigateToProducts: () -> Unit,
     onNavigateToSearch: () -> Unit,
@@ -197,7 +200,7 @@ internal fun HomeContent(
     state: HomeState,
     wishlistProductIds: Set<String>,
     onNavigateToBrand: (String) -> Unit,
-    onNavigateToCategory: (String) -> Unit,
+    onNavigateToCategory: (String, String) -> Unit,
     onNavigateToProduct: (String) -> Unit,
     onWishlistClick: (Product) -> Unit,
     onNavigateToProducts: () -> Unit,
@@ -232,6 +235,7 @@ internal fun HomeContent(
         HomeAnimatedSection(index = 2) {
             AdBannerSection(
                 ads = state.ads,
+                onAdClick = { onNavigateToProducts() },
                 modifier = Modifier.testTag(HomeTestTags.Ads),
             )
         }
@@ -424,7 +428,7 @@ private fun BrandPill(
 @Composable
 private fun HomeCategorySection(
     categories: List<Category>,
-    onCategoryClick: (String) -> Unit,
+    onCategoryClick: (String, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (categories.isEmpty()) return
@@ -445,7 +449,7 @@ private fun HomeCategorySection(
             items(categories, key = { it.id }) { category ->
                 CategoryFeatureCard(
                     category = category,
-                    onClick = { onCategoryClick(category.id) },
+                    onClick = { onCategoryClick(category.id, category.title) },
                 )
             }
         }
@@ -464,16 +468,33 @@ private fun CategoryFeatureCard(
             .clickable(onClick = onClick),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        AsyncImage(
-            model = category.imageUrl,
-            contentDescription = category.title,
-            contentScale = ContentScale.Crop,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(0.82f)
                 .clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
-        )
+        ) {
+            if (category.imageUrl.isNotBlank()) {
+                SubcomposeAsyncImage(
+                    model = category.imageUrl,
+                    contentDescription = category.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                    loading = {
+                        ShimmerBox(modifier = Modifier.fillMaxSize())
+                    },
+                    error = {
+                        CategoryImageFallback(category.title)
+                    },
+                    success = {
+                        SubcomposeAsyncImageContent()
+                    }
+                )
+            } else {
+                CategoryImageFallback(category.title)
+            }
+        }
         Text(
             text = category.title.uppercase(),
             style = MaterialTheme.typography.labelMedium,
@@ -481,6 +502,21 @@ private fun CategoryFeatureCard(
             fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun CategoryImageFallback(title: String) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = title.take(2).uppercase(),
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            fontWeight = FontWeight.Bold,
         )
     }
 }
