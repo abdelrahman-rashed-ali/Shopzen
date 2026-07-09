@@ -86,6 +86,9 @@ data object AddressesScreen : NavScreen("addresses")
 data object SearchScreen : NavScreen("search")
 
 @Serializable
+data object AiChatScreen : NavScreen("ai-chat")
+
+@Serializable
 data class AddressEditScreen(val addressId: String? = null) : NavScreen("address-edit")
 
 @Serializable
@@ -99,3 +102,6 @@ data class BrandProducts(val brandName: String) : NavScreen("brand-products")
 
 @Serializable
 data class CategoryProductsScreen(val categoryId: String, val categoryTitle: String) : NavScreen("category-products")
+
+@Serializable
+data object AiComparisonRoute : NavScreen("ai-comparison")

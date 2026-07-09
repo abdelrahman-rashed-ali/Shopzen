@@ -23,6 +23,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.BrokenImage
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.CompareArrows
+import androidx.compose.material.icons.filled.CompareArrows
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -58,6 +60,7 @@ fun ProductCard(
     isFavorite: Boolean,
     onProductClick: (String) -> Unit,
     onFavoriteClick: () -> Unit,
+    onCompareClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -126,6 +129,28 @@ fun ProductCard(
                             tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
                         )
+                    }
+                }
+                
+                // Compare Button
+                if (onCompareClick != null) {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(8.dp)
+                            .size(32.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                        shadowElevation = 2.dp
+                    ) {
+                        IconButton(onClick = onCompareClick) {
+                            Icon(
+                                imageVector = Icons.Outlined.CompareArrows,
+                                contentDescription = "Compare",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                 }
             }

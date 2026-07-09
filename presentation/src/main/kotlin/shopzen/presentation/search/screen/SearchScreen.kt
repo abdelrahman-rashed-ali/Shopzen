@@ -73,6 +73,9 @@ import shopzen.presentation.search.components.SuggestionChip
 import shopzen.presentation.search.intent.SearchIntent
 import shopzen.presentation.search.state.SearchState
 import shopzen.presentation.search.viewmodel.SearchViewModel
+import shopzen.presentation.comparison.viewmodel.ComparisonViewModel
+import shopzen.presentation.comparison.screen.ComparisonTray
+import shopzen.presentation.comparison.state.ComparisonIntent
 import kotlin.collections.drop
 
 @Composable
@@ -85,10 +88,13 @@ fun SearchScreen(
     onNavigateToCart: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToAiComparison: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: SearchViewModel = hiltViewModel()
+    viewModel: SearchViewModel = hiltViewModel(),
+    comparisonViewModel: ComparisonViewModel = hiltViewModel(androidx.compose.ui.platform.LocalContext.current as androidx.activity.ComponentActivity)
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val comparisonState by comparisonViewModel.state.collectAsStateWithLifecycle()
     val onIntent = viewModel::processIntent
 
     if (state.showFilterSheet) {
@@ -138,13 +144,34 @@ fun SearchScreen(
                 )
             }
             else -> {
-                SearchContent(
-                    state = state,
-                    onIntent = onIntent,
-                    onNavigateToProduct = onNavigateToProduct,
-                    onNavigateToCategory = onNavigateToCategory,
-                    modifier = Modifier.padding(innerPadding)
-                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    SearchContent(
+                        state = state,
+                        onIntent = onIntent,
+                        onNavigateToProduct = onNavigateToProduct,
+                        onNavigateToCategory = onNavigateToCategory,
+                        onCompareClick = { product ->
+                            comparisonViewModel.processIntent(
+                                ComparisonIntent.AddProduct(
+                                    shopzen.presentation.comparison.state.ComparableProductUiModel(
+                                        productId = product.id,
+                                        title = product.title,
+                                        imageUrl = product.imageUrl,
+                                        price = product.price.toDoubleOrNull() ?: 0.0,
+                                        currency = state.currency.symbol
+                                    )
+                                )
+                            )
+                        },
+                        modifier = Modifier.padding(innerPadding).fillMaxSize()
+                    )
+                    ComparisonTray(
+                        state = comparisonState,
+                        onIntent = comparisonViewModel::processIntent,
+                        onNavigateToComparison = onNavigateToAiComparison,
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = innerPadding.calculateBottomPadding())
+                    )
+                }
             }
         }
     }
@@ -159,6 +186,7 @@ fun SearchContent(
     onIntent: (SearchIntent) -> Unit,
     onNavigateToProduct: (String) -> Unit,
     onNavigateToCategory: (String, String) -> Unit,
+    onCompareClick: (Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -484,8 +512,9 @@ fun SearchContent(
                                 currency = state.currency,
                                 imageUrl = product.imageUrl,
                                 isFavorite = false,
-                                onProductClick = onNavigateToProduct,
-                                onFavoriteClick = { },
+                                onProductClick = { onNavigateToProduct(product.id) },
+                                onFavoriteClick = { /* TODO */ },
+                                onCompareClick = { onCompareClick(product) },
                                 modifier = Modifier.weight(1f)
                             )
                         }
