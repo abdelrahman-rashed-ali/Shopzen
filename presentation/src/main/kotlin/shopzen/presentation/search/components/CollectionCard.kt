@@ -22,10 +22,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import shopzen.domain.catalog.model.Category
+import shopzen.presentation.common.components.ShimmerBox
 
 @Composable
 fun CollectionCard(
@@ -43,26 +44,43 @@ fun CollectionCard(
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable { onClick(category.id) }
     ) {
-        AsyncImage(
-            model = category.imageUrl,
-            contentDescription = category.title,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
+        if (category.imageUrl.isNotBlank()) {
+            SubcomposeAsyncImage(
+                model = category.imageUrl,
+                contentDescription = category.title,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                loading = {
+                    ShimmerBox(modifier = Modifier.fillMaxSize())
+                },
+                error = {
+                    CollectionFallbackContent(category.title)
+                },
+                success = {
+                    SubcomposeAsyncImageContent()
+                }
+            )
+        } else {
+            // No image: show a premium gradient fallback with the title
+            CollectionFallbackContent(category.title)
+        }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.18f),
-                            Color.Black.copy(alpha = 0.72f),
+        // Dark overlay gradient for text legibility (only on top of real images)
+        if (category.imageUrl.isNotBlank()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.18f),
+                                Color.Black.copy(alpha = 0.72f),
+                            )
                         )
                     )
-                )
-        )
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -88,3 +106,28 @@ fun CollectionCard(
         }
     }
 }
+
+@Composable
+private fun CollectionFallbackContent(title: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = title.take(2).uppercase(),
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.ExtraBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+        )
+    }
+}
+

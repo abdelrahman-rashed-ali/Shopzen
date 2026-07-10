@@ -123,5 +123,6 @@ dependencies {
     implementation(libs.bundles.room)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.mapbox.maps.android)
+    implementation(libs.coil.compose)
     //ziad
 }

@@ -7,6 +7,7 @@ data class CategoryProductsState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val products: List<Product> = emptyList(),
+    val categoryId: String = "",
     val categoryTitle: String = "",
     val currency: AppCurrency = AppCurrency.USD,
 )

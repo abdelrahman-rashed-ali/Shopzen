@@ -101,7 +101,7 @@ data object BrandListScreen : NavScreen("brand-list")
 data class BrandProducts(val brandName: String) : NavScreen("brand-products")
 
 @Serializable
-data class CategoryProductsScreen(val categoryTitle: String) : NavScreen("category-products")
+data class CategoryProductsScreen(val categoryId: String, val categoryTitle: String) : NavScreen("category-products")
 
 @Serializable
 data object AiComparisonRoute : NavScreen("ai-comparison")

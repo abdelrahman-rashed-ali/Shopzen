@@ -41,9 +41,9 @@ class RemoteCatalogDataSource @Inject constructor(
         return client.get("custom_collections.json").body()
     }
 
-    suspend fun getProductsByCategory(categoryTitle: String): ProductsResponse {
+    suspend fun getProductsByCategory(categoryId: String): ProductsResponse {
         return client.get("products.json") {
-            parameter("product_type", categoryTitle)
+            parameter("collection_id", categoryId)
             parameter("limit", 50)
         }.body()
     }
